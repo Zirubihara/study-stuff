@@ -1,4 +1,3 @@
-import io
 import json
 import time
 from dataclasses import dataclass
@@ -9,7 +8,6 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.csv as csv
-import streamlit as st
 
 
 @dataclass
@@ -23,7 +21,7 @@ class ArrowProcessingResults:
 
 
 class ArrowDataProcessor:
-    """Handle data processing operations using PyArrow with Streamlit visualization."""
+    """Handle data processing operations using PyArrow."""
 
     def __init__(self, file_path: str):
         """Initialize processor with file path."""
@@ -166,49 +164,9 @@ class ArrowDataProcessor:
         try:
             with open(output_path, "w") as f:
                 json.dump(self.performance_metrics, f, indent=4)
-            st.success(f"Performance metrics saved to: {output_path}")
+            print(f"Performance metrics saved to: {output_path}")
         except Exception as e:
-            st.error(f"Error saving performance metrics: {e}")
-
-    def display_results(self, results: Dict[str, ArrowProcessingResults]):
-        """Display processing results using Streamlit."""
-        st.write("## Processing Results")
-
-        # Display timing information
-        st.write("### Performance Metrics")
-        st.write(f"Loading time: {results['load'].execution_time:.2f} seconds")
-        st.write(f"Memory size: {self.performance_metrics['memory_size_gb']:.2f} GB")
-        st.write(f"Number of rows: {self.performance_metrics['row_count']}")
-
-        # Display grouped data
-        if results["aggregate"].table is not None:
-            st.write("### Grouping Results")
-            st.dataframe(results["aggregate"].table.to_pandas())
-
-        # Display top sorted rows
-        if results["sort"].table is not None:
-            st.write("### Top 5 Sorted Rows")
-            st.dataframe(results["sort"].table.to_pandas())
-
-        # Display filtered average
-        if results["filter"].value is not None:
-            st.write("### Filtered Data Statistics")
-            st.write(f"Average value for filtered data: {results['filter'].value:.2f}")
-
-        # Display correlation matrix
-        if results["correlation"].value:
-            st.write("### Correlation Matrix")
-            corr_df = pd.DataFrame(results["correlation"].value)
-            st.dataframe(corr_df)
-
-        # Display table schema
-        if results["load"].table is not None:
-            st.write("### Table Schema")
-            st.write(results["load"].table.schema)
-
-            # Display descriptive statistics
-            st.write("### Descriptive Statistics")
-            st.write(results["load"].table.to_pandas().describe())
+            print(f"Error saving performance metrics: {e}")
 
     def process_data(self) -> Dict[str, ArrowProcessingResults]:
         """Execute complete data processing pipeline."""
@@ -236,25 +194,24 @@ class ArrowDataProcessor:
             return results
 
         except Exception as e:
-            st.error(f"Error during data processing: {e}")
+            print(f"Error during data processing: {e}")
             raise
 
 
 def main():
     """Main execution function."""
-    st.title("PyArrow Data Processing Dashboard")
-
     csv_path = "/Users/krystianswiecicki/Downloads/custom_1988_2020.csv"
 
     try:
         processor = ArrowDataProcessor(csv_path)
         results = processor.process_data()
-        processor.display_results(results)
         processor.save_performance_metrics()
-        st.success("Data processing completed successfully!")
+        print("Data processing completed successfully!")
+        return results
 
     except Exception as e:
-        st.error(f"Error in main execution: {e}")
+        print(f"Error in main execution: {e}")
+        return None
 
 
 if __name__ == "__main__":
