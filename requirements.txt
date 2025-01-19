@@ -1,0 +1,4 @@
+polars
+typing-extensions
+python-dateutil
+pyarrow
