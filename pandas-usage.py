@@ -1,6 +1,7 @@
 import json
 import time
 from dataclasses import dataclass
+from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
@@ -14,6 +15,30 @@ class ProcessingResults:
     df: pd.DataFrame
     execution_time: float
     additional_info: Optional[Any] = None
+
+
+def time_operation(operation_name: str):
+    """Decorator to measure operation execution time."""
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            start_time = time.time()
+            result = func(self, *args, **kwargs)
+            execution_time = time.time() - start_time
+            self.performance_metrics[f"{operation_name}_time_seconds"] = execution_time
+
+            return ProcessingResults(
+                df=result[0] if isinstance(result, tuple) else result,
+                execution_time=execution_time,
+                additional_info=(
+                    result[1] if isinstance(result, tuple) and len(result) > 1 else None
+                ),
+            )
+
+        return wrapper
+
+    return decorator
 
 
 class DataProcessor:
@@ -46,32 +71,7 @@ class DataProcessor:
         self.file_path = Path(file_path)
         self.performance_metrics: Dict[str, float] = {}
 
-    def _time_operation(self, operation_name: str):
-        """Decorator to measure operation execution time."""
-
-        def decorator(func):
-            def wrapper(*args, **kwargs):
-                start_time = time.time()
-                result = func(*args, **kwargs)
-                execution_time = time.time() - start_time
-                self.performance_metrics[f"{operation_name}_time_seconds"] = (
-                    execution_time
-                )
-                return ProcessingResults(
-                    df=result[0] if isinstance(result, tuple) else result,
-                    execution_time=execution_time,
-                    additional_info=(
-                        result[1]
-                        if isinstance(result, tuple) and len(result) > 1
-                        else None
-                    ),
-                )
-
-            return wrapper
-
-        return decorator
-
-    @_time_operation("loading")
+    @time_operation("loading")
     def load_data(self) -> pd.DataFrame:
         """Load CSV data into DataFrame with proper data types."""
         if not self.file_path.exists():
@@ -88,12 +88,12 @@ class DataProcessor:
 
         return df
 
-    @_time_operation("cleaning")
+    @time_operation("cleaning")
     def clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Clean DataFrame by filling missing values."""
         return df.fillna(0)
 
-    @_time_operation("aggregation")
+    @time_operation("aggregation")
     def aggregate_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Group and aggregate data."""
         group_cols = ["year_month", "category1", "category2"]
@@ -107,12 +107,12 @@ class DataProcessor:
             .reset_index()
         )
 
-    @_time_operation("sorting")
+    @time_operation("sorting")
     def sort_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Sort DataFrame by value2 column."""
         return df.sort_values(by="value2", ascending=False)
 
-    @_time_operation("filtering")
+    @time_operation("filtering")
     def filter_data(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, float]:
         """Filter rows where value2 is above mean."""
         mean_value2 = df["value2"].mean()
@@ -120,13 +120,13 @@ class DataProcessor:
         avg_filtered = filtered_df["value2"].mean()
         return filtered_df, avg_filtered
 
-    @_time_operation("correlation")
+    @time_operation("correlation")
     def calculate_correlation(self, df: pd.DataFrame) -> pd.DataFrame:
         """Calculate correlation matrix for numeric columns."""
         numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns
         return df[numeric_cols].corr()
 
-    def save_performance_metrics(self, output_path: str = "performance_metrics.json"):
+    def save_performance_metrics(self, output_path: str = "performance_metrics_pandas.json"):
         """Save performance metrics to JSON file."""
         try:
             with open(output_path, "w") as f:
