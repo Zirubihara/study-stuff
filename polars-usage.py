@@ -3,6 +3,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from functools import wraps
 
 import polars as pl
 
@@ -10,10 +11,28 @@ import polars as pl
 @dataclass
 class ProcessingResults:
     """Store results of data processing operations."""
-
     df: pl.DataFrame
     execution_time: float
     additional_info: Optional[Any] = None
+
+
+def time_operation(operation_name: str):
+    """Decorator to measure operation execution time."""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            start_time = time.time()
+            result = func(self, *args, **kwargs)
+            execution_time = time.time() - start_time
+            self.performance_metrics[f"{operation_name}_time_seconds"] = execution_time
+            
+            return ProcessingResults(
+                df=result[0] if isinstance(result, tuple) else result,
+                execution_time=execution_time,
+                additional_info=result[1] if isinstance(result, tuple) and len(result) > 1 else None
+            )
+        return wrapper
+    return decorator
 
 
 class PolarsDataProcessor:
@@ -46,36 +65,11 @@ class PolarsDataProcessor:
         self.file_path = Path(file_path)
         self.performance_metrics: Dict[str, float] = {}
 
-    def _time_operation(self, operation_name: str):
-        """Decorator to measure operation execution time."""
-
-        def decorator(func):
-            def wrapper(*args, **kwargs):
-                start_time = time.time()
-                result = func(*args, **kwargs)
-                execution_time = time.time() - start_time
-                self.performance_metrics[f"{operation_name}_time_seconds"] = (
-                    execution_time
-                )
-                return ProcessingResults(
-                    df=result[0] if isinstance(result, tuple) else result,
-                    execution_time=execution_time,
-                    additional_info=(
-                        result[1]
-                        if isinstance(result, tuple) and len(result) > 1
-                        else None
-                    ),
-                )
-
-            return wrapper
-
-        return decorator
-
     def _get_size(self, df: pl.DataFrame) -> float:
         """Calculate DataFrame size in gigabytes."""
         return df.estimated_size() / (1024**3)
 
-    @_time_operation("loading")
+    @time_operation("loading")
     def load_data(self) -> pl.DataFrame:
         """Load CSV data into Polars DataFrame with proper schema."""
         if not self.file_path.exists():
@@ -93,12 +87,12 @@ class PolarsDataProcessor:
 
         return df
 
-    @_time_operation("cleaning")
+    @time_operation("cleaning")
     def clean_data(self, df: pl.DataFrame) -> pl.DataFrame:
         """Clean DataFrame by filling null values with zeros."""
         return df.fill_null(0)
 
-    @_time_operation("aggregation")
+    @time_operation("aggregation")
     def aggregate_data(self, df: pl.DataFrame) -> pl.DataFrame:
         """Group and aggregate data using Polars expressions."""
         group_cols = ["year_month", "category1", "category2"]
@@ -110,12 +104,12 @@ class PolarsDataProcessor:
             ]
         )
 
-    @_time_operation("sorting")
+    @time_operation("sorting")
     def sort_data(self, df: pl.DataFrame) -> pl.DataFrame:
         """Sort DataFrame by value2 column in descending order."""
         return df.sort("value2", descending=True)
 
-    @_time_operation("filtering")
+    @time_operation("filtering")
     def filter_data(self, df: pl.DataFrame) -> Tuple[pl.DataFrame, float]:
         """Filter rows where value2 is above mean."""
         mean_value2 = df["value2"].mean()
@@ -123,13 +117,13 @@ class PolarsDataProcessor:
         avg_filtered = filtered_df["value2"].mean()
         return filtered_df, avg_filtered
 
-    @_time_operation("correlation")
+    @time_operation("correlation")
     def calculate_correlation(self, df: pl.DataFrame) -> pl.DataFrame:
         """Calculate correlation matrix for numeric columns."""
         numeric_cols = df.select(pl.col(pl.Int64)).columns
         return df.select(numeric_cols).corr()
 
-    def save_performance_metrics(self, output_path: str = "performance_metrics.json"):
+    def save_performance_metrics(self, output_path: str = "performance_metrics_polars.json"):
         """Save performance metrics to JSON file."""
         try:
             with open(output_path, "w") as f:
@@ -141,23 +135,30 @@ class PolarsDataProcessor:
     def process_data(self) -> Dict[str, pl.DataFrame]:
         """Execute complete data processing pipeline."""
         try:
-            # Load and process data
+            print("Loading data...")
             df_result = self.load_data()
+            
+            print("Cleaning data...")
             df_clean = self.clean_data(df_result.df)
+            
+            print("Aggregating data...")
             df_agg = self.aggregate_data(df_clean.df)
+            
+            print("Sorting data...")
             df_sorted = self.sort_data(df_clean.df)
+            
+            print("Filtering data...")
             df_filtered = self.filter_data(df_clean.df)
+            
+            print("Calculating correlations...")
             correlation = self.calculate_correlation(df_clean.df)
 
             # Store filtered average
-            self.performance_metrics["average_filtered_value"] = (
-                df_filtered.additional_info
-            )
+            self.performance_metrics["average_filtered_value"] = df_filtered.additional_info
 
             # Calculate total processing time
             self.performance_metrics["total_operation_time_seconds"] = sum(
-                time
-                for key, time in self.performance_metrics.items()
+                time for key, time in self.performance_metrics.items()
                 if key.endswith("_time_seconds")
             )
 
