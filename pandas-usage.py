@@ -110,7 +110,7 @@ class DataProcessor:
     @time_operation("sorting")
     def sort_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """Sort DataFrame by value2 column."""
-        return df.sort_values(by="value2", ascending=False)
+        return df.sort_values(by="value2", ascending=False, kind="mergesort")
 
     @time_operation("filtering")
     def filter_data(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, float]:
@@ -126,7 +126,9 @@ class DataProcessor:
         numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns
         return df[numeric_cols].corr()
 
-    def save_performance_metrics(self, output_path: str = "performance_metrics_pandas.json"):
+    def save_performance_metrics(
+        self, output_path: str = "performance_metrics_pandas.json"
+    ):
         """Save performance metrics to JSON file."""
         try:
             with open(output_path, "w") as f:
