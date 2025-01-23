@@ -1,6 +1,7 @@
 import json
 import time
 from dataclasses import dataclass
+from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -18,6 +19,41 @@ class ArrowProcessingResults:
     table: Optional[pa.Table] = None
     value: Optional[Any] = None
     metadata: Optional[Dict] = None
+
+
+def time_operation(operation_name: str):
+    """Decorator to measure operation execution time."""
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, *args, **kwargs) -> ArrowProcessingResults:
+            start_time = time.time()
+            result = func(self, *args, **kwargs)
+            execution_time = time.time() - start_time
+
+            # Store timing in performance metrics
+            self.performance_metrics[f"{operation_name}_time_seconds"] = execution_time
+
+            # Handle different return types
+            if isinstance(result, tuple):
+                table = result[0] if isinstance(result[0], pa.Table) else None
+                value = result[1] if len(result) > 1 else None
+                metadata = result[2] if len(result) > 2 else None
+            else:
+                table = result if isinstance(result, pa.Table) else None
+                value = result if not isinstance(result, pa.Table) else None
+                metadata = None
+
+            return ArrowProcessingResults(
+                execution_time=execution_time,
+                table=table,
+                value=value,
+                metadata=metadata,
+            )
+
+        return wrapper
+
+    return decorator
 
 
 class ArrowDataProcessor:
@@ -41,47 +77,13 @@ class ArrowDataProcessor:
         """Calculate table size in gigabytes."""
         return table.nbytes / (1024**3)
 
-    def _time_operation(self, operation_name: str):
-        """Decorator to measure operation execution time."""
-
-        def decorator(func):
-            def wrapper(*args, **kwargs) -> ArrowProcessingResults:
-                start_time = time.time()
-                result = func(*args, **kwargs)
-                execution_time = time.time() - start_time
-
-                # Store timing in performance metrics
-                self.performance_metrics[f"{operation_name}_time_seconds"] = (
-                    execution_time
-                )
-
-                # Handle different return types
-                if isinstance(result, tuple):
-                    table = result[0] if isinstance(result[0], pa.Table) else None
-                    value = result[1] if len(result) > 1 else None
-                    metadata = result[2] if len(result) > 2 else None
-                else:
-                    table = result if isinstance(result, pa.Table) else None
-                    value = result if not isinstance(result, pa.Table) else None
-                    metadata = None
-
-                return ArrowProcessingResults(
-                    execution_time=execution_time,
-                    table=table,
-                    value=value,
-                    metadata=metadata,
-                )
-
-            return wrapper
-
-        return decorator
-
-    @_time_operation("loading")
+    @time_operation("loading")
     def load_data(self) -> pa.Table:
         """Load CSV data into PyArrow table."""
         if not self.file_path.exists():
             raise FileNotFoundError(f"File not found: {self.file_path}")
 
+        print("Loading data...")
         table = csv.read_csv(self.file_path)
 
         self.performance_metrics["memory_size_gb"] = self._get_size_in_gb(table)
@@ -89,9 +91,10 @@ class ArrowDataProcessor:
 
         return table
 
-    @_time_operation("cleaning")
+    @time_operation("cleaning")
     def clean_data(self, table: pa.Table) -> pa.Table:
         """Replace null values with zeros in numeric columns."""
+        print("Cleaning data...")
         numeric_cols = self._get_numeric_columns(table)
 
         for col in numeric_cols:
@@ -103,9 +106,10 @@ class ArrowDataProcessor:
 
         return table
 
-    @_time_operation("aggregation")
+    @time_operation("aggregation")
     def aggregate_data(self, table: pa.Table) -> Tuple[pa.Table, Dict]:
         """Perform grouping and aggregation operations."""
+        print("Aggregating data...")
         numeric_cols = self._get_numeric_columns(table)[:3]  # First 3 numeric columns
         group_col = table.column_names[0]
 
@@ -117,9 +121,10 @@ class ArrowDataProcessor:
 
         return grouped, {"grouped_columns": numeric_cols}
 
-    @_time_operation("sorting")
+    @time_operation("sorting")
     def sort_data(self, table: pa.Table, n: int = 5) -> pa.Table:
         """Sort table by first numeric column and return top N rows."""
+        print("Sorting data...")
         numeric_cols = self._get_numeric_columns(table)
 
         if not numeric_cols:
@@ -130,9 +135,10 @@ class ArrowDataProcessor:
         )
         return table.take(sorted_indices).slice(0, n)
 
-    @_time_operation("filtering")
+    @time_operation("filtering")
     def filter_data(self, table: pa.Table) -> Tuple[pa.Table, float]:
         """Filter rows above mean value in first numeric column."""
+        print("Filtering data...")
         numeric_cols = self._get_numeric_columns(table)
 
         if not numeric_cols:
@@ -146,9 +152,10 @@ class ArrowDataProcessor:
 
         return filtered, avg_filtered
 
-    @_time_operation("correlation")
+    @time_operation("correlation")
     def calculate_correlation(self, table: pa.Table) -> Dict:
         """Calculate correlation matrix for numeric columns."""
+        print("Calculating correlations...")
         numeric_cols = self._get_numeric_columns(table)[:3]  # First 3 numeric columns
 
         if len(numeric_cols) < 2:
@@ -181,16 +188,43 @@ class ArrowDataProcessor:
             results["filter"] = self.filter_data(results["clean"].table)
             results["correlation"] = self.calculate_correlation(results["clean"].table)
 
-            # Update performance metrics
-            self.performance_metrics.update(
-                {
-                    "average_filtered_value": results["filter"].value,
-                    "grouping_results": results["aggregate"].table.to_pydict(),
-                    "top_5_sorted_rows": results["sort"].table.to_pydict(),
-                    "correlation_matrix": results["correlation"].value,
-                }
-            )
+            # Update performance metrics with only required fields
+            metrics = {
+                "memory_size_gb": self.performance_metrics["memory_size_gb"],
+                "row_count": self.performance_metrics["row_count"],
+                "loading_time_seconds": self.performance_metrics[
+                    "loading_time_seconds"
+                ],
+                "cleaning_time_seconds": self.performance_metrics[
+                    "cleaning_time_seconds"
+                ],
+                "aggregation_time_seconds": self.performance_metrics[
+                    "aggregation_time_seconds"
+                ],
+                "sorting_time_seconds": self.performance_metrics[
+                    "sorting_time_seconds"
+                ],
+                "filtering_time_seconds": self.performance_metrics[
+                    "filtering_time_seconds"
+                ],
+                "correlation_time_seconds": self.performance_metrics[
+                    "correlation_time_seconds"
+                ],
+                "average_filtered_value": results["filter"].value,
+                "total_operation_time_seconds": sum(
+                    self.performance_metrics[f"{op}_time_seconds"]
+                    for op in [
+                        "loading",
+                        "cleaning",
+                        "aggregation",
+                        "sorting",
+                        "filtering",
+                        "correlation",
+                    ]
+                ),
+            }
 
+            self.performance_metrics = metrics
             return results
 
         except Exception as e:
