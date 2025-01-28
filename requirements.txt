@@ -2,3 +2,5 @@ polars
 typing-extensions
 python-dateutil
 pyarrow
+pandas
+dask
