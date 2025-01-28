@@ -12,6 +12,7 @@ import pandas as pd
 @dataclass
 class ProcessingResults:
     """Store results of data processing operations (Dask-based)."""
+
     df: dd.DataFrame
     execution_time: float
     additional_info: Optional[Any] = None
@@ -49,13 +50,13 @@ class DaskDataProcessor:
 
     COLUMN_NAMES = [
         "year_month",  # Format: YYYYMM
-        "category1",   # Integer category
-        "category2",   # Integer category
-        "category3",   # Integer category
-        "code",        # String code with leading zeros
-        "flag",        # Integer flag
-        "value1",      # Integer value
-        "value2",      # Integer value
+        "category1",  # Integer category
+        "category2",  # Integer category
+        "category3",  # Integer category
+        "code",  # String code with leading zeros
+        "flag",  # Integer flag
+        "value1",  # Integer value
+        "value2",  # Integer value
     ]
 
     DTYPE_MAP = {
@@ -96,7 +97,9 @@ class DaskDataProcessor:
 
         # --- Workaround for memory usage issue ---
         # Step 1: Convert partition-wise memory usage to a concrete pandas Series
-        mem_usage_series = df.map_partitions(lambda pdf: pdf.memory_usage(deep=True).sum())
+        mem_usage_series = df.map_partitions(
+            lambda pdf: pdf.memory_usage(deep=True).sum()
+        )
         mem_usage_vals = mem_usage_series.compute()  # now it's a normal pandas Series
         # Step 2: sum the values in that pandas Series
         memory_usage = mem_usage_vals.sum() / 1024**3
@@ -128,11 +131,7 @@ class DaskDataProcessor:
         """
         group_cols = ["year_month", "category1", "category2"]
         # Perform groupby and aggregation
-        df_agg = df.groupby(group_cols).agg(
-            {
-                "value2": ["mean", "median", "max"]
-            }
-        )
+        df_agg = df.groupby(group_cols).agg({"value2": ["mean", "median", "max"]})
 
         # The resulting columns have a MultiIndex; rename them for clarity
         df_agg.columns = ["value2_mean", "value2_median", "value2_max"]
@@ -187,7 +186,9 @@ class DaskDataProcessor:
         corr_result_dd = dd.from_pandas(corr_result, npartitions=1)
         return corr_result_dd
 
-    def save_performance_metrics(self, output_path: str = "performance_metrics_dask.json"):
+    def save_performance_metrics(
+        self, output_path: str = "performance_metrics_dask.json"
+    ):
         """Save performance metrics to JSON file."""
         try:
             with open(output_path, "w") as f:
@@ -208,11 +209,14 @@ class DaskDataProcessor:
             correlation = self.calculate_correlation(df_clean.df)
 
             # Store filtered average
-            self.performance_metrics["average_filtered_value"] = df_filtered.additional_info
+            self.performance_metrics["average_filtered_value"] = (
+                df_filtered.additional_info
+            )
 
             # Calculate total processing time
             self.performance_metrics["total_operation_time_seconds"] = sum(
-                t for key, t in self.performance_metrics.items()
+                t
+                for key, t in self.performance_metrics.items()
                 if key.endswith("_time_seconds")
             )
 
