@@ -68,8 +68,8 @@ class SparkDataProcessor:
         # Initialize Spark session
         self.spark = SparkSession.builder \
             .appName("DataProcessor") \
-            .config("spark.driver.memory", "4g") \
-            .config("spark.executor.memory", "4g") \
+            .config("spark.driver.memory", "8g") \
+            .config("spark.executor.memory", "8g") \
             .getOrCreate()
 
     def __del__(self):
