@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
 import dask.dataframe as dd
-import pandas as pd
 
 
 @dataclass
