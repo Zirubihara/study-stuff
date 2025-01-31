@@ -5,7 +5,6 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.csv as csv
