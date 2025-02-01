@@ -5,6 +5,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+import numpy as np  # needed for correlation calculation
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.csv as csv
@@ -29,11 +30,8 @@ def time_operation(operation_name: str):
             start_time = time.time()
             result = func(self, *args, **kwargs)
             execution_time = time.time() - start_time
-
-            # Store timing in performance metrics
             self.performance_metrics[f"{operation_name}_time_seconds"] = execution_time
 
-            # Handle different return types
             if isinstance(result, tuple):
                 table = result[0] if isinstance(result[0], pa.Table) else None
                 value = result[1] if len(result) > 1 else None
@@ -58,6 +56,30 @@ def time_operation(operation_name: str):
 class ArrowDataProcessor:
     """Handle data processing operations using PyArrow."""
 
+    COLUMN_NAMES = [
+        "year_month",  # Format: YYYYMM
+        "category1",  # Integer category
+        "category2",  # Integer category
+        "category3",  # Integer category
+        "code",  # String code with leading zeros
+        "flag",  # Integer flag
+        "value1",  # Integer value
+        "value2",  # Integer value
+    ]
+
+    SCHEMA = pa.schema(
+        [
+            ("year_month", pa.string()),
+            ("category1", pa.int64()),
+            ("category2", pa.int64()),
+            ("category3", pa.int64()),
+            ("code", pa.string()),
+            ("flag", pa.int64()),
+            ("value1", pa.int64()),
+            ("value2", pa.int64()),
+        ]
+    )
+
     def __init__(self, file_path: str):
         """Initialize processor with file path."""
         self.file_path = Path(file_path)
@@ -78,12 +100,16 @@ class ArrowDataProcessor:
 
     @time_operation("loading")
     def load_data(self) -> pa.Table:
-        """Load CSV data into PyArrow table."""
+        """Load CSV data into PyArrow table with explicit schema."""
         if not self.file_path.exists():
             raise FileNotFoundError(f"File not found: {self.file_path}")
 
-        print("Loading data...")
-        table = csv.read_csv(self.file_path)
+        read_options = csv.ReadOptions(column_names=self.COLUMN_NAMES)
+        convert_options = csv.ConvertOptions(column_types=self.SCHEMA)
+
+        table = csv.read_csv(
+            self.file_path, read_options=read_options, convert_options=convert_options
+        )
 
         self.performance_metrics["memory_size_gb"] = self._get_size_in_gb(table)
         self.performance_metrics["row_count"] = table.num_rows
@@ -93,78 +119,116 @@ class ArrowDataProcessor:
     @time_operation("cleaning")
     def clean_data(self, table: pa.Table) -> pa.Table:
         """Replace null values with zeros in numeric columns."""
-        print("Cleaning data...")
         numeric_cols = self._get_numeric_columns(table)
+        arrays = []
 
-        for col in numeric_cols:
-            col_array = table[col]
-            if col_array.null_count > 0:
-                table = table.set_column(
-                    table.schema.get_field_index(col), col, pc.fill_null(col_array, 0)
-                )
+        for col_name in table.column_names:
+            col = table[col_name]
+            if col_name in numeric_cols and col.null_count > 0:
+                arrays.append(pc.fill_null(col, 0))
+            else:
+                arrays.append(col)
 
-        return table
+        return pa.Table.from_arrays(arrays, schema=table.schema)
+
+    def _calculate_median(self, array: pa.Array) -> float:
+        """Calculate median using PyArrow's approximate_median."""
+        return pc.approximate_median(array).as_py()
 
     @time_operation("aggregation")
-    def aggregate_data(self, table: pa.Table) -> Tuple[pa.Table, Dict]:
-        """Perform grouping and aggregation operations."""
-        print("Aggregating data...")
-        numeric_cols = self._get_numeric_columns(table)[:3]  # First 3 numeric columns
-        group_col = table.column_names[0]
+    def aggregate_data(self, table: pa.Table) -> pa.Table:
+        """Group and aggregate data with mean, median, and max."""
+        group_cols = ["year_month", "category1", "category2"]
 
-        aggs = []
-        for ncol in numeric_cols:
-            aggs.extend([(ncol, "mean"), (ncol, "max")])
+        # Get unique combinations of grouping columns
+        try:
+            # Try using drop_duplicates() if available
+            unique_groups = table.select(group_cols).drop_duplicates()
+        except AttributeError:
+            # Fallback: Convert to Pandas, drop duplicates, then convert back to Arrow
+            unique_groups = pa.Table.from_pandas(
+                table.select(group_cols).to_pandas().drop_duplicates(),
+                preserve_index=False
+            )
 
-        grouped = table.group_by(group_col).aggregate(aggs)
+        value2_col = table["value2"]
+        means = []
+        medians = []
+        maxes = []
 
-        return grouped, {"grouped_columns": numeric_cols}
+        # Iterate over unique group combinations and compute statistics
+        for row in unique_groups.to_pylist():
+            mask = None
+            for col in group_cols:
+                current_mask = pc.equal(table[col], row[col])
+                mask = current_mask if mask is None else pc.and_(mask, current_mask)
+            group_data = value2_col.filter(mask)
+            means.append(pc.mean(group_data).as_py())
+            medians.append(pc.approximate_median(group_data).as_py())
+            maxes.append(pc.max(group_data).as_py())
 
-    @time_operation("sorting")
-    def sort_data(self, table: pa.Table, n: int = 5) -> pa.Table:
-        """Sort table by first numeric column and return top N rows."""
-        print("Sorting data...")
-        numeric_cols = self._get_numeric_columns(table)
+        # Build result arrays
+        result_arrays = [
+            unique_groups[col] for col in group_cols
+        ] + [
+            pa.array(means, type=pa.float64()),
+            pa.array(medians, type=pa.float64()),
+            pa.array(maxes, type=pa.float64()),
+        ]
 
-        if not numeric_cols:
-            return pa.Table.from_arrays([], schema=pa.schema([]))
-
-        sorted_indices = pc.sort_indices(
-            table, sort_keys=[(numeric_cols[0], "descending")]
+        result_schema = pa.schema(
+            [(col, table.schema.field(col).type) for col in group_cols] +
+            [
+                ("value2_mean", pa.float64()),
+                ("value2_median", pa.float64()),
+                ("value2_max", pa.float64()),
+            ]
         )
-        return table.take(sorted_indices).slice(0, n)
+
+        return pa.Table.from_arrays(result_arrays, schema=result_schema)
+
+    
+    @time_operation("sorting")
+    def sort_data(self, table: pa.Table) -> pa.Table:
+        """Sort table by value2 column (full sort)."""
+        indices = pc.sort_indices(table, sort_keys=[("value2", "descending")])
+        return table.take(indices)
 
     @time_operation("filtering")
     def filter_data(self, table: pa.Table) -> Tuple[pa.Table, float]:
-        """Filter rows above mean value in first numeric column."""
-        print("Filtering data...")
-        numeric_cols = self._get_numeric_columns(table)
-
-        if not numeric_cols:
-            return table, 0.0
-
-        col = numeric_cols[0]
-        mean_val = pc.mean(table[col]).as_py()
-        condition = pc.greater(table[col], pa.scalar(mean_val))
-        filtered = table.filter(condition)
-        avg_filtered = pc.mean(filtered[col]).as_py()
-
+        """Filter rows above mean value in value2 column."""
+        mean_val = pc.mean(table["value2"]).as_py()
+        mask = pc.greater(table["value2"], mean_val)
+        filtered = table.filter(mask)
+        avg_filtered = pc.mean(filtered["value2"]).as_py()
         return filtered, avg_filtered
 
     @time_operation("correlation")
     def calculate_correlation(self, table: pa.Table) -> Dict:
-        """Calculate correlation matrix for numeric columns."""
-        print("Calculating correlations...")
-        numeric_cols = self._get_numeric_columns(table)[:3]  # First 3 numeric columns
+        """Calculate full correlation matrix for all numeric columns."""
+        numeric_cols = self._get_numeric_columns(table)
+        n_cols = len(numeric_cols)
+        corr_matrix = np.zeros((n_cols, n_cols))
 
-        if len(numeric_cols) < 2:
-            return {}
+        for i, col1 in enumerate(numeric_cols):
+            for j, col2 in enumerate(numeric_cols):
+                if i <= j:  # Correlation matrix is symmetric
+                    x = table[col1].to_numpy()
+                    y = table[col2].to_numpy()
+                    correlation = pc.covariance(table[col1], table[col2]).as_py() / (
+                        pc.stddev(table[col1]).as_py() * pc.stddev(table[col2]).as_py()
+                    )
+                    corr_matrix[i, j] = correlation
+                    if i != j:
+                        corr_matrix[j, i] = correlation
 
-        df_corr = table.select(numeric_cols).to_pandas()
-        return df_corr.corr().to_dict()
+        return {
+            col1: {col2: corr_matrix[i, j] for j, col2 in enumerate(numeric_cols)}
+            for i, col1 in enumerate(numeric_cols)
+        }
 
     def save_performance_metrics(
-        self, output_path: str = "performance_data_arrow.json"
+        self, output_path: str = "performance_metrics_arrow.json"
     ):
         """Save performance metrics to JSON file."""
         try:
@@ -179,7 +243,6 @@ class ArrowDataProcessor:
         try:
             results = {}
 
-            # Load and process data
             results["load"] = self.load_data()
             results["clean"] = self.clean_data(results["load"].table)
             results["aggregate"] = self.aggregate_data(results["clean"].table)
@@ -187,43 +250,18 @@ class ArrowDataProcessor:
             results["filter"] = self.filter_data(results["clean"].table)
             results["correlation"] = self.calculate_correlation(results["clean"].table)
 
-            # Update performance metrics with only required fields
-            metrics = {
-                "memory_size_gb": self.performance_metrics["memory_size_gb"],
-                "row_count": self.performance_metrics["row_count"],
-                "loading_time_seconds": self.performance_metrics[
-                    "loading_time_seconds"
-                ],
-                "cleaning_time_seconds": self.performance_metrics[
-                    "cleaning_time_seconds"
-                ],
-                "aggregation_time_seconds": self.performance_metrics[
-                    "aggregation_time_seconds"
-                ],
-                "sorting_time_seconds": self.performance_metrics[
-                    "sorting_time_seconds"
-                ],
-                "filtering_time_seconds": self.performance_metrics[
-                    "filtering_time_seconds"
-                ],
-                "correlation_time_seconds": self.performance_metrics[
-                    "correlation_time_seconds"
-                ],
-                "average_filtered_value": results["filter"].value,
-                "total_operation_time_seconds": sum(
-                    self.performance_metrics[f"{op}_time_seconds"]
-                    for op in [
-                        "loading",
-                        "cleaning",
-                        "aggregation",
-                        "sorting",
-                        "filtering",
-                        "correlation",
-                    ]
-                ),
-            }
+            self.performance_metrics["total_operation_time_seconds"] = sum(
+                self.performance_metrics[f"{op}_time_seconds"]
+                for op in [
+                    "loading",
+                    "cleaning",
+                    "aggregation",
+                    "sorting",
+                    "filtering",
+                    "correlation",
+                ]
+            )
 
-            self.performance_metrics = metrics
             return results
 
         except Exception as e:
