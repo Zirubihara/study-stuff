@@ -1,22 +1,30 @@
+import gc
 import json
+import os
 import time
 from dataclasses import dataclass
 from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
-import gc
-import os
 
 import dask.dataframe as dd
 import pandas as pd
 import polars as pl
+import pyarrow as pa
+import pyarrow.compute as pc  # for compute functions
+
+# Try to import the CSV module from pyarrow; if not available, fallback to dataset API.
+try:
+    import pyarrow.csv as pacsv
+except ImportError:
+    pacsv = None
 
 
 @dataclass
 class ProcessingResults:
     """Store results of data processing operations."""
 
-    df: Union[pd.DataFrame, pl.DataFrame, dd.DataFrame]
+    df: Union[pd.DataFrame, pl.DataFrame, dd.DataFrame, pa.Table]
     execution_time: float
     additional_info: Optional[Any] = None
 
@@ -276,6 +284,125 @@ class DaskDataProcessor(BaseDataProcessor):
         return df.corr().compute()
 
 
+class PyArrowDataProcessor(BaseDataProcessor):
+    """Memory-optimized PyArrow implementation."""
+
+    # Define the schema using PyArrow types
+    SCHEMA = pa.schema(
+        [
+            ("year_month", pa.string()),
+            ("category1", pa.int32()),
+            ("category2", pa.int32()),
+            ("category3", pa.int32()),
+            ("code", pa.string()),
+            ("flag", pa.int32()),
+            ("value1", pa.int32()),
+            ("value2", pa.int32()),
+        ]
+    )
+
+    @time_operation("loading")
+    def load_data(self) -> pa.Table:
+        # If the pyarrow.csv module is available, use it.
+        if pacsv is not None:
+            read_options = pacsv.ReadOptions(
+                column_names=self.COLUMN_NAMES,
+                autogenerate_column_names=False,
+            )
+            convert_options = pacsv.ConvertOptions(
+                column_types={field.name: field.type for field in self.SCHEMA}
+            )
+            table = pacsv.read_csv(
+                str(self.file_path),
+                read_options=read_options,
+                convert_options=convert_options,
+            )
+        else:
+            # Fall back to using the dataset API if pacsv is unavailable.
+            ds = pa.dataset.dataset(
+                str(self.file_path),
+                format="csv",
+                schema=self.SCHEMA,
+            )
+            table = ds.to_table()
+
+        self.performance_metrics["memory_size_gb"] = table.nbytes / (1024**3)
+        self.performance_metrics["row_count"] = table.num_rows
+        return table
+
+    @time_operation("cleaning")
+    def clean_data(self, table: pa.Table) -> pa.Table:
+        # Fill nulls: for numeric types fill with 0; for strings, fill with empty string.
+        arrays = {}
+        for col in table.column_names:
+            array = table.column(col)
+            if pa.types.is_integer(array.type):
+                filled = pc.fill_null(array, 0)
+            elif pa.types.is_floating(array.type):
+                filled = pc.fill_null(array, 0.0)
+            elif pa.types.is_string(array.type):
+                filled = pc.fill_null(array, "")
+            else:
+                filled = array
+            arrays[col] = filled
+        return pa.Table.from_pydict(arrays)
+
+    @time_operation("aggregation")
+    def aggregate_data(self, table: pa.Table) -> pa.Table:
+        group_cols = ["year_month", "category1", "category2"]
+        # Use the experimental hash_aggregate to group and aggregate "value2"
+        try:
+            result = pc.hash_aggregate(
+                table,
+                group_keys=group_cols,
+                aggregates=[
+                    ("value2", "mean"),
+                    ("value2", "median"),
+                    ("value2", "max"),
+                ],
+            )
+        except Exception as e:
+            # If hash_aggregate is not available in your PyArrow version, you may need to implement an alternative.
+            raise e
+        return result
+
+    @time_operation("sorting")
+    def sort_data(self, table: pa.Table) -> pa.Table:
+        sorted_indices = pc.sort_indices(table, sort_keys=[("value2", "descending")])
+        return table.take(sorted_indices)
+
+    @time_operation("filtering")
+    def filter_data(self, table: pa.Table) -> Tuple[pa.Table, float]:
+        value2_array = table.column("value2")
+        mean_value2 = pc.mean(value2_array).as_py()
+        condition = pc.greater(value2_array, mean_value2)
+        filtered_table = table.filter(condition)
+        avg_filtered = pc.mean(filtered_table.column("value2")).as_py()
+        return filtered_table, avg_filtered
+
+    @time_operation("correlation")
+    def calculate_correlation(self, table: pa.Table) -> pd.DataFrame:
+        import numpy as np
+
+        # Select numeric columns (int32 or float types)
+        numeric_cols = [
+            field.name
+            for field in table.schema
+            if pa.types.is_integer(field.type) or pa.types.is_floating(field.type)
+        ]
+        data = {}
+        for col in numeric_cols:
+            # Convert each column to a numpy array (using to_pandas for simplicity)
+            arr = table.column(col).to_pandas().to_numpy(dtype=float)
+            data[col] = arr
+        if not data:
+            return pd.DataFrame()
+        # Compute correlation matrix using numpy
+        arr_stack = np.vstack(list(data.values()))
+        corr_matrix = np.corrcoef(arr_stack)
+        return pd.DataFrame(corr_matrix, index=numeric_cols, columns=numeric_cols)
+
+
 def process_implementation(processor, name: str):
     """Process a single implementation with proper cleanup."""
     try:
@@ -325,6 +452,7 @@ def run_comparison(file_path: str, skip_dask: bool = False):
     processors = {
         "pandas": PandasDataProcessor(file_path),
         "polars": PolarsDataProcessor(file_path),
+        "pyarrow": PyArrowDataProcessor(file_path),
     }
 
     if not skip_dask:
@@ -343,8 +471,8 @@ def run_comparison(file_path: str, skip_dask: bool = False):
 if __name__ == "__main__":
     CSV_PATH = "/Users/krystianswiecicki/Downloads/custom_1988_2020.csv"
 
-    # Run Pandas and Polars first
-    print("Running Pandas and Polars implementations...")
+    # Run Pandas, Polars, and PyArrow implementations first
+    print("Running Pandas, Polars, and PyArrow implementations...")
     results = run_comparison(CSV_PATH, skip_dask=True)
     cleanup_memory()
 
