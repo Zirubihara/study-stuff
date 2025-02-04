@@ -23,7 +23,6 @@ except ImportError:
 @dataclass
 class ProcessingResults:
     """Store results of data processing operations."""
-
     df: Union[pd.DataFrame, pl.DataFrame, dd.DataFrame, pa.Table]
     execution_time: float
     additional_info: Optional[Any] = None
@@ -31,7 +30,6 @@ class ProcessingResults:
 
 def time_operation(operation_name: str):
     """Decorator to measure operation execution time."""
-
     def decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -45,9 +43,7 @@ def time_operation(operation_name: str):
                 execution_time=execution_time,
                 additional_info=result[1] if isinstance(result, tuple) else None,
             )
-
         return wrapper
-
     return decorator
 
 
@@ -60,7 +56,6 @@ def cleanup_memory():
 
 class BaseDataProcessor:
     """Base class for data processing operations."""
-
     COLUMN_NAMES = [
         "year_month",
         "category1",
@@ -87,7 +82,6 @@ class BaseDataProcessor:
 
 class PandasDataProcessor(BaseDataProcessor):
     """Memory-optimized Pandas implementation."""
-
     DTYPE_MAP = {
         "year_month": str,
         "category1": "int32",
@@ -112,9 +106,7 @@ class PandasDataProcessor(BaseDataProcessor):
             chunks.append(chunk)
         df = pd.concat(chunks, ignore_index=True)
 
-        self.performance_metrics["memory_size_gb"] = df.memory_usage(
-            deep=True
-        ).sum() / (1024**3)
+        self.performance_metrics["memory_size_gb"] = df.memory_usage(deep=True).sum() / (1024**3)
         self.performance_metrics["row_count"] = len(df)
         return df
 
@@ -154,7 +146,6 @@ class PandasDataProcessor(BaseDataProcessor):
 
 class PolarsDataProcessor(BaseDataProcessor):
     """Memory-optimized Polars implementation."""
-
     SCHEMA = {
         "year_month": pl.Utf8,
         "category1": pl.Int32,
@@ -207,15 +198,12 @@ class PolarsDataProcessor(BaseDataProcessor):
 
     @time_operation("correlation")
     def calculate_correlation(self, df: pl.DataFrame) -> pl.DataFrame:
-        numeric_cols = [
-            col for col, dtype in df.schema.items() if dtype in [pl.Int32, pl.Int64]
-        ]
+        numeric_cols = [col for col, dtype in df.schema.items() if dtype in [pl.Int32, pl.Int64]]
         return df.select(numeric_cols).corr()
 
 
 class DaskDataProcessor(BaseDataProcessor):
     """Memory-optimized Dask implementation."""
-
     DTYPE_MAP = {
         "year_month": str,
         "category1": "int32",
@@ -230,7 +218,6 @@ class DaskDataProcessor(BaseDataProcessor):
     @time_operation("loading")
     def load_data(self) -> dd.DataFrame:
         partition_size = "128MB"
-
         df = dd.read_csv(
             str(self.file_path),
             header=None,
@@ -238,14 +225,11 @@ class DaskDataProcessor(BaseDataProcessor):
             dtype=self.DTYPE_MAP,
             blocksize=partition_size,
         )
-
         self.performance_metrics["row_count"] = int(df.shape[0].compute())
-
         sample = df.get_partition(0).compute()
         avg_row_size = sample.memory_usage(deep=True).sum() / len(sample)
         total_size = avg_row_size * self.performance_metrics["row_count"]
         self.performance_metrics["memory_size_gb"] = total_size / (1024**3)
-
         return df
 
     @time_operation("cleaning")
@@ -256,7 +240,6 @@ class DaskDataProcessor(BaseDataProcessor):
     def aggregate_data(self, df: dd.DataFrame) -> dd.DataFrame:
         group_cols = ["year_month", "category1", "category2"]
         df = df.repartition(npartitions=max(1, df.npartitions // 2))
-
         agg_df = (
             df.groupby(group_cols)
             .agg({"value2": ["mean", "median", "max"]})
@@ -286,20 +269,18 @@ class DaskDataProcessor(BaseDataProcessor):
 
 class PyArrowDataProcessor(BaseDataProcessor):
     """Memory-optimized PyArrow implementation."""
-
-    # Define the schema using PyArrow types
-    SCHEMA = pa.schema(
-        [
-            ("year_month", pa.string()),
-            ("category1", pa.int32()),
-            ("category2", pa.int32()),
-            ("category3", pa.int32()),
-            ("code", pa.string()),
-            ("flag", pa.int32()),
-            ("value1", pa.int32()),
-            ("value2", pa.int32()),
-        ]
-    )
+    # Define the schema using PyArrow types.
+    # Note: The "flag" column is now defined as int64 to accommodate large integer values.
+    SCHEMA = pa.schema([
+        ("year_month", pa.string()),
+        ("category1", pa.int32()),
+        ("category2", pa.int32()),
+        ("category3", pa.int32()),
+        ("code", pa.string()),
+        ("flag", pa.int64()),  # Changed from int32 to int64
+        ("value1", pa.int32()),
+        ("value2", pa.int32()),
+    ])
 
     @time_operation("loading")
     def load_data(self) -> pa.Table:
@@ -350,21 +331,28 @@ class PyArrowDataProcessor(BaseDataProcessor):
     @time_operation("aggregation")
     def aggregate_data(self, table: pa.Table) -> pa.Table:
         group_cols = ["year_month", "category1", "category2"]
-        # Use the experimental hash_aggregate to group and aggregate "value2"
-        try:
-            result = pc.hash_aggregate(
-                table,
-                group_keys=group_cols,
-                aggregates=[
-                    ("value2", "mean"),
-                    ("value2", "median"),
-                    ("value2", "max"),
-                ],
-            )
-        except Exception as e:
-            # If hash_aggregate is not available in your PyArrow version, you may need to implement an alternative.
-            raise e
-        return result
+        # Check if the experimental hash_aggregate is available.
+        if hasattr(pc, "hash_aggregate"):
+            try:
+                result = pc.hash_aggregate(
+                    table,
+                    group_keys=group_cols,
+                    aggregates=[
+                        ("value2", "mean"),
+                        ("value2", "median"),
+                        ("value2", "max"),
+                    ],
+                )
+                return result
+            except Exception as e:
+                raise e
+        else:
+            print("pyarrow.compute.hash_aggregate not available, falling back to Pandas aggregation")
+            # Fallback: convert to pandas, aggregate, then convert back to Arrow Table.
+            df = table.to_pandas()
+            agg_df = df.groupby(group_cols)["value2"].agg(["mean", "median", "max"]).reset_index()
+            agg_df = agg_df.rename(columns={"mean": "value2_mean", "median": "value2_median", "max": "value2_max"})
+            return pa.Table.from_pandas(agg_df)
 
     @time_operation("sorting")
     def sort_data(self, table: pa.Table) -> pa.Table:
@@ -386,8 +374,7 @@ class PyArrowDataProcessor(BaseDataProcessor):
 
         # Select numeric columns (int32 or float types)
         numeric_cols = [
-            field.name
-            for field in table.schema
+            field.name for field in table.schema
             if pa.types.is_integer(field.type) or pa.types.is_floating(field.type)
         ]
         data = {}
@@ -417,13 +404,9 @@ def process_implementation(processor, name: str):
         df_filtered = processor.filter_data(df_clean.df)
         correlation = processor.calculate_correlation(df_clean.df)
 
-        processor.performance_metrics["average_filtered_value"] = (
-            df_filtered.additional_info
-        )
+        processor.performance_metrics["average_filtered_value"] = df_filtered.additional_info
         processor.performance_metrics["total_operation_time_seconds"] = sum(
-            time
-            for key, time in processor.performance_metrics.items()
-            if key.endswith("_time_seconds")
+            time for key, time in processor.performance_metrics.items() if key.endswith("_time_seconds")
         )
 
         processor.save_performance_metrics(f"performance_metrics_{name}.json")
@@ -439,10 +422,8 @@ def process_implementation(processor, name: str):
     except Exception as e:
         print(f"Error in {name} implementation: {e}")
         import traceback
-
         traceback.print_exc()
         return None
-
     finally:
         cleanup_memory()
 
