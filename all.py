@@ -12,6 +12,10 @@ import pandas as pd
 import polars as pl
 import pyarrow as pa
 import pyarrow.compute as pc  # for compute functions
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.types import (IntegerType, LongType, StringType, StructField,
+                               StructType)
 
 # Try to import the CSV module from pyarrow; if not available, fallback to dataset API.
 try:
@@ -23,6 +27,7 @@ except ImportError:
 @dataclass
 class ProcessingResults:
     """Store results of data processing operations."""
+
     df: Union[pd.DataFrame, pl.DataFrame, dd.DataFrame, pa.Table]
     execution_time: float
     additional_info: Optional[Any] = None
@@ -30,6 +35,7 @@ class ProcessingResults:
 
 def time_operation(operation_name: str):
     """Decorator to measure operation execution time."""
+
     def decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -43,7 +49,9 @@ def time_operation(operation_name: str):
                 execution_time=execution_time,
                 additional_info=result[1] if isinstance(result, tuple) else None,
             )
+
         return wrapper
+
     return decorator
 
 
@@ -56,6 +64,7 @@ def cleanup_memory():
 
 class BaseDataProcessor:
     """Base class for data processing operations."""
+
     COLUMN_NAMES = [
         "year_month",
         "category1",
@@ -82,6 +91,7 @@ class BaseDataProcessor:
 
 class PandasDataProcessor(BaseDataProcessor):
     """Memory-optimized Pandas implementation."""
+
     DTYPE_MAP = {
         "year_month": str,
         "category1": "int32",
@@ -106,7 +116,9 @@ class PandasDataProcessor(BaseDataProcessor):
             chunks.append(chunk)
         df = pd.concat(chunks, ignore_index=True)
 
-        self.performance_metrics["memory_size_gb"] = df.memory_usage(deep=True).sum() / (1024**3)
+        self.performance_metrics["memory_size_gb"] = df.memory_usage(
+            deep=True
+        ).sum() / (1024**3)
         self.performance_metrics["row_count"] = len(df)
         return df
 
@@ -146,6 +158,7 @@ class PandasDataProcessor(BaseDataProcessor):
 
 class PolarsDataProcessor(BaseDataProcessor):
     """Memory-optimized Polars implementation."""
+
     SCHEMA = {
         "year_month": pl.Utf8,
         "category1": pl.Int32,
@@ -198,12 +211,15 @@ class PolarsDataProcessor(BaseDataProcessor):
 
     @time_operation("correlation")
     def calculate_correlation(self, df: pl.DataFrame) -> pl.DataFrame:
-        numeric_cols = [col for col, dtype in df.schema.items() if dtype in [pl.Int32, pl.Int64]]
+        numeric_cols = [
+            col for col, dtype in df.schema.items() if dtype in [pl.Int32, pl.Int64]
+        ]
         return df.select(numeric_cols).corr()
 
 
 class DaskDataProcessor(BaseDataProcessor):
     """Memory-optimized Dask implementation."""
+
     DTYPE_MAP = {
         "year_month": str,
         "category1": "int32",
@@ -269,22 +285,22 @@ class DaskDataProcessor(BaseDataProcessor):
 
 class PyArrowDataProcessor(BaseDataProcessor):
     """Memory-optimized PyArrow implementation."""
-    # Define the schema using PyArrow types.
-    # Note: The "flag" column is now defined as int64 to accommodate large integer values.
-    SCHEMA = pa.schema([
-        ("year_month", pa.string()),
-        ("category1", pa.int32()),
-        ("category2", pa.int32()),
-        ("category3", pa.int32()),
-        ("code", pa.string()),
-        ("flag", pa.int64()),  # Changed from int32 to int64
-        ("value1", pa.int32()),
-        ("value2", pa.int32()),
-    ])
+
+    SCHEMA = pa.schema(
+        [
+            ("year_month", pa.string()),
+            ("category1", pa.int32()),
+            ("category2", pa.int32()),
+            ("category3", pa.int32()),
+            ("code", pa.string()),
+            ("flag", pa.int64()),
+            ("value1", pa.int32()),
+            ("value2", pa.int32()),
+        ]
+    )
 
     @time_operation("loading")
     def load_data(self) -> pa.Table:
-        # If the pyarrow.csv module is available, use it.
         if pacsv is not None:
             read_options = pacsv.ReadOptions(
                 column_names=self.COLUMN_NAMES,
@@ -299,7 +315,6 @@ class PyArrowDataProcessor(BaseDataProcessor):
                 convert_options=convert_options,
             )
         else:
-            # Fall back to using the dataset API if pacsv is unavailable.
             ds = pa.dataset.dataset(
                 str(self.file_path),
                 format="csv",
@@ -313,7 +328,6 @@ class PyArrowDataProcessor(BaseDataProcessor):
 
     @time_operation("cleaning")
     def clean_data(self, table: pa.Table) -> pa.Table:
-        # Fill nulls: for numeric types fill with 0; for strings, fill with empty string.
         arrays = {}
         for col in table.column_names:
             array = table.column(col)
@@ -331,7 +345,6 @@ class PyArrowDataProcessor(BaseDataProcessor):
     @time_operation("aggregation")
     def aggregate_data(self, table: pa.Table) -> pa.Table:
         group_cols = ["year_month", "category1", "category2"]
-        # Check if the experimental hash_aggregate is available.
         if hasattr(pc, "hash_aggregate"):
             try:
                 result = pc.hash_aggregate(
@@ -347,11 +360,22 @@ class PyArrowDataProcessor(BaseDataProcessor):
             except Exception as e:
                 raise e
         else:
-            print("pyarrow.compute.hash_aggregate not available, falling back to Pandas aggregation")
-            # Fallback: convert to pandas, aggregate, then convert back to Arrow Table.
+            print(
+                "pyarrow.compute.hash_aggregate not available, falling back to Pandas aggregation"
+            )
             df = table.to_pandas()
-            agg_df = df.groupby(group_cols)["value2"].agg(["mean", "median", "max"]).reset_index()
-            agg_df = agg_df.rename(columns={"mean": "value2_mean", "median": "value2_median", "max": "value2_max"})
+            agg_df = (
+                df.groupby(group_cols)["value2"]
+                .agg(["mean", "median", "max"])
+                .reset_index()
+            )
+            agg_df = agg_df.rename(
+                columns={
+                    "mean": "value2_mean",
+                    "median": "value2_median",
+                    "max": "value2_max",
+                }
+            )
             return pa.Table.from_pandas(agg_df)
 
     @time_operation("sorting")
@@ -372,22 +396,118 @@ class PyArrowDataProcessor(BaseDataProcessor):
     def calculate_correlation(self, table: pa.Table) -> pd.DataFrame:
         import numpy as np
 
-        # Select numeric columns (int32 or float types)
         numeric_cols = [
-            field.name for field in table.schema
+            field.name
+            for field in table.schema
             if pa.types.is_integer(field.type) or pa.types.is_floating(field.type)
         ]
         data = {}
         for col in numeric_cols:
-            # Convert each column to a numpy array (using to_pandas for simplicity)
             arr = table.column(col).to_pandas().to_numpy(dtype=float)
             data[col] = arr
         if not data:
             return pd.DataFrame()
-        # Compute correlation matrix using numpy
         arr_stack = np.vstack(list(data.values()))
         corr_matrix = np.corrcoef(arr_stack)
         return pd.DataFrame(corr_matrix, index=numeric_cols, columns=numeric_cols)
+
+
+class SparkDataProcessor(BaseDataProcessor):
+    """Memory-optimized PySpark implementation."""
+
+    # Define the schema using PySpark types
+    SCHEMA = StructType(
+        [
+            StructField("year_month", StringType(), True),
+            StructField("category1", IntegerType(), True),
+            StructField("category2", IntegerType(), True),
+            StructField("category3", IntegerType(), True),
+            StructField("code", StringType(), True),
+            StructField("flag", LongType(), True),
+            StructField("value1", IntegerType(), True),
+            StructField("value2", IntegerType(), True),
+        ]
+    )
+
+    def __init__(self, file_path: str):
+        super().__init__(file_path)
+        self.spark = (
+            SparkSession.builder.appName("DataProcessing")
+            .config("spark.driver.memory", "4g")
+            .config("spark.executor.memory", "4g")
+            .getOrCreate()
+        )
+
+    @time_operation("loading")
+    def load_data(self):
+        df = self.spark.read.csv(str(self.file_path), schema=self.SCHEMA, header=False)
+
+        # Calculate metrics
+        row_count = df.count()
+        self.performance_metrics["row_count"] = row_count
+
+        # Estimate memory size (rough approximation)
+        sample = df.limit(1000).toPandas()
+        avg_row_size = sample.memory_usage(deep=True).sum() / len(sample)
+        total_size = avg_row_size * row_count
+        self.performance_metrics["memory_size_gb"] = total_size / (1024**3)
+
+        return df
+
+    @time_operation("cleaning")
+    def clean_data(self, df):
+        return df.fillna(0)
+
+    @time_operation("aggregation")
+    def aggregate_data(self, df):
+        group_cols = ["year_month", "category1", "category2"]
+        return df.groupBy(group_cols).agg(
+            F.mean("value2").alias("value2_mean"),
+            F.expr("percentile_approx(value2, 0.5)").alias("value2_median"),
+            F.max("value2").alias("value2_max"),
+        )
+
+    @time_operation("sorting")
+    def sort_data(self, df):
+        return df.orderBy(F.col("value2").desc())
+
+    @time_operation("filtering")
+    def filter_data(self, df):
+        # Calculate mean value
+        mean_value = df.select(F.mean("value2")).collect()[0][0]
+
+        # Filter and calculate new mean
+        filtered_df = df.filter(F.col("value2") > mean_value)
+        avg_filtered = filtered_df.select(F.mean("value2")).collect()[0][0]
+
+        return filtered_df, float(avg_filtered)
+
+    @time_operation("correlation")
+    def calculate_correlation(self, df):
+        # Get numeric columns
+        numeric_cols = [
+            field.name
+            for field in df.schema.fields
+            if isinstance(field.dataType, (IntegerType, LongType))
+        ]
+
+        # Calculate correlation matrix
+        correlation_matrix = []
+        for col1 in numeric_cols:
+            row = []
+            for col2 in numeric_cols:
+                corr = df.stat.corr(col1, col2)
+                row.append(corr)
+            correlation_matrix.append(row)
+
+        return pd.DataFrame(
+            correlation_matrix, index=numeric_cols, columns=numeric_cols
+        )
+
+    def __del__(self):
+        """Clean up Spark session on object destruction."""
+        if hasattr(self, "spark"):
+            self.spark.stop()
 
 
 def process_implementation(processor, name: str):
@@ -404,9 +524,13 @@ def process_implementation(processor, name: str):
         df_filtered = processor.filter_data(df_clean.df)
         correlation = processor.calculate_correlation(df_clean.df)
 
-        processor.performance_metrics["average_filtered_value"] = df_filtered.additional_info
+        processor.performance_metrics["average_filtered_value"] = (
+            df_filtered.additional_info
+        )
         processor.performance_metrics["total_operation_time_seconds"] = sum(
-            time for key, time in processor.performance_metrics.items() if key.endswith("_time_seconds")
+            time
+            for key, time in processor.performance_metrics.items()
+            if key.endswith("_time_seconds")
         )
 
         processor.save_performance_metrics(f"performance_metrics_{name}.json")
@@ -422,13 +546,14 @@ def process_implementation(processor, name: str):
     except Exception as e:
         print(f"Error in {name} implementation: {e}")
         import traceback
+
         traceback.print_exc()
         return None
     finally:
         cleanup_memory()
 
 
-def run_comparison(file_path: str, skip_dask: bool = False):
+def run_comparison(file_path: str, skip_dask: bool = False, skip_spark: bool = False):
     """Run comparison between different implementations."""
     processors = {
         "pandas": PandasDataProcessor(file_path),
@@ -438,6 +563,9 @@ def run_comparison(file_path: str, skip_dask: bool = False):
 
     if not skip_dask:
         processors["dask"] = DaskDataProcessor(file_path)
+
+    if not skip_spark:
+        processors["spark"] = SparkDataProcessor(file_path)
 
     results = {}
     for name, processor in processors.items():
@@ -454,7 +582,7 @@ if __name__ == "__main__":
 
     # Run Pandas, Polars, and PyArrow implementations first
     print("Running Pandas, Polars, and PyArrow implementations...")
-    results = run_comparison(CSV_PATH, skip_dask=True)
+    results = run_comparison(CSV_PATH, skip_dask=True, skip_spark=False)
     cleanup_memory()
 
     # Run Dask separately
