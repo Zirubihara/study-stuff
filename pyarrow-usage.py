@@ -139,37 +139,51 @@ class ArrowDataProcessor:
     def aggregate_data(self, table: pa.Table) -> pa.Table:
         """Group and aggregate data with mean, median, and max."""
         group_cols = ["year_month", "category1", "category2"]
-
-        # Get unique combinations of grouping columns
-        try:
-            # Try using drop_duplicates() if available
-            unique_groups = table.select(group_cols).drop_duplicates()
-        except AttributeError:
-            # Fallback: Convert to Pandas, drop duplicates, then convert back to Arrow
-            unique_groups = pa.Table.from_pandas(
-                table.select(group_cols).to_pandas().drop_duplicates(),
-                preserve_index=False
-            )
-
-        value2_col = table["value2"]
+        
+        # Get unique combinations using groupby
+        unique_groups = []
+        for group_key in group_cols:
+            unique_values = pc.unique(table[group_key])
+            unique_groups.append(unique_values)
+        
+        # Create all combinations of unique values
+        import itertools
+        group_combinations = list(itertools.product(*unique_groups))
+        
+        # For each unique combination, calculate stats
         means = []
         medians = []
         maxes = []
-
-        # Iterate over unique group combinations and compute statistics
-        for row in unique_groups.to_pylist():
+        final_groups = {col: [] for col in group_cols}
+        
+        for combination in group_combinations:
+            # Create mask for current group
             mask = None
-            for col in group_cols:
-                current_mask = pc.equal(table[col], row[col])
+            for col, val in zip(group_cols, combination):
+                current_mask = pc.equal(table[col], val)
                 mask = current_mask if mask is None else pc.and_(mask, current_mask)
-            group_data = value2_col.filter(mask)
-            means.append(pc.mean(group_data).as_py())
-            medians.append(pc.approximate_median(group_data).as_py())
-            maxes.append(pc.max(group_data).as_py())
-
-        # Build result arrays
+            
+            # Skip if no matching rows
+            if pc.sum(pc.cast(mask, pa.int8())).as_py() == 0:
+                continue
+                
+            # Get group data
+            group_data = table["value2"].filter(mask)
+            
+            # Only add group if it has data
+            if len(group_data) > 0:
+                for col, val in zip(group_cols, combination):
+                    final_groups[col].append(val)
+                
+                # Calculate statistics
+                means.append(pc.mean(group_data).as_py())
+                medians.append(pc.approximate_median(group_data).as_py())
+                maxes.append(pc.max(group_data).as_py())
+        
+        # Combine results
         result_arrays = [
-            unique_groups[col] for col in group_cols
+            pa.array(final_groups[col], type=table.schema.field(col).type) 
+            for col in group_cols
         ] + [
             pa.array(means, type=pa.float64()),
             pa.array(medians, type=pa.float64()),
@@ -177,8 +191,8 @@ class ArrowDataProcessor:
         ]
 
         result_schema = pa.schema(
-            [(col, table.schema.field(col).type) for col in group_cols] +
             [
+                *((col, table.schema.field(col).type) for col in group_cols),
                 ("value2_mean", pa.float64()),
                 ("value2_median", pa.float64()),
                 ("value2_max", pa.float64()),
@@ -187,7 +201,6 @@ class ArrowDataProcessor:
 
         return pa.Table.from_arrays(result_arrays, schema=result_schema)
 
-    
     @time_operation("sorting")
     def sort_data(self, table: pa.Table) -> pa.Table:
         """Sort table by value2 column (full sort)."""
