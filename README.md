@@ -1,6 +1,6 @@
 # Data Processing Performance Comparison
 
-This project provides implementations of data processing operations using different Python libraries (Pandas, Polars, and PyArrow) with performance benchmarking. Each implementation includes loading, cleaning, aggregating, sorting, filtering, and correlation analysis capabilities.
+This project provides implementations of data processing operations using different Python libraries (Pandas, Polars, PyArrow, Dask, and PySpark) with performance benchmarking. Each implementation includes loading, cleaning, aggregating, sorting, filtering, and correlation analysis capabilities.
 
 ## Features
 
@@ -46,7 +46,9 @@ data-processing-comparison/
 ├── README.md
 ├── pandas_processor.py
 ├── polars_processor.py
-└── arrow_processor.py
+├── arrow_processor.py
+├── dask_processor.py
+└── spark_processor.py
 ```
 
 ## Usage
@@ -54,9 +56,9 @@ data-processing-comparison/
 ### Pandas Implementation
 
 ```python
-from pandas_processor import DataProcessor
+from pandas_processor import PandasDataProcessor
 
-processor = DataProcessor("path/to/your/data.csv")
+processor = PandasDataProcessor("path/to/your/data.csv")
 results = processor.process_data()
 processor.save_performance_metrics()
 ```
@@ -71,24 +73,40 @@ results = processor.process_data()
 processor.save_performance_metrics()
 ```
 
-### PyArrow Implementation (with Streamlit)
+### PyArrow Implementation
 
-1. Run the Streamlit app:
+```python
+from arrow_processor import PyArrowDataProcessor
 
-```bash
-streamlit run arrow_processor.py
+processor = PyArrowDataProcessor("path/to/your/data.csv")
+results = processor.process_data()
+processor.save_performance_metrics()
 ```
 
-2. The dashboard will open in your default web browser, showing:
-   - Loading and processing times
-   - Memory usage statistics
-   - Data aggregations and summaries
-   - Correlation matrix
-   - Descriptive statistics
+### Dask Implementation
+
+```python
+from dask_processor import DaskDataProcessor
+
+processor = DaskDataProcessor("path/to/your/data.csv")
+results = processor.process_data()
+processor.save_performance_metrics()
+```
+
+### PySpark Implementation
+
+```python
+from spark_processor import SparkDataProcessor
+
+processor = SparkDataProcessor("path/to/your/data.csv")
+results = processor.process_data()
+processor.save_performance_metrics()
+```
 
 ## Performance Metrics
 
 Each implementation saves performance metrics to a JSON file, including:
+
 - Loading time
 - Memory usage
 - Processing times for different operations
@@ -98,6 +116,7 @@ Each implementation saves performance metrics to a JSON file, including:
 ## Expected Data Format
 
 The input CSV file should have the following columns:
+
 - year_month (YYYYMM format)
 - category1 (integer)
 - category2 (integer)
@@ -110,9 +129,12 @@ The input CSV file should have the following columns:
 ## Performance Comparison
 
 Performance varies based on data size and operations:
+
 - **Pandas**: Good for smaller datasets and complex operations
 - **Polars**: Excellent for large datasets and parallel processing
 - **PyArrow**: Best for memory efficiency and integration with big data tools
+- **Dask**: Suitable for distributed data processing and handling large datasets
+- **PySpark**: Scalable and optimized for big data processing in distributed environments
 
 ## Contributing
 
@@ -127,8 +149,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- The Pandas, Polars, and PyArrow development teams
-- The Streamlit team for their excellent visualization framework
+- The Pandas, Polars, PyArrow, Dask, and PySpark development teams
 
 ## Contact
 
