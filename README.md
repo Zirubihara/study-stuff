@@ -14,23 +14,26 @@ This project provides implementations of data processing operations using differ
 ## Requirements
 
 - Python 3.8+
-- Required packages listed in `requirements.txt`
+- Required packages listed in requirements.txt
 
 ## Installation
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/yourusername/data-processing-comparison.git
 cd data-processing-comparison
 ```
 
 2. Create and activate a virtual environment:
+
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows, use: venv\Scripts\activate
 ```
 
 3. Install the required packages:
+
 ```bash
 pip install -r requirements.txt
 ```
@@ -71,6 +74,7 @@ processor.save_performance_metrics()
 ### PyArrow Implementation (with Streamlit)
 
 1. Run the Streamlit app:
+
 ```bash
 streamlit run arrow_processor.py
 ```
@@ -106,9 +110,9 @@ The input CSV file should have the following columns:
 ## Performance Comparison
 
 Performance varies based on data size and operations:
-- Pandas: Good for smaller datasets and complex operations
-- Polars: Excellent for large datasets and parallel processing
-- PyArrow: Best for memory efficiency and integration with big data tools
+- **Pandas**: Good for smaller datasets and complex operations
+- **Polars**: Excellent for large datasets and parallel processing
+- **PyArrow**: Best for memory efficiency and integration with big data tools
 
 ## Contributing
 
