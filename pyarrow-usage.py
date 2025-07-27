@@ -225,12 +225,15 @@ class ArrowDataProcessor:
         n_cols = len(numeric_cols)
         corr_matrix = np.zeros((n_cols, n_cols))
 
+        # Convert to numpy arrays for correlation calculation
+        arrays = {}
+        for col in numeric_cols:
+            arrays[col] = table[col].to_numpy(zero_copy_only=False)
+
         for i, col1 in enumerate(numeric_cols):
             for j, col2 in enumerate(numeric_cols):
                 if i <= j:  # Correlation matrix is symmetric
-                    correlation = pc.covariance(table[col1], table[col2]).as_py() / (
-                        pc.stddev(table[col1]).as_py() * pc.stddev(table[col2]).as_py()
-                    )
+                    correlation = np.corrcoef(arrays[col1], arrays[col2])[0, 1]
                     corr_matrix[i, j] = correlation
                     if i != j:
                         corr_matrix[j, i] = correlation
@@ -284,7 +287,12 @@ class ArrowDataProcessor:
 
 def main():
     """Main execution function."""
-    csv_path = "/Users/krystianswiecicki/Downloads/custom_1988_2020.csv"
+    # Dataset options
+    small_dataset = "sample_data.csv"      # 50K rows
+    large_dataset = "large_data.csv"       # 1M rows
+    
+    # Choose dataset to use
+    csv_path = large_dataset  # Change to small_dataset for smaller test
 
     try:
         processor = ArrowDataProcessor(csv_path)
