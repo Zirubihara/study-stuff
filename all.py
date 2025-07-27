@@ -430,12 +430,19 @@ class SparkDataProcessor(BaseDataProcessor):
 
     def __init__(self, file_path: str):
         super().__init__(file_path)
-        self.spark = (
-            SparkSession.builder.appName("DataProcessing")
-            .config("spark.driver.memory", "4g")
-            .config("spark.executor.memory", "4g")
-            .getOrCreate()
-        )
+        try:
+            self.spark = (
+                SparkSession.builder.appName("DataProcessing")
+                .config("spark.driver.memory", "4g")
+                .config("spark.executor.memory", "4g")
+                .config("spark.driver.host", "localhost")
+                .config("spark.ui.enabled", "false")
+                .master("local[*]")
+                .getOrCreate()
+            )
+        except Exception as e:
+            print(f"Failed to initialize Spark: {e}")
+            raise
 
     @time_operation("loading")
     def load_data(self):
@@ -564,7 +571,11 @@ def run_comparison(file_path: str, skip_dask: bool = False, skip_spark: bool = F
         processors["dask"] = DaskDataProcessor(file_path)
 
     if not skip_spark:
-        processors["spark"] = SparkDataProcessor(file_path)
+        try:
+            processors["spark"] = SparkDataProcessor(file_path)
+        except Exception as e:
+            print(f"Skipping Spark due to initialization error: {e}")
+            skip_spark = True
 
     results = {}
     for name, processor in processors.items():
