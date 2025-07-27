@@ -67,13 +67,22 @@ class SparkDataProcessor:
         self.file_path = Path(file_path)
         self.performance_metrics: Dict[str, float] = {}
 
-        # Initialize Spark session
-        self.spark = (
-            SparkSession.builder.appName("DataProcessor")
-            .config("spark.driver.memory", "8g")
-            .config("spark.executor.memory", "8g")
-            .getOrCreate()
-        )
+        # Initialize Spark session with proper configuration for Windows
+        try:
+            self.spark = (
+                SparkSession.builder.appName("DataProcessor")
+                .config("spark.driver.memory", "4g")
+                .config("spark.executor.memory", "4g")
+                .config("spark.sql.adaptive.enabled", "true")
+                .config("spark.sql.adaptive.coalescePartitions.enabled", "true")
+                .config("spark.driver.host", "localhost")
+                .config("spark.ui.enabled", "false")
+                .master("local[*]")
+                .getOrCreate()
+            )
+        except Exception as e:
+            print(f"Failed to create Spark session: {e}")
+            raise
 
     def __del__(self):
         """Clean up Spark session."""

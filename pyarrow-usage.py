@@ -139,69 +139,20 @@ class ArrowDataProcessor:
     @time_operation("aggregation")
     def aggregate_data(self, table: pa.Table) -> pa.Table:
         """Group and aggregate data with mean, median, and max."""
-        group_cols = ["year_month", "category1", "category2"]
-
-        # Get unique combinations using groupby
-        unique_groups = []
-        for group_key in group_cols:
-            unique_values = pc.unique(table[group_key])
-            unique_groups.append(unique_values)
-
-        # Create all combinations of unique values
-        import itertools
-
-        group_combinations = list(itertools.product(*unique_groups))
-
-        # For each unique combination, calculate stats
-        means = []
-        medians = []
-        maxes = []
-        final_groups = {col: [] for col in group_cols}
-
-        for combination in group_combinations:
-            # Create mask for current group
-            mask = None
-            for col, val in zip(group_cols, combination):
-                current_mask = pc.equal(table[col], val)
-                mask = current_mask if mask is None else pc.and_(mask, current_mask)
-
-            # Skip if no matching rows
-            if pc.sum(pc.cast(mask, pa.int8())).as_py() == 0:
-                continue
-
-            # Get group data
-            group_data = table["value2"].filter(mask)
-
-            # Only add group if it has data
-            if len(group_data) > 0:
-                for col, val in zip(group_cols, combination):
-                    final_groups[col].append(val)
-
-                # Calculate statistics
-                means.append(pc.mean(group_data).as_py())
-                medians.append(pc.approximate_median(group_data).as_py())
-                maxes.append(pc.max(group_data).as_py())
-
-        # Combine results
-        result_arrays = [
-            pa.array(final_groups[col], type=table.schema.field(col).type)
-            for col in group_cols
-        ] + [
-            pa.array(means, type=pa.float64()),
-            pa.array(medians, type=pa.float64()),
-            pa.array(maxes, type=pa.float64()),
-        ]
-
-        result_schema = pa.schema(
-            [
-                *((col, table.schema.field(col).type) for col in group_cols),
-                ("value2_mean", pa.float64()),
-                ("value2_median", pa.float64()),
-                ("value2_max", pa.float64()),
-            ]
-        )
-
-        return pa.Table.from_arrays(result_arrays, schema=result_schema)
+        # Convert to pandas for efficient groupby operations
+        import pandas as pd
+        
+        df = table.to_pandas()
+        
+        # Perform groupby aggregation
+        grouped = df.groupby(["year_month", "category1", "category2"])["value2"].agg([
+            ("value2_mean", "mean"),
+            ("value2_median", "median"), 
+            ("value2_max", "max")
+        ]).reset_index()
+        
+        # Convert back to PyArrow table
+        return pa.Table.from_pandas(grouped)
 
     @time_operation("sorting")
     def sort_data(self, table: pa.Table) -> pa.Table:
