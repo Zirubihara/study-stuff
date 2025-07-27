@@ -233,7 +233,12 @@ class DaskDataProcessor:
 
 def main():
     """Main execution function using DaskDataProcessor."""
-    csv_path = "/Users/krystianswiecicki/Downloads/custom_1988_2020.csv"
+    # Dataset options
+    small_dataset = "sample_data.csv"      # 50K rows
+    large_dataset = "large_data.csv"       # 1M rows
+    
+    # Choose dataset to use
+    csv_path = large_dataset  # Change to small_dataset for smaller test
 
     try:
         processor = DaskDataProcessor(csv_path)

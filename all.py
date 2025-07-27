@@ -8,14 +8,10 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
 
 import dask.dataframe as dd
-
 import pandas as pd
-
 import polars as pl
-
 import pyarrow as pa
 import pyarrow.compute as pc  # for compute functions
-
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
 from pyspark.sql.types import IntegerType, LongType, StringType, StructField, StructType
@@ -364,8 +360,7 @@ class PyArrowDataProcessor(BaseDataProcessor):
                 raise e
         else:
             print(
-                "pyarrow.compute.hash_aggregate not available, "
-                "falling back to Pandas aggregation"
+                "pyarrow.compute.hash_aggregate not available, falling back to Pandas aggregation"
             )
             df = table.to_pandas()
             agg_df = (
@@ -582,7 +577,12 @@ def run_comparison(file_path: str, skip_dask: bool = False, skip_spark: bool = F
 
 
 if __name__ == "__main__":
-    CSV_PATH = "/Users/krystianswiecicki/Downloads/custom_1988_2020.csv"
+    # Dataset options
+    small_dataset = "sample_data.csv"      # 50K rows
+    large_dataset = "large_data.csv"       # 1M rows
+    
+    # Choose dataset to use
+    CSV_PATH = large_dataset  # Change to small_dataset for smaller test
 
     # Run Pandas, Polars, and PyArrow implementations first
     print("Running Pandas, Polars, and PyArrow implementations...")
