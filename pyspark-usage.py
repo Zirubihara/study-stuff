@@ -5,11 +5,11 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql import functions as F
-from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 from pyspark.ml.feature import VectorAssembler
 from pyspark.ml.stat import Correlation
+from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
 
 @dataclass
@@ -49,32 +49,35 @@ class SparkDataProcessor:
     """Handle data processing operations on CSV files using PySpark."""
 
     # Define schema for the CSV data
-    SCHEMA = StructType([
-        StructField("year_month", StringType(), True),
-        StructField("category1", IntegerType(), True),
-        StructField("category2", IntegerType(), True),
-        StructField("category3", IntegerType(), True),
-        StructField("code", StringType(), True),
-        StructField("flag", IntegerType(), True),
-        StructField("value1", IntegerType(), True),
-        StructField("value2", IntegerType(), True),
-    ])
+    SCHEMA = StructType(
+        [
+            StructField("year_month", StringType(), True),
+            StructField("category1", IntegerType(), True),
+            StructField("category2", IntegerType(), True),
+            StructField("category3", IntegerType(), True),
+            StructField("code", StringType(), True),
+            StructField("flag", IntegerType(), True),
+            StructField("value1", IntegerType(), True),
+            StructField("value2", IntegerType(), True),
+        ]
+    )
 
     def __init__(self, file_path: str):
         """Initialize processor with file path and create Spark session."""
         self.file_path = Path(file_path)
         self.performance_metrics: Dict[str, float] = {}
-        
+
         # Initialize Spark session
-        self.spark = SparkSession.builder \
-            .appName("DataProcessor") \
-            .config("spark.driver.memory", "8g") \
-            .config("spark.executor.memory", "8g") \
+        self.spark = (
+            SparkSession.builder.appName("DataProcessor")
+            .config("spark.driver.memory", "8g")
+            .config("spark.executor.memory", "8g")
             .getOrCreate()
+        )
 
     def __del__(self):
         """Clean up Spark session."""
-        if hasattr(self, 'spark'):
+        if hasattr(self, "spark"):
             self.spark.stop()
 
     @time_operation("loading")
@@ -83,15 +86,11 @@ class SparkDataProcessor:
         if not self.file_path.exists():
             raise FileNotFoundError(f"File not found: {self.file_path}")
 
-        df = self.spark.read.csv(
-            str(self.file_path),
-            schema=self.SCHEMA,
-            header=False
-        )
+        df = self.spark.read.csv(str(self.file_path), schema=self.SCHEMA, header=False)
 
         # Cache the DataFrame for better performance in subsequent operations
         df = df.cache()
-        
+
         # Get row count for metrics
         row_count = df.count()
         self.performance_metrics["row_count"] = row_count
@@ -106,12 +105,11 @@ class SparkDataProcessor:
     @time_operation("aggregation")
     def aggregate_data(self, df: DataFrame) -> DataFrame:
         """Group and aggregate data."""
-        return df.groupBy("year_month", "category1", "category2") \
-            .agg(
-                F.mean("value2").alias("value2_mean"),
-                F.expr("percentile_approx(value2, 0.5)").alias("value2_median"),
-                F.max("value2").alias("value2_max")
-            )
+        return df.groupBy("year_month", "category1", "category2").agg(
+            F.mean("value2").alias("value2_mean"),
+            F.expr("percentile_approx(value2, 0.5)").alias("value2_median"),
+            F.max("value2").alias("value2_max"),
+        )
 
     @time_operation("sorting")
     def sort_data(self, df: DataFrame) -> DataFrame:
@@ -123,34 +121,36 @@ class SparkDataProcessor:
         """Filter rows where value2 is above mean."""
         # Calculate mean
         mean_value2 = df.select(F.mean("value2")).first()[0]
-        
+
         # Filter and calculate new mean
         filtered_df = df.filter(F.col("value2") > mean_value2)
         avg_filtered = filtered_df.select(F.mean("value2")).first()[0]
-        
+
         return filtered_df, float(avg_filtered)
 
     @time_operation("correlation")
     def calculate_correlation(self, df: DataFrame) -> DataFrame:
         """Calculate correlation matrix for numeric columns."""
-        numeric_cols = [field.name for field in df.schema.fields 
-                       if isinstance(field.dataType, IntegerType)]
-        
+        numeric_cols = [
+            field.name
+            for field in df.schema.fields
+            if isinstance(field.dataType, IntegerType)
+        ]
+
         # Convert to vector for correlation
         vector_col = "features"
         assembler = VectorAssembler(inputCols=numeric_cols, outputCol=vector_col)
         vector_df = assembler.transform(df)
-        
+
         # Calculate correlation matrix
         correlation_matrix = Correlation.corr(vector_df, vector_col)
-        
+
         # Convert correlation matrix to DataFrame
         correlation_array = correlation_matrix.collect()[0][0].toArray()
         correlation_df = self.spark.createDataFrame(
-            correlation_array.tolist(),
-            numeric_cols
+            correlation_array.tolist(), numeric_cols
         )
-        
+
         return correlation_df
 
     def save_performance_metrics(
@@ -199,7 +199,7 @@ class SparkDataProcessor:
             raise
         finally:
             # Cleanup cached DataFrames
-            if hasattr(self, 'spark'):
+            if hasattr(self, "spark"):
                 self.spark.catalog.clearCache()
 
 

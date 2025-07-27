@@ -41,66 +41,61 @@ pip install -r requirements.txt
 ## Project Structure
 
 ```
-data-processing-comparison/
+study-stuff/
 ├── requirements.txt
 ├── README.md
-├── pandas_processor.py
-├── polars_processor.py
-├── arrow_processor.py
-├── dask_processor.py
-└── spark_processor.py
+├── CLAUDE.md                          # Project context for Claude Code
+├── all.py                             # Unified implementation with all processors
+├── pandas-usage.py                    # Pandas-specific implementation
+├── polars-usage.py                    # Polars-specific implementation
+├── pyarrow-usage.py                   # PyArrow-specific implementation
+├── dask-usage.py                      # Dask-specific implementation
+├── pyspark-usage.py                   # PySpark-specific implementation
+├── performance_metrics_*.json         # Performance results for each library
+└── venv/                             # Virtual environment
 ```
 
 ## Usage
 
-### Pandas Implementation
+### Running Individual Implementations
+
+Each implementation can be run as a standalone script:
+
+```bash
+# Pandas implementation
+python pandas-usage.py
+
+# Polars implementation  
+python polars-usage.py
+
+# PyArrow implementation
+python pyarrow-usage.py
+
+# Dask implementation
+python dask-usage.py
+
+# PySpark implementation
+python pyspark-usage.py
+```
+
+### Running All Implementations
+
+Use the unified script to run all implementations:
+
+```bash
+python all.py
+```
+
+### Using as Library
 
 ```python
-from pandas_processor import PandasDataProcessor
+# Import individual processors from all.py
+from all import PandasDataProcessor, PolarsDataProcessor, PyArrowDataProcessor
 
+# Example usage
 processor = PandasDataProcessor("path/to/your/data.csv")
 results = processor.process_data()
-processor.save_performance_metrics()
-```
-
-### Polars Implementation
-
-```python
-from polars_processor import PolarsDataProcessor
-
-processor = PolarsDataProcessor("path/to/your/data.csv")
-results = processor.process_data()
-processor.save_performance_metrics()
-```
-
-### PyArrow Implementation
-
-```python
-from arrow_processor import PyArrowDataProcessor
-
-processor = PyArrowDataProcessor("path/to/your/data.csv")
-results = processor.process_data()
-processor.save_performance_metrics()
-```
-
-### Dask Implementation
-
-```python
-from dask_processor import DaskDataProcessor
-
-processor = DaskDataProcessor("path/to/your/data.csv")
-results = processor.process_data()
-processor.save_performance_metrics()
-```
-
-### PySpark Implementation
-
-```python
-from spark_processor import SparkDataProcessor
-
-processor = SparkDataProcessor("path/to/your/data.csv")
-results = processor.process_data()
-processor.save_performance_metrics()
+processor.save_performance_metrics("custom_output.json")
 ```
 
 ## Performance Metrics
@@ -130,11 +125,22 @@ The input CSV file should have the following columns:
 
 Performance varies based on data size and operations:
 
-- **Pandas**: Good for smaller datasets and complex operations
-- **Polars**: Excellent for large datasets and parallel processing
-- **PyArrow**: Best for memory efficiency and integration with big data tools
-- **Dask**: Suitable for distributed data processing and handling large datasets
-- **PySpark**: Scalable and optimized for big data processing in distributed environments
+- **Pandas**: Good for smaller datasets and complex operations. Uses chunked reading for memory efficiency.
+- **Polars**: Excellent for large datasets and parallel processing. Fastest for most operations with lazy evaluation.
+- **PyArrow**: Best for memory efficiency and integration with big data tools. Columnar storage format.
+- **Dask**: Suitable for distributed data processing and handling large datasets. Out-of-core processing.
+- **PySpark**: Scalable and optimized for big data processing in distributed environments.
+
+### Key Files Generated
+
+After running the benchmarks, you'll find these performance metric files:
+- `performance_metrics_pandas.json`
+- `performance_metrics_polars.json` 
+- `performance_metrics_pyarrow.json`
+- `performance_metrics_dask.json`
+- `performance_metrics_spark.json`
+
+Each file contains timing data for loading, cleaning, aggregation, sorting, filtering, and correlation operations.
 
 ## Contributing
 

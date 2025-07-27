@@ -8,14 +8,17 @@ from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
 
 import dask.dataframe as dd
+
 import pandas as pd
+
 import polars as pl
+
 import pyarrow as pa
 import pyarrow.compute as pc  # for compute functions
+
 from pyspark.sql import SparkSession
 from pyspark.sql import functions as F
-from pyspark.sql.types import (IntegerType, LongType, StringType, StructField,
-                               StructType)
+from pyspark.sql.types import IntegerType, LongType, StringType, StructField, StructType
 
 # Try to import the CSV module from pyarrow; if not available, fallback to dataset API.
 try:
@@ -361,7 +364,8 @@ class PyArrowDataProcessor(BaseDataProcessor):
                 raise e
         else:
             print(
-                "pyarrow.compute.hash_aggregate not available, falling back to Pandas aggregation"
+                "pyarrow.compute.hash_aggregate not available, "
+                "falling back to Pandas aggregation"
             )
             df = table.to_pandas()
             agg_df = (

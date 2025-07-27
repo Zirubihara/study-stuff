@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np  # needed for correlation calculation
+
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.csv as csv
@@ -139,50 +140,51 @@ class ArrowDataProcessor:
     def aggregate_data(self, table: pa.Table) -> pa.Table:
         """Group and aggregate data with mean, median, and max."""
         group_cols = ["year_month", "category1", "category2"]
-        
+
         # Get unique combinations using groupby
         unique_groups = []
         for group_key in group_cols:
             unique_values = pc.unique(table[group_key])
             unique_groups.append(unique_values)
-        
+
         # Create all combinations of unique values
         import itertools
+
         group_combinations = list(itertools.product(*unique_groups))
-        
+
         # For each unique combination, calculate stats
         means = []
         medians = []
         maxes = []
         final_groups = {col: [] for col in group_cols}
-        
+
         for combination in group_combinations:
             # Create mask for current group
             mask = None
             for col, val in zip(group_cols, combination):
                 current_mask = pc.equal(table[col], val)
                 mask = current_mask if mask is None else pc.and_(mask, current_mask)
-            
+
             # Skip if no matching rows
             if pc.sum(pc.cast(mask, pa.int8())).as_py() == 0:
                 continue
-                
+
             # Get group data
             group_data = table["value2"].filter(mask)
-            
+
             # Only add group if it has data
             if len(group_data) > 0:
                 for col, val in zip(group_cols, combination):
                     final_groups[col].append(val)
-                
+
                 # Calculate statistics
                 means.append(pc.mean(group_data).as_py())
                 medians.append(pc.approximate_median(group_data).as_py())
                 maxes.append(pc.max(group_data).as_py())
-        
+
         # Combine results
         result_arrays = [
-            pa.array(final_groups[col], type=table.schema.field(col).type) 
+            pa.array(final_groups[col], type=table.schema.field(col).type)
             for col in group_cols
         ] + [
             pa.array(means, type=pa.float64()),
@@ -226,8 +228,6 @@ class ArrowDataProcessor:
         for i, col1 in enumerate(numeric_cols):
             for j, col2 in enumerate(numeric_cols):
                 if i <= j:  # Correlation matrix is symmetric
-                    x = table[col1].to_numpy()
-                    y = table[col2].to_numpy()
                     correlation = pc.covariance(table[col1], table[col2]).as_py() / (
                         pc.stddev(table[col1]).as_py() * pc.stddev(table[col2]).as_py()
                     )
