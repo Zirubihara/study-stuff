@@ -589,9 +589,9 @@ def run_comparison(file_path: str, skip_dask: bool = False, skip_spark: bool = F
 
 if __name__ == "__main__":
     # Dataset options
-    small_dataset = "sample_data.csv"      # 50K rows
-    large_dataset = "large_data.csv"       # 1M rows
-    
+    small_dataset = "sample_data.csv"  # 50K rows
+    large_dataset = "large_data.csv"  # 1M rows
+
     # Choose dataset to use
     CSV_PATH = large_dataset  # Change to small_dataset for smaller test
 

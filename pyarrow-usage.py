@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np  # needed for correlation calculation
-
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.csv as csv
@@ -141,16 +140,22 @@ class ArrowDataProcessor:
         """Group and aggregate data with mean, median, and max."""
         # Convert to pandas for efficient groupby operations
         import pandas as pd
-        
+
         df = table.to_pandas()
-        
+
         # Perform groupby aggregation
-        grouped = df.groupby(["year_month", "category1", "category2"])["value2"].agg([
-            ("value2_mean", "mean"),
-            ("value2_median", "median"), 
-            ("value2_max", "max")
-        ]).reset_index()
-        
+        grouped = (
+            df.groupby(["year_month", "category1", "category2"])["value2"]
+            .agg(
+                [
+                    ("value2_mean", "mean"),
+                    ("value2_median", "median"),
+                    ("value2_max", "max"),
+                ]
+            )
+            .reset_index()
+        )
+
         # Convert back to PyArrow table
         return pa.Table.from_pandas(grouped)
 
@@ -239,9 +244,9 @@ class ArrowDataProcessor:
 def main():
     """Main execution function."""
     # Dataset options
-    small_dataset = "sample_data.csv"      # 50K rows
-    large_dataset = "large_data.csv"       # 1M rows
-    
+    small_dataset = "sample_data.csv"  # 50K rows
+    large_dataset = "large_data.csv"  # 1M rows
+
     # Choose dataset to use
     csv_path = large_dataset  # Change to small_dataset for smaller test
 
