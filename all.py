@@ -750,12 +750,10 @@ def generate_dataset(num_rows: int, output_path: str):
 
 def run_comprehensive_benchmark():
     """Run comprehensive benchmark with multiple dataset sizes and runs."""
-    # Dataset sizes for comprehensive benchmarking
+    # Dataset sizes for comprehensive benchmarking (reduced for faster testing)
     dataset_configs = [
         {"rows": 100000, "name": "100K", "file": "benchmark_100k.csv"},
         {"rows": 500000, "name": "500K", "file": "benchmark_500k.csv"},
-        {"rows": 1000000, "name": "1M", "file": "benchmark_1m.csv"},
-        {"rows": 5000000, "name": "5M", "file": "benchmark_5m.csv"},
     ]
     
     # Configuration
@@ -788,8 +786,8 @@ def run_comprehensive_benchmark():
         # Run benchmarks for this dataset size
         dataset_results = {}
         
-        # Test each library
-        libraries = ["pandas", "polars", "pyarrow", "dask", "spark"]
+        # Test each library (excluding spark due to Java version issue)
+        libraries = ["pandas", "polars", "pyarrow", "dask"]
         
         for lib_name in libraries:
             try:
