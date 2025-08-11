@@ -105,10 +105,11 @@ def generate_multiple_sizes():
     """Generate datasets of different sizes for scalability testing."""
 
     sizes = [
-        (100000, "../data/large_data_100k.csv"),
-        (500000, "../data/large_data_500k.csv"),
-        (1000000, "../data/large_data_1m.csv"),
-        (2000000, "../data/large_data_2m.csv"),
+        (1000000, "../data/benchmark_1m.csv"),
+        (5000000, "../data/benchmark_5m.csv"),
+        (10000000, "../data/benchmark_10m.csv"),
+        (20000000, "../data/benchmark_20m.csv"),
+        (50000000, "../data/benchmark_50m.csv"),
     ]
 
     print("Generating multiple dataset sizes for scalability analysis...\n")
@@ -126,11 +127,11 @@ if __name__ == "__main__":
 
     # Ask user for size preference or use default
     try:
-        size_input = input("\nEnter number of rows (default 1000000): ").strip()
+        size_input = input("\nEnter number of rows (default 10000000 for better Spark performance): ").strip()
         if size_input:
             num_rows = int(size_input)
         else:
-            num_rows = 1000000
+            num_rows = 10000000
 
         if num_rows < 10000:
             print(
@@ -142,10 +143,10 @@ if __name__ == "__main__":
             )
 
     except ValueError:
-        print("Invalid input, using default size of 1,000,000 rows")
-        num_rows = 1000000
+        print("Invalid input, using default size of 10,000,000 rows")
+        num_rows = 10000000
 
-    # Generate the dataset
+    # Generate the dataset (default to 10M rows for better Spark performance)
     output_file = "../data/large_data.csv"
     generate_large_dataset(output_file, num_rows)
 

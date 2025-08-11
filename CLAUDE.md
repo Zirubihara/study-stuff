@@ -18,10 +18,13 @@ study-stuff/
 │   ├── create_simple_charts.py        # Generate simple charts
 │   └── visualize_results.py           # Generate detailed visualizations
 ├── data/                              # CSV data files
-│   ├── sample_data.csv                # 50K rows test data
-│   ├── large_data.csv                 # 1M rows test data
-│   ├── benchmark_100k.csv             # 100K rows benchmark data
-│   └── benchmark_500k.csv             # 500K rows benchmark data
+│   ├── sample_data.csv                # 50K rows test data (tiny)
+│   ├── benchmark_1m.csv               # 1M rows (small dataset)
+│   ├── benchmark_5m.csv               # 5M rows (medium dataset)
+│   ├── benchmark_10m.csv              # 10M rows (large dataset)
+│   ├── benchmark_50m.csv              # 50M rows (~1GB, massive for Spark)
+│   ├── benchmark_100k.csv             # 100K rows (legacy)
+│   └── benchmark_500k.csv             # 500K rows (legacy)
 ├── results/                           # Performance metrics JSON files
 │   └── performance_metrics_*.json     # Performance results for each library
 ├── charts/                            # Generated charts and visualizations
@@ -62,7 +65,8 @@ pip install -r requirements.txt
 # Generate data files (from scripts directory)
 cd scripts
 python generate_sample_data.py    # Creates 50K row sample
-python generate_large_data.py     # Creates 1M row dataset
+python generate_big_datasets.py   # Creates 1M, 5M, 10M row datasets
+python generate_50m_dataset.py    # Creates massive 50M row dataset (~1GB)
 
 # Run individual implementations (from scripts directory)
 python pandas-usage.py
@@ -87,12 +91,20 @@ No specific test framework is configured. To test:
 4. Check that visualization charts are created in charts/ directory
 5. Compare timing results across implementations
 
+## Dataset Sizes for Performance Testing
+- **1M rows (30MB)**: Good for initial testing, fast execution
+- **5M rows (150MB)**: Medium dataset for balanced performance comparison  
+- **10M rows (300MB)**: Large dataset where Spark shows its advantages
+- **50M rows (~1GB)**: Massive dataset for serious Spark distributed processing testing
+- **Recommendation**: Use 50M row dataset for Spark to see true big data performance benefits
+
 ## Notes
 - All file paths have been updated to use the organized directory structure
 - Scripts should be run from the scripts/ directory
 - Data files are automatically saved to ../data/ directory
 - Results are saved to ../results/ directory
 - Charts are saved to ../charts/ directory
-- Dask and Spark implementations may require additional configuration for large datasets
+- **Spark performs best with massive datasets (50M+ rows, 1GB+)** - smaller datasets may not show Spark's distributed processing advantages
+- Dask and Spark implementations may require additional configuration for very large datasets
 - Performance varies significantly based on data size and system resources
 - Each implementation optimizes for different use cases (memory vs speed vs scalability)

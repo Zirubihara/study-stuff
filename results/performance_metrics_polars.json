@@ -1,12 +1,12 @@
 {
-    "memory_size_gb": 0.054016709327697754,
-    "row_count": 1000000,
-    "loading_time_seconds": 0.4478151798248291,
-    "cleaning_time_seconds": 0.09558439254760742,
-    "aggregation_time_seconds": 1.1802716255187988,
-    "sorting_time_seconds": 0.3125777244567871,
-    "filtering_time_seconds": 0.04753232002258301,
-    "correlation_time_seconds": 0.9575841426849365,
-    "average_filtered_value": 10977.787448157242,
-    "total_operation_time_seconds": 3.041365385055542
+    "memory_size_gb": 0.27474015951156616,
+    "row_count": 5000000,
+    "loading_time_seconds": 0.6234936714172363,
+    "cleaning_time_seconds": 0.0415492057800293,
+    "aggregation_time_seconds": 0.4416782855987549,
+    "sorting_time_seconds": 0.31924915313720703,
+    "filtering_time_seconds": 0.0441744327545166,
+    "correlation_time_seconds": 0.30494213104248047,
+    "average_filtered_value": 7498.603640230923,
+    "total_operation_time_seconds": 1.7750868797302246
 }

@@ -750,10 +750,11 @@ def generate_dataset(num_rows: int, output_path: str):
 
 def run_comprehensive_benchmark():
     """Run comprehensive benchmark with multiple dataset sizes and runs."""
-    # Dataset sizes for comprehensive benchmarking (reduced for faster testing)
+    # Dataset sizes for comprehensive benchmarking (massive sizes for true Spark advantages)
     dataset_configs = [
-        {"rows": 100000, "name": "100K", "file": "../data/benchmark_100k.csv"},
-        {"rows": 500000, "name": "500K", "file": "../data/benchmark_500k.csv"},
+        {"rows": 5000000, "name": "5M", "file": "../data/benchmark_5m.csv"},
+        {"rows": 10000000, "name": "10M", "file": "../data/benchmark_10m.csv"},
+        {"rows": 50000000, "name": "50M", "file": "../data/benchmark_50m.csv"},
     ]
     
     # Configuration
