@@ -10,14 +10,20 @@ import numpy as np
 import pandas as pd
 from pathlib import Path
 
-# Set clean, professional styling
-plt.rcParams['figure.figsize'] = (10, 6)
-plt.rcParams['font.size'] = 12
-plt.rcParams['axes.titlesize'] = 16
-plt.rcParams['axes.labelsize'] = 14
-plt.rcParams['legend.fontsize'] = 12
-plt.rcParams['xtick.labelsize'] = 11
-plt.rcParams['ytick.labelsize'] = 11
+# Set clean, professional styling with better readability
+plt.rcParams['figure.figsize'] = (12, 8)
+plt.rcParams['font.family'] = 'DejaVu Sans'
+plt.rcParams['font.size'] = 13
+plt.rcParams['axes.titlesize'] = 18
+plt.rcParams['axes.labelsize'] = 15
+plt.rcParams['legend.fontsize'] = 13
+plt.rcParams['xtick.labelsize'] = 12
+plt.rcParams['ytick.labelsize'] = 12
+plt.rcParams['axes.titleweight'] = 'bold'
+plt.rcParams['figure.facecolor'] = 'white'
+plt.rcParams['axes.facecolor'] = '#fafafa'
+plt.rcParams['grid.alpha'] = 0.4
+plt.rcParams['grid.linewidth'] = 0.8
 
 def load_data():
     """Load benchmark data from JSON files."""
@@ -46,9 +52,10 @@ def chart_1_total_execution_time():
     libraries = list(data.keys())
     sizes = ['100K', '500K']
     
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 8))
     
-    colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12']
+    # Use colorblind-friendly, high-contrast colors
+    colors = ['#2E86AB', '#A23B72', '#F18F01', '#C73E1D']
     
     for i, size in enumerate(sizes):
         ax = ax1 if i == 0 else ax2
@@ -68,22 +75,28 @@ def chart_1_total_execution_time():
                 total_times.append(total_time)
                 std_devs.append(total_std)
         
-        bars = ax.bar(lib_names, total_times, yerr=std_devs, capsize=5, 
-                     color=colors[:len(lib_names)], alpha=0.8, edgecolor='black', linewidth=1)
+        bars = ax.bar(lib_names, total_times, yerr=std_devs, capsize=6, 
+                     color=colors[:len(lib_names)], alpha=0.9, edgecolor='white', linewidth=2)
         
-        ax.set_title(f'{size} Dataset', fontweight='bold')
-        ax.set_ylabel('Total Execution Time (seconds)')
-        ax.grid(True, alpha=0.3, axis='y')
+        ax.set_title(f'{size} Dataset', fontweight='bold', pad=20)
+        ax.set_ylabel('Total Execution Time (seconds)', labelpad=15)
+        ax.grid(True, alpha=0.4, axis='y', linestyle='-', linewidth=0.8)
+        ax.set_axisbelow(True)
         
-        # Add value labels on bars
+        # Improve spacing
+        ax.tick_params(axis='x', pad=8)
+        ax.tick_params(axis='y', pad=5)
+        
+        # Add clear value labels on bars
         for bar, time in zip(bars, total_times):
             height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height + 0.01,
-                   f'{time:.2f}s', ha='center', va='bottom', fontweight='bold')
+            ax.text(bar.get_x() + bar.get_width()/2., height + height*0.02,
+                   f'{time:.2f}s', ha='center', va='bottom', fontweight='bold',
+                   bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
     
-    plt.suptitle('Total Execution Time Comparison', fontsize=18, fontweight='bold')
-    plt.tight_layout()
-    plt.savefig('01_total_execution_time.png', dpi=300, bbox_inches='tight')
+    plt.suptitle('Total Execution Time Comparison', fontsize=20, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.savefig('01_total_execution_time.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 01_total_execution_time.png")
 
@@ -92,7 +105,7 @@ def chart_2_loading_time_detailed():
     data = load_data()
     libraries = list(data.keys())
     
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 8))
     
     x = np.arange(len(libraries))
     width = 0.35
@@ -119,29 +132,33 @@ def chart_2_loading_time_detailed():
             means_500k.append(0)
             stds_500k.append(0)
     
-    bars1 = ax.bar(x - width/2, means_100k, width, yerr=stds_100k, capsize=5,
-                   label='100K rows', color='#3498db', alpha=0.8, edgecolor='black')
-    bars2 = ax.bar(x + width/2, means_500k, width, yerr=stds_500k, capsize=5,
-                   label='500K rows', color='#e74c3c', alpha=0.8, edgecolor='black')
+    bars1 = ax.bar(x - width/2, means_100k, width, yerr=stds_100k, capsize=6,
+                   label='100K rows', color='#2E86AB', alpha=0.9, edgecolor='white', linewidth=2)
+    bars2 = ax.bar(x + width/2, means_500k, width, yerr=stds_500k, capsize=6,
+                   label='500K rows', color='#A23B72', alpha=0.9, edgecolor='white', linewidth=2)
     
-    ax.set_xlabel('Library')
-    ax.set_ylabel('Loading Time (seconds)')
-    ax.set_title('CSV Loading Performance Comparison', fontsize=16, fontweight='bold')
+    ax.set_xlabel('Library', labelpad=15)
+    ax.set_ylabel('Loading Time (seconds)', labelpad=15)
+    ax.set_title('CSV Loading Performance Comparison', fontsize=18, fontweight='bold', pad=20)
     ax.set_xticks(x)
     ax.set_xticklabels([lib.capitalize() for lib in libraries])
-    ax.legend()
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.legend(loc='upper right', frameon=True, fancybox=True, shadow=True)
+    ax.grid(True, alpha=0.4, axis='y', linestyle='-', linewidth=0.8)
+    ax.set_axisbelow(True)
+    ax.tick_params(axis='x', pad=8)
+    ax.tick_params(axis='y', pad=5)
     
-    # Add value labels
+    # Add clear value labels
     for bars in [bars1, bars2]:
         for bar in bars:
             height = bar.get_height()
             if height > 0:
-                ax.text(bar.get_x() + bar.get_width()/2., height,
-                       f'{height:.3f}s', ha='center', va='bottom', fontsize=10)
+                ax.text(bar.get_x() + bar.get_width()/2., height + height*0.02,
+                       f'{height:.3f}s', ha='center', va='bottom', fontsize=11, fontweight='bold',
+                       bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
     
     plt.tight_layout()
-    plt.savefig('02_loading_time_comparison.png', dpi=300, bbox_inches='tight')
+    plt.savefig('02_loading_time_comparison.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 02_loading_time_comparison.png")
 
@@ -150,7 +167,7 @@ def chart_3_memory_usage_simple():
     data = load_data()
     libraries = list(data.keys())
     
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 8))
     
     x = np.arange(len(libraries))
     width = 0.35
@@ -176,28 +193,32 @@ def chart_3_memory_usage_simple():
             peak_500k.append(0)
     
     bars1 = ax.bar(x - width/2, peak_100k, width, label='100K rows', 
-                   color='#2ecc71', alpha=0.8, edgecolor='black')
+                   color='#2E86AB', alpha=0.9, edgecolor='white', linewidth=2)
     bars2 = ax.bar(x + width/2, peak_500k, width, label='500K rows', 
-                   color='#f39c12', alpha=0.8, edgecolor='black')
+                   color='#F18F01', alpha=0.9, edgecolor='white', linewidth=2)
     
-    ax.set_xlabel('Library')
-    ax.set_ylabel('Peak Memory Usage (MB)')
-    ax.set_title('Peak Memory Usage Comparison', fontsize=16, fontweight='bold')
+    ax.set_xlabel('Library', labelpad=15)
+    ax.set_ylabel('Peak Memory Usage (MB)', labelpad=15)
+    ax.set_title('Peak Memory Usage Comparison', fontsize=18, fontweight='bold', pad=20)
     ax.set_xticks(x)
     ax.set_xticklabels([lib.capitalize() for lib in libraries])
-    ax.legend()
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.legend(loc='upper right', frameon=True, fancybox=True, shadow=True)
+    ax.grid(True, alpha=0.4, axis='y', linestyle='-', linewidth=0.8)
+    ax.set_axisbelow(True)
+    ax.tick_params(axis='x', pad=8)
+    ax.tick_params(axis='y', pad=5)
     
-    # Add value labels
+    # Add clear value labels
     for bars in [bars1, bars2]:
         for bar in bars:
             height = bar.get_height()
             if height > 0:
-                ax.text(bar.get_x() + bar.get_width()/2., height,
-                       f'{height:.1f}MB', ha='center', va='bottom', fontsize=10)
+                ax.text(bar.get_x() + bar.get_width()/2., height + height*0.02,
+                       f'{height:.1f}MB', ha='center', va='bottom', fontsize=11, fontweight='bold',
+                       bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
     
     plt.tight_layout()
-    plt.savefig('03_memory_usage_comparison.png', dpi=300, bbox_inches='tight')
+    plt.savefig('03_memory_usage_comparison.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 03_memory_usage_comparison.png")
 
@@ -206,7 +227,7 @@ def chart_4_aggregation_performance():
     data = load_data()
     libraries = list(data.keys())
     
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 8))
     
     x = np.arange(len(libraries))
     width = 0.35
@@ -233,29 +254,33 @@ def chart_4_aggregation_performance():
             agg_500k.append(0)
             std_500k.append(0)
     
-    bars1 = ax.bar(x - width/2, agg_100k, width, yerr=std_100k, capsize=5,
-                   label='100K rows', color='#9b59b6', alpha=0.8, edgecolor='black')
-    bars2 = ax.bar(x + width/2, agg_500k, width, yerr=std_500k, capsize=5,
-                   label='500K rows', color='#34495e', alpha=0.8, edgecolor='black')
+    bars1 = ax.bar(x - width/2, agg_100k, width, yerr=std_100k, capsize=6,
+                   label='100K rows', color='#2E86AB', alpha=0.9, edgecolor='white', linewidth=2)
+    bars2 = ax.bar(x + width/2, agg_500k, width, yerr=std_500k, capsize=6,
+                   label='500K rows', color='#C73E1D', alpha=0.9, edgecolor='white', linewidth=2)
     
-    ax.set_xlabel('Library')
-    ax.set_ylabel('Aggregation Time (seconds)')
-    ax.set_title('Group-By Aggregation Performance', fontsize=16, fontweight='bold')
+    ax.set_xlabel('Library', labelpad=15)
+    ax.set_ylabel('Aggregation Time (seconds)', labelpad=15)
+    ax.set_title('Group-By Aggregation Performance', fontsize=18, fontweight='bold', pad=20)
     ax.set_xticks(x)
     ax.set_xticklabels([lib.capitalize() for lib in libraries])
-    ax.legend()
-    ax.grid(True, alpha=0.3, axis='y')
+    ax.legend(loc='upper right', frameon=True, fancybox=True, shadow=True)
+    ax.grid(True, alpha=0.4, axis='y', linestyle='-', linewidth=0.8)
+    ax.set_axisbelow(True)
+    ax.tick_params(axis='x', pad=8)
+    ax.tick_params(axis='y', pad=5)
     
-    # Add value labels
+    # Add clear value labels
     for bars in [bars1, bars2]:
         for bar in bars:
             height = bar.get_height()
             if height > 0:
-                ax.text(bar.get_x() + bar.get_width()/2., height,
-                       f'{height:.3f}s', ha='center', va='bottom', fontsize=10)
+                ax.text(bar.get_x() + bar.get_width()/2., height + height*0.02,
+                       f'{height:.3f}s', ha='center', va='bottom', fontsize=11, fontweight='bold',
+                       bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
     
     plt.tight_layout()
-    plt.savefig('04_aggregation_performance.png', dpi=300, bbox_inches='tight')
+    plt.savefig('04_aggregation_performance.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 04_aggregation_performance.png")
 
@@ -264,11 +289,11 @@ def chart_5_scalability_lines():
     data = load_data()
     libraries = list(data.keys())
     
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(12, 8))
     
     sizes = [100000, 500000]
     size_labels = ['100K', '500K']
-    colors = ['#3498db', '#e74c3c', '#2ecc71', '#f39c12']
+    colors = ['#2E86AB', '#A23B72', '#F18F01', '#C73E1D']
     
     for i, library in enumerate(libraries):
         total_times = []
@@ -282,24 +307,29 @@ def chart_5_scalability_lines():
                 total_times.append(0)
         
         if len(total_times) == 2 and total_times[1] > 0:
-            ax.plot(sizes, total_times, marker='o', linewidth=3, markersize=8,
-                   label=library.capitalize(), color=colors[i % len(colors)])
+            ax.plot(sizes, total_times, marker='o', linewidth=4, markersize=10,
+                   label=library.capitalize(), color=colors[i % len(colors)],
+                   markerfacecolor='white', markeredgewidth=3)
             
-            # Add value labels
+            # Add clear value labels
             for x, y in zip(sizes, total_times):
                 ax.annotate(f'{y:.2f}s', (x, y), textcoords="offset points", 
-                           xytext=(0,10), ha='center', fontweight='bold')
+                           xytext=(0,15), ha='center', fontweight='bold', fontsize=11,
+                           bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.9))
     
-    ax.set_xlabel('Dataset Size (rows)')
-    ax.set_ylabel('Total Execution Time (seconds)')
-    ax.set_title('Performance Scalability', fontsize=16, fontweight='bold')
+    ax.set_xlabel('Dataset Size (rows)', labelpad=15)
+    ax.set_ylabel('Total Execution Time (seconds)', labelpad=15)
+    ax.set_title('Performance Scalability', fontsize=18, fontweight='bold', pad=20)
     ax.set_xticks(sizes)
     ax.set_xticklabels(size_labels)
-    ax.legend()
-    ax.grid(True, alpha=0.3)
+    ax.legend(loc='upper left', frameon=True, fancybox=True, shadow=True)
+    ax.grid(True, alpha=0.4, linestyle='-', linewidth=0.8)
+    ax.set_axisbelow(True)
+    ax.tick_params(axis='x', pad=8)
+    ax.tick_params(axis='y', pad=5)
     
     plt.tight_layout()
-    plt.savefig('05_scalability_analysis.png', dpi=300, bbox_inches='tight')
+    plt.savefig('05_scalability_analysis.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 05_scalability_analysis.png")
 
@@ -311,7 +341,7 @@ def chart_6_operation_ranking():
     # Use 500K dataset for ranking
     size = '500K'
     
-    fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+    fig, axes = plt.subplots(2, 3, figsize=(20, 14))
     axes = axes.flatten()
     
     for i, op in enumerate(operations):
@@ -334,29 +364,33 @@ def chart_6_operation_ranking():
         sorted_data = sorted(zip(lib_times, lib_names, lib_stds))
         lib_times, lib_names, lib_stds = zip(*sorted_data) if sorted_data else ([], [], [])
         
-        colors = ['#2ecc71', '#f39c12', '#e74c3c', '#9b59b6']  # Green = best, Red = worst
-        bars = ax.bar(lib_names, lib_times, yerr=lib_stds, capsize=4,
-                     color=colors[:len(lib_names)], alpha=0.8, edgecolor='black')
+        colors = ['#2E86AB', '#F18F01', '#A23B72', '#C73E1D']  # Blue = best, Red = worst
+        bars = ax.bar(lib_names, lib_times, yerr=lib_stds, capsize=5,
+                     color=colors[:len(lib_names)], alpha=0.9, edgecolor='white', linewidth=2)
         
-        ax.set_title(f'{op.capitalize()} Operation', fontweight='bold')
-        ax.set_ylabel('Time (seconds)')
-        ax.grid(True, alpha=0.3, axis='y')
+        ax.set_title(f'{op.capitalize()} Operation', fontweight='bold', pad=15, fontsize=16)
+        ax.set_ylabel('Time (seconds)', labelpad=10)
+        ax.grid(True, alpha=0.4, axis='y', linestyle='-', linewidth=0.8)
+        ax.set_axisbelow(True)
+        ax.tick_params(axis='x', pad=5)
+        ax.tick_params(axis='y', pad=3)
         
-        # Add value labels
+        # Add clear value labels
         for bar, time in zip(bars, lib_times):
             height = bar.get_height()
-            ax.text(bar.get_x() + bar.get_width()/2., height,
-                   f'{time:.3f}s', ha='center', va='bottom', fontsize=9)
+            ax.text(bar.get_x() + bar.get_width()/2., height + height*0.02,
+                   f'{time:.3f}s', ha='center', va='bottom', fontsize=10, fontweight='bold',
+                   bbox=dict(boxstyle='round,pad=0.2', facecolor='white', alpha=0.8))
         
         # Add ranking badges
         if lib_names:
-            ax.text(0.02, 0.95, 'FASTEST', transform=ax.transAxes, fontsize=10, 
-                   bbox=dict(boxstyle="round,pad=0.3", facecolor='gold', alpha=0.7),
-                   verticalalignment='top')
+            ax.text(0.02, 0.95, 'FASTEST', transform=ax.transAxes, fontsize=11, 
+                   bbox=dict(boxstyle="round,pad=0.4", facecolor='gold', alpha=0.8, edgecolor='orange'),
+                   verticalalignment='top', fontweight='bold')
     
-    plt.suptitle('Individual Operation Performance Ranking (500K Dataset)', fontsize=16, fontweight='bold')
-    plt.tight_layout()
-    plt.savefig('06_operation_rankings.png', dpi=300, bbox_inches='tight')
+    plt.suptitle('Individual Operation Performance Ranking (500K Dataset)', fontsize=20, fontweight='bold', y=0.98)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+    plt.savefig('06_operation_rankings.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 06_operation_rankings.png")
 
