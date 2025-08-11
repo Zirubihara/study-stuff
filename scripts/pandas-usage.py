@@ -175,11 +175,13 @@ class DataProcessor:
 def main():
     """Main execution function."""
     # Dataset options
-    small_dataset = "../data/sample_data.csv"  # 50K rows
-    large_dataset = "../data/large_data.csv"  # 1M rows
+    small_dataset = "../data/benchmark_1m.csv"  # 1M rows
+    medium_dataset = "../data/benchmark_5m.csv"  # 5M rows  
+    large_dataset = "../data/benchmark_10m.csv"  # 10M rows
+    massive_dataset = "../data/benchmark_50m.csv"  # 50M rows (~1GB)
 
-    # Choose dataset to use
-    csv_path = large_dataset  # Change to small_dataset for smaller test
+    # Choose dataset to use (start with large for good performance comparison)
+    csv_path = large_dataset  # Use massive_dataset to test memory limits
 
     try:
         processor = DataProcessor(csv_path)

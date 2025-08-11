@@ -234,11 +234,12 @@ class DaskDataProcessor:
 def main():
     """Main execution function using DaskDataProcessor."""
     # Dataset options
-    small_dataset = "../data/sample_data.csv"  # 50K rows
-    large_dataset = "../data/large_data.csv"  # 1M rows
+    small_dataset = "../data/benchmark_1m.csv"  # 1M rows
+    medium_dataset = "../data/benchmark_5m.csv"  # 5M rows  
+    large_dataset = "../data/benchmark_10m.csv"  # 10M rows
 
-    # Choose dataset to use
-    csv_path = large_dataset  # Change to small_dataset for smaller test
+    # Choose dataset to use (start with medium for reasonable performance)
+    csv_path = medium_dataset  # Change to large_dataset for maximum Spark advantage
 
     try:
         processor = DaskDataProcessor(csv_path)

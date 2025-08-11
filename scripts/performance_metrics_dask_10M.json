@@ -1,0 +1,138 @@
+{
+    "row_count": 10000000,
+    "memory_size_gb": 0.47497475892000496,
+    "average_filtered_value": 7502.053136843133,
+    "total_operation_time_mean": 34.48925938606262,
+    "loading_time_mean": 9.977972412109375,
+    "loading_time_std": 0.9202644722205062,
+    "loading_time_min": 8.987945795059204,
+    "loading_time_max": 10.994954586029053,
+    "loading_time_runs": [
+        8.987945795059204,
+        9.138608455657959,
+        9.972712278366089,
+        10.79564094543457,
+        10.994954586029053
+    ],
+    "loading_memory_mean": 100.14921875,
+    "loading_memory_std": 164.19820088691444,
+    "loading_memory_min": -32.23828125,
+    "loading_memory_max": 373.74609375,
+    "loading_memory_runs": [
+        31.3984375,
+        0.23828125,
+        -32.23828125,
+        127.6015625,
+        373.74609375
+    ],
+    "cleaning_time_mean": 0.00019960403442382814,
+    "cleaning_time_std": 0.00044632818955488775,
+    "cleaning_time_min": 0.0,
+    "cleaning_time_max": 0.0009980201721191406,
+    "cleaning_time_runs": [
+        0.0009980201721191406,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ],
+    "cleaning_memory_mean": -1.0,
+    "cleaning_memory_std": 1.224744871391589,
+    "cleaning_memory_min": -3.0,
+    "cleaning_memory_max": 0.0,
+    "cleaning_memory_runs": [
+        -3.0,
+        -1.0,
+        0.0,
+        -1.0,
+        0.0
+    ],
+    "aggregation_time_mean": 0.009530258178710938,
+    "aggregation_time_std": 0.002163319348537959,
+    "aggregation_time_min": 0.006775856018066406,
+    "aggregation_time_max": 0.012520551681518555,
+    "aggregation_time_runs": [
+        0.009247064590454102,
+        0.006775856018066406,
+        0.012520551681518555,
+        0.010581016540527344,
+        0.008526802062988281
+    ],
+    "aggregation_memory_mean": -10.0,
+    "aggregation_memory_std": 2.449489742783178,
+    "aggregation_memory_min": -13.0,
+    "aggregation_memory_max": -7.0,
+    "aggregation_memory_runs": [
+        -11.0,
+        -11.0,
+        -7.0,
+        -13.0,
+        -8.0
+    ],
+    "sorting_time_mean": 0.000502920150756836,
+    "sorting_time_std": 0.0007117790443227436,
+    "sorting_time_min": 0.0,
+    "sorting_time_max": 0.0015118122100830078,
+    "sorting_time_runs": [
+        0.0,
+        0.0010027885437011719,
+        0.0,
+        0.0,
+        0.0015118122100830078
+    ],
+    "sorting_memory_mean": -1.6,
+    "sorting_memory_std": 1.3416407864998738,
+    "sorting_memory_min": -3.0,
+    "sorting_memory_max": 0.0,
+    "sorting_memory_runs": [
+        -3.0,
+        -3.0,
+        -1.0,
+        0.0,
+        -1.0
+    ],
+    "filtering_time_mean": 11.380558013916016,
+    "filtering_time_std": 0.9132787158581661,
+    "filtering_time_min": 10.253697156906128,
+    "filtering_time_max": 12.385002613067627,
+    "filtering_time_runs": [
+        10.585097551345825,
+        10.253697156906128,
+        12.385002613067627,
+        11.881813764572144,
+        11.797178983688354
+    ],
+    "filtering_memory_mean": -109.83515625,
+    "filtering_memory_std": 125.90127326860812,
+    "filtering_memory_min": -231.0546875,
+    "filtering_memory_max": 26.859375,
+    "filtering_memory_runs": [
+        -176.28515625,
+        -194.59765625,
+        -231.0546875,
+        25.90234375,
+        26.859375
+    ],
+    "correlation_time_mean": 13.12049617767334,
+    "correlation_time_std": 1.004650877579566,
+    "correlation_time_min": 11.661303281784058,
+    "correlation_time_max": 14.271482229232788,
+    "correlation_time_runs": [
+        12.998924970626831,
+        12.847457647323608,
+        14.271482229232788,
+        13.823312759399414,
+        11.661303281784058
+    ],
+    "correlation_memory_mean": 38.56640625,
+    "correlation_memory_std": 290.6131386844676,
+    "correlation_memory_min": -293.46484375,
+    "correlation_memory_max": 269.05859375,
+    "correlation_memory_runs": [
+        226.01171875,
+        256.0234375,
+        269.05859375,
+        -264.796875,
+        -293.46484375
+    ]
+}

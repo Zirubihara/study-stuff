@@ -215,11 +215,13 @@ class SparkDataProcessor:
 def main():
     """Main execution function."""
     # Dataset options
-    small_dataset = "../data/sample_data.csv"  # 50K rows
-    large_dataset = "../data/large_data.csv"  # 1M rows
+    small_dataset = "../data/benchmark_1m.csv"  # 1M rows
+    medium_dataset = "../data/benchmark_5m.csv"  # 5M rows  
+    large_dataset = "../data/benchmark_10m.csv"  # 10M rows
+    massive_dataset = "../data/benchmark_50m.csv"  # 50M rows (~1GB)
 
-    # Choose dataset to use
-    csv_path = large_dataset  # Change to small_dataset for smaller test
+    # Choose dataset to use (Spark performs best with massive datasets)
+    csv_path = massive_dataset  # Spark excels with 50M+ rows for true distributed processing
 
     try:
         processor = SparkDataProcessor(csv_path)
