@@ -6,15 +6,28 @@ This project benchmarks different Python data processing libraries (Pandas, Pola
 ## Project Structure
 ```
 study-stuff/
-├── all.py                              # Unified implementation with all processors
-├── pandas-usage.py                     # Pandas-specific implementation
-├── polars-usage.py                     # Polars-specific implementation  
-├── pyarrow-usage.py                    # PyArrow-specific implementation
-├── dask-usage.py                       # Dask-specific implementation
-├── pyspark-usage.py                    # PySpark-specific implementation
-├── requirements.txt                    # Python dependencies
+├── scripts/                           # All Python scripts
+│   ├── all.py                         # Unified implementation with all processors
+│   ├── pandas-usage.py                # Pandas-specific implementation
+│   ├── polars-usage.py                # Polars-specific implementation  
+│   ├── pyarrow-usage.py               # PyArrow-specific implementation
+│   ├── dask-usage.py                  # Dask-specific implementation
+│   ├── pyspark-usage.py               # PySpark-specific implementation
+│   ├── generate_sample_data.py        # Generate test data files
+│   ├── generate_large_data.py         # Generate large datasets
+│   ├── create_simple_charts.py        # Generate simple charts
+│   └── visualize_results.py           # Generate detailed visualizations
+├── data/                              # CSV data files
+│   ├── sample_data.csv                # 50K rows test data
+│   ├── large_data.csv                 # 1M rows test data
+│   ├── benchmark_100k.csv             # 100K rows benchmark data
+│   └── benchmark_500k.csv             # 500K rows benchmark data
+├── results/                           # Performance metrics JSON files
+│   └── performance_metrics_*.json     # Performance results for each library
+├── charts/                            # Generated charts and visualizations
+│   ├── *.png                          # Chart files
+├── requirements.txt                   # Python dependencies
 ├── README.md                          # Project documentation
-├── performance_metrics_*.json         # Performance results for each library
 └── venv/                             # Virtual environment
 ```
 
@@ -46,7 +59,12 @@ The CSV files processed have these columns:
 # Install dependencies
 pip install -r requirements.txt
 
-# Run individual implementations
+# Generate data files (from scripts directory)
+cd scripts
+python generate_sample_data.py    # Creates 50K row sample
+python generate_large_data.py     # Creates 1M row dataset
+
+# Run individual implementations (from scripts directory)
 python pandas-usage.py
 python polars-usage.py
 python pyarrow-usage.py
@@ -55,17 +73,26 @@ python pyspark-usage.py
 
 # Run all implementations (unified)
 python all.py
+
+# Generate visualizations
+python create_simple_charts.py    # Simple charts for thesis
+python visualize_results.py       # Detailed analysis charts
 ```
 
 ## Test Commands
 No specific test framework is configured. To test:
-1. Ensure a CSV file exists at the specified path in each script
-2. Run the scripts and check for successful completion
-3. Verify performance metrics JSON files are generated
-4. Compare timing results across implementations
+1. Generate data files first using the data generation scripts
+2. Run the scripts from the scripts/ directory and check for successful completion
+3. Verify performance metrics JSON files are generated in results/ directory
+4. Check that visualization charts are created in charts/ directory
+5. Compare timing results across implementations
 
 ## Notes
-- Update the `CSV_PATH` variable in each script to point to your data file
+- All file paths have been updated to use the organized directory structure
+- Scripts should be run from the scripts/ directory
+- Data files are automatically saved to ../data/ directory
+- Results are saved to ../results/ directory
+- Charts are saved to ../charts/ directory
 - Dask and Spark implementations may require additional configuration for large datasets
 - Performance varies significantly based on data size and system resources
 - Each implementation optimizes for different use cases (memory vs speed vs scalability)
