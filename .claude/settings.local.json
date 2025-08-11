@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(move all.py pandas-usage.py polars-usage.py pyarrow-usage.py dask-usage.py pyspark-usage.py create_simple_charts.py generate_large_data.py generate_sample_data.py visualize_results.py scripts/)",
+      "Bash(mv:*)"
+    ],
+    "deny": []
+  }
+}

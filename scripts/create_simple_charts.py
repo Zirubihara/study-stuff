@@ -28,7 +28,7 @@ plt.rcParams['grid.linewidth'] = 0.8
 def load_data():
     """Load benchmark data from JSON files."""
     data = {}
-    json_files = list(Path('.').glob('performance_metrics_*_*.json'))
+    json_files = list(Path('../results').glob('performance_metrics_*_*.json'))
     
     for file_path in json_files:
         filename = file_path.stem
@@ -96,7 +96,7 @@ def chart_1_total_execution_time():
     
     plt.suptitle('Total Execution Time Comparison', fontsize=20, fontweight='bold', y=0.98)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig('01_total_execution_time.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig('../charts/01_total_execution_time.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 01_total_execution_time.png")
 
@@ -158,7 +158,7 @@ def chart_2_loading_time_detailed():
                        bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
     
     plt.tight_layout()
-    plt.savefig('02_loading_time_comparison.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig('../charts/02_loading_time_comparison.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 02_loading_time_comparison.png")
 
@@ -218,7 +218,7 @@ def chart_3_memory_usage_simple():
                        bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
     
     plt.tight_layout()
-    plt.savefig('03_memory_usage_comparison.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig('../charts/03_memory_usage_comparison.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 03_memory_usage_comparison.png")
 
@@ -280,7 +280,7 @@ def chart_4_aggregation_performance():
                        bbox=dict(boxstyle='round,pad=0.3', facecolor='white', alpha=0.8))
     
     plt.tight_layout()
-    plt.savefig('04_aggregation_performance.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig('../charts/04_aggregation_performance.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 04_aggregation_performance.png")
 
@@ -329,7 +329,7 @@ def chart_5_scalability_lines():
     ax.tick_params(axis='y', pad=5)
     
     plt.tight_layout()
-    plt.savefig('05_scalability_analysis.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig('../charts/05_scalability_analysis.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 05_scalability_analysis.png")
 
@@ -390,7 +390,7 @@ def chart_6_operation_ranking():
     
     plt.suptitle('Individual Operation Performance Ranking (500K Dataset)', fontsize=20, fontweight='bold', y=0.98)
     plt.tight_layout(rect=[0, 0.03, 1, 0.95])
-    plt.savefig('06_operation_rankings.png', dpi=300, bbox_inches='tight', facecolor='white')
+    plt.savefig('../charts/06_operation_rankings.png', dpi=300, bbox_inches='tight', facecolor='white')
     plt.close()
     print("Created: 06_operation_rankings.png")
 

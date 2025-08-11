@@ -752,8 +752,8 @@ def run_comprehensive_benchmark():
     """Run comprehensive benchmark with multiple dataset sizes and runs."""
     # Dataset sizes for comprehensive benchmarking (reduced for faster testing)
     dataset_configs = [
-        {"rows": 100000, "name": "100K", "file": "benchmark_100k.csv"},
-        {"rows": 500000, "name": "500K", "file": "benchmark_500k.csv"},
+        {"rows": 100000, "name": "100K", "file": "../data/benchmark_100k.csv"},
+        {"rows": 500000, "name": "500K", "file": "../data/benchmark_500k.csv"},
     ]
     
     # Configuration

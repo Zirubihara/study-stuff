@@ -57,7 +57,7 @@ def generate_sample_data(output_path: str, num_rows: int = 100000):
 
 if __name__ == "__main__":
     # Create sample data file
-    output_file = "sample_data.csv"
+    output_file = "../data/sample_data.csv"
     generate_sample_data(
         output_file, num_rows=50000
     )  # 50K rows for reasonable test size

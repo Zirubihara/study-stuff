@@ -105,10 +105,10 @@ def generate_multiple_sizes():
     """Generate datasets of different sizes for scalability testing."""
 
     sizes = [
-        (100000, "large_data_100k.csv"),
-        (500000, "large_data_500k.csv"),
-        (1000000, "large_data_1m.csv"),
-        (2000000, "large_data_2m.csv"),
+        (100000, "../data/large_data_100k.csv"),
+        (500000, "../data/large_data_500k.csv"),
+        (1000000, "../data/large_data_1m.csv"),
+        (2000000, "../data/large_data_2m.csv"),
     ]
 
     print("Generating multiple dataset sizes for scalability analysis...\n")
@@ -146,7 +146,7 @@ if __name__ == "__main__":
         num_rows = 1000000
 
     # Generate the dataset
-    output_file = "large_data.csv"
+    output_file = "../data/large_data.csv"
     generate_large_dataset(output_file, num_rows)
 
     # Option to generate multiple sizes

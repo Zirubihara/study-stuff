@@ -27,7 +27,7 @@ def load_benchmark_data():
     data = {}
     
     # Find all performance metric files
-    json_files = list(Path('.').glob('performance_metrics_*_*.json'))
+    json_files = list(Path('../results').glob('performance_metrics_*_*.json'))
     
     for file_path in json_files:
         filename = file_path.stem
@@ -89,7 +89,7 @@ def create_execution_time_comparison():
         ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('execution_time_comparison.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../charts/execution_time_comparison.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_memory_usage_comparison():
@@ -136,7 +136,7 @@ def create_memory_usage_comparison():
         ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig('memory_usage_comparison.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../charts/memory_usage_comparison.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_scalability_analysis():
@@ -202,7 +202,7 @@ def create_scalability_analysis():
     ax2.set_xscale('log')
     
     plt.tight_layout()
-    plt.savefig('scalability_analysis.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../charts/scalability_analysis.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_operation_breakdown_heatmap():
@@ -253,7 +253,7 @@ def create_operation_breakdown_heatmap():
     plt.setp(ax.get_xticklabels(), rotation=45, ha="right", rotation_mode="anchor")
     
     plt.tight_layout()
-    plt.savefig('operation_breakdown_heatmap.png', dpi=300, bbox_inches='tight')
+    plt.savefig('../charts/operation_breakdown_heatmap.png', dpi=300, bbox_inches='tight')
     plt.close()
 
 def create_statistical_summary_table():

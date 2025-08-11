@@ -5,14 +5,14 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
-import polars as pl
+import pandas as pd
 
 
 @dataclass
 class ProcessingResults:
     """Store results of data processing operations."""
 
-    df: pl.DataFrame
+    df: pd.DataFrame
     execution_time: float
     additional_info: Optional[Any] = None
 
@@ -41,8 +41,8 @@ def time_operation(operation_name: str):
     return decorator
 
 
-class PolarsDataProcessor:
-    """Handle data processing operations on CSV files using Polars."""
+class DataProcessor:
+    """Handle data processing operations on CSV files."""
 
     COLUMN_NAMES = [
         "year_month",  # Format: YYYYMM
@@ -55,15 +55,15 @@ class PolarsDataProcessor:
         "value2",  # Integer value
     ]
 
-    SCHEMA = {
-        "year_month": pl.Utf8,  # Preserve leading zeros
-        "category1": pl.Int64,
-        "category2": pl.Int64,
-        "category3": pl.Int64,
-        "code": pl.Utf8,  # Preserve leading zeros
-        "flag": pl.Int64,
-        "value1": pl.Int64,
-        "value2": pl.Int64,
+    DTYPE_MAP = {
+        "year_month": str,
+        "category1": int,
+        "category2": int,
+        "category3": int,
+        "code": str,
+        "flag": int,
+        "value1": int,
+        "value2": int,
     }
 
     def __init__(self, file_path: str):
@@ -71,67 +71,63 @@ class PolarsDataProcessor:
         self.file_path = Path(file_path)
         self.performance_metrics: Dict[str, float] = {}
 
-    def _get_size(self, df: pl.DataFrame) -> float:
-        """Calculate DataFrame size in gigabytes."""
-        return df.estimated_size() / (1024**3)
-
     @time_operation("loading")
-    def load_data(self) -> pl.DataFrame:
-        """Load CSV data into Polars DataFrame with proper schema."""
+    def load_data(self) -> pd.DataFrame:
+        """Load CSV data into DataFrame with proper data types."""
         if not self.file_path.exists():
             raise FileNotFoundError(f"File not found: {self.file_path}")
 
-        df = pl.read_csv(
-            self.file_path,
-            has_header=False,
-            new_columns=self.COLUMN_NAMES,
-            schema_overrides=self.SCHEMA,
+        df = pd.read_csv(
+            self.file_path, header=None, names=self.COLUMN_NAMES, dtype=self.DTYPE_MAP
         )
 
-        self.performance_metrics["memory_size_gb"] = self._get_size(df)
-        self.performance_metrics["row_count"] = df.height
+        self.performance_metrics["memory_size_gb"] = (
+            df.memory_usage(deep=True).sum() / 1024**3
+        )
+        self.performance_metrics["row_count"] = len(df)
 
         return df
 
     @time_operation("cleaning")
-    def clean_data(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Clean DataFrame by filling null values with zeros."""
-        return df.fill_null(0)
+    def clean_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Clean DataFrame by filling missing values."""
+        return df.fillna(0)
 
     @time_operation("aggregation")
-    def aggregate_data(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Group and aggregate data using Polars expressions."""
+    def aggregate_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Group and aggregate data."""
         group_cols = ["year_month", "category1", "category2"]
-        return df.group_by(group_cols).agg(
-            [
-                pl.col("value2").mean().alias("value2_mean"),
-                pl.col("value2").median().alias("value2_median"),
-                pl.col("value2").max().alias("value2_max"),
-            ]
+        return (
+            df.groupby(group_cols)
+            .agg(
+                value2_mean=("value2", "mean"),
+                value2_median=("value2", "median"),
+                value2_max=("value2", "max"),
+            )
+            .reset_index()
         )
 
     @time_operation("sorting")
-    def sort_data(self, df: pl.DataFrame) -> pl.DataFrame:
-        """Sort DataFrame by value2 column in descending order."""
-        print(df.dtypes)
-        return df.sort("value2", descending=True)
+    def sort_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Sort DataFrame by value2 column."""
+        return df.sort_values(by="value2", ascending=False, kind="mergesort")
 
     @time_operation("filtering")
-    def filter_data(self, df: pl.DataFrame) -> Tuple[pl.DataFrame, float]:
+    def filter_data(self, df: pd.DataFrame) -> Tuple[pd.DataFrame, float]:
         """Filter rows where value2 is above mean."""
         mean_value2 = df["value2"].mean()
-        filtered_df = df.filter(pl.col("value2") > mean_value2)
+        filtered_df = df[df["value2"] > mean_value2]
         avg_filtered = filtered_df["value2"].mean()
         return filtered_df, avg_filtered
 
     @time_operation("correlation")
-    def calculate_correlation(self, df: pl.DataFrame) -> pl.DataFrame:
+    def calculate_correlation(self, df: pd.DataFrame) -> pd.DataFrame:
         """Calculate correlation matrix for numeric columns."""
-        numeric_cols = df.select(pl.col(pl.Int64)).columns
-        return df.select(numeric_cols).corr()
+        numeric_cols = df.select_dtypes(include=["int64", "float64"]).columns
+        return df[numeric_cols].corr()
 
     def save_performance_metrics(
-        self, output_path: str = "performance_metrics_polars.json"
+        self, output_path: str = "../results/performance_metrics_pandas.json"
     ):
         """Save performance metrics to JSON file."""
         try:
@@ -141,25 +137,15 @@ class PolarsDataProcessor:
         except Exception as e:
             print(f"Error saving performance metrics: {e}")
 
-    def process_data(self) -> Dict[str, pl.DataFrame]:
+    def process_data(self):
         """Execute complete data processing pipeline."""
         try:
-            print("Loading data...")
+            # Load and process data
             df_result = self.load_data()
-
-            print("Cleaning data...")
             df_clean = self.clean_data(df_result.df)
-
-            print("Aggregating data...")
             df_agg = self.aggregate_data(df_clean.df)
-
-            print("Sorting data...")
             df_sorted = self.sort_data(df_clean.df)
-
-            print("Filtering data...")
             df_filtered = self.filter_data(df_clean.df)
-
-            print("Calculating correlations...")
             correlation = self.calculate_correlation(df_clean.df)
 
             # Store filtered average
@@ -189,14 +175,14 @@ class PolarsDataProcessor:
 def main():
     """Main execution function."""
     # Dataset options
-    small_dataset = "sample_data.csv"  # 50K rows
-    large_dataset = "large_data.csv"  # 1M rows
+    small_dataset = "../data/sample_data.csv"  # 50K rows
+    large_dataset = "../data/large_data.csv"  # 1M rows
 
     # Choose dataset to use
     csv_path = large_dataset  # Change to small_dataset for smaller test
 
     try:
-        processor = PolarsDataProcessor(csv_path)
+        processor = DataProcessor(csv_path)
         results = processor.process_data()
         processor.save_performance_metrics()
         print("Data processing completed successfully!")

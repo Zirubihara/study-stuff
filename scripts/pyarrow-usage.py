@@ -200,7 +200,7 @@ class ArrowDataProcessor:
         }
 
     def save_performance_metrics(
-        self, output_path: str = "performance_metrics_arrow.json"
+        self, output_path: str = "../results/performance_metrics_arrow.json"
     ):
         """Save performance metrics to JSON file."""
         try:
@@ -244,8 +244,8 @@ class ArrowDataProcessor:
 def main():
     """Main execution function."""
     # Dataset options
-    small_dataset = "sample_data.csv"  # 50K rows
-    large_dataset = "large_data.csv"  # 1M rows
+    small_dataset = "../data/sample_data.csv"  # 50K rows
+    large_dataset = "../data/large_data.csv"  # 1M rows
 
     # Choose dataset to use
     csv_path = large_dataset  # Change to small_dataset for smaller test
