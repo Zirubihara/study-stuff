@@ -2,41 +2,41 @@
     "row_count": 1000000,
     "memory_size_gb": 0.047497574239969254,
     "average_filtered_value": 7499.858703990418,
-    "total_operation_time_mean": 5.597152471542358,
-    "loading_time_mean": 1.6940369606018066,
+    "total_operation_time_mean": 3.9267029762268066,
+    "loading_time_mean": 1.2308061122894287,
     "loading_time_std": 0.0,
-    "loading_time_min": 1.6940369606018066,
-    "loading_time_max": 1.6940369606018066,
+    "loading_time_min": 1.2308061122894287,
+    "loading_time_max": 1.2308061122894287,
     "loading_time_runs": [
-        1.6940369606018066
+        1.2308061122894287
     ],
-    "loading_memory_mean": 17.515625,
+    "loading_memory_mean": 19.6171875,
     "loading_memory_std": 0.0,
-    "loading_memory_min": 17.515625,
-    "loading_memory_max": 17.515625,
+    "loading_memory_min": 19.6171875,
+    "loading_memory_max": 19.6171875,
     "loading_memory_runs": [
-        17.515625
+        19.6171875
     ],
-    "cleaning_time_mean": 0.0005438327789306641,
+    "cleaning_time_mean": 0.0,
     "cleaning_time_std": 0.0,
-    "cleaning_time_min": 0.0005438327789306641,
-    "cleaning_time_max": 0.0005438327789306641,
+    "cleaning_time_min": 0.0,
+    "cleaning_time_max": 0.0,
     "cleaning_time_runs": [
-        0.0005438327789306641
+        0.0
     ],
-    "cleaning_memory_mean": 0.0078125,
+    "cleaning_memory_mean": -0.99609375,
     "cleaning_memory_std": 0.0,
-    "cleaning_memory_min": 0.0078125,
-    "cleaning_memory_max": 0.0078125,
+    "cleaning_memory_min": -0.99609375,
+    "cleaning_memory_max": -0.99609375,
     "cleaning_memory_runs": [
-        0.0078125
+        -0.99609375
     ],
-    "aggregation_time_mean": 0.014591455459594727,
+    "aggregation_time_mean": 0.005011081695556641,
     "aggregation_time_std": 0.0,
-    "aggregation_time_min": 0.014591455459594727,
-    "aggregation_time_max": 0.014591455459594727,
+    "aggregation_time_min": 0.005011081695556641,
+    "aggregation_time_max": 0.005011081695556641,
     "aggregation_time_runs": [
-        0.014591455459594727
+        0.005011081695556641
     ],
     "aggregation_memory_mean": 0.21484375,
     "aggregation_memory_std": 0.0,
@@ -52,39 +52,39 @@
     "sorting_time_runs": [
         0.0
     ],
-    "sorting_memory_mean": 0.00390625,
+    "sorting_memory_mean": 0.0,
     "sorting_memory_std": 0.0,
-    "sorting_memory_min": 0.00390625,
-    "sorting_memory_max": 0.00390625,
+    "sorting_memory_min": 0.0,
+    "sorting_memory_max": 0.0,
     "sorting_memory_runs": [
-        0.00390625
+        0.0
     ],
-    "filtering_time_mean": 2.2536497116088867,
+    "filtering_time_mean": 1.273583173751831,
     "filtering_time_std": 0.0,
-    "filtering_time_min": 2.2536497116088867,
-    "filtering_time_max": 2.2536497116088867,
+    "filtering_time_min": 1.273583173751831,
+    "filtering_time_max": 1.273583173751831,
     "filtering_time_runs": [
-        2.2536497116088867
+        1.273583173751831
     ],
-    "filtering_memory_mean": 1.40625,
+    "filtering_memory_mean": 4.5859375,
     "filtering_memory_std": 0.0,
-    "filtering_memory_min": 1.40625,
-    "filtering_memory_max": 1.40625,
+    "filtering_memory_min": 4.5859375,
+    "filtering_memory_max": 4.5859375,
     "filtering_memory_runs": [
-        1.40625
+        4.5859375
     ],
-    "correlation_time_mean": 1.6343305110931396,
+    "correlation_time_mean": 1.4173026084899902,
     "correlation_time_std": 0.0,
-    "correlation_time_min": 1.6343305110931396,
-    "correlation_time_max": 1.6343305110931396,
+    "correlation_time_min": 1.4173026084899902,
+    "correlation_time_max": 1.4173026084899902,
     "correlation_time_runs": [
-        1.6343305110931396
+        1.4173026084899902
     ],
-    "correlation_memory_mean": 0.84765625,
+    "correlation_memory_mean": 1.640625,
     "correlation_memory_std": 0.0,
-    "correlation_memory_min": 0.84765625,
-    "correlation_memory_max": 0.84765625,
+    "correlation_memory_min": 1.640625,
+    "correlation_memory_max": 1.640625,
     "correlation_memory_runs": [
-        0.84765625
+        1.640625
     ]
 }
