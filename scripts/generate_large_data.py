@@ -127,7 +127,9 @@ if __name__ == "__main__":
 
     # Ask user for size preference or use default
     try:
-        size_input = input("\nEnter number of rows (default 10000000 for better Spark performance): ").strip()
+        size_input = input(
+            "\nEnter number of rows (default 10000000 for better Spark performance): "
+        ).strip()
         if size_input:
             num_rows = int(size_input)
         else:
