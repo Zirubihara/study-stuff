@@ -1,0 +1,90 @@
+{
+    "row_count": 1000000,
+    "memory_size_gb": 0.1277141273021698,
+    "average_filtered_value": 7499.858703990418,
+    "total_operation_time_mean": 33.3497793674469,
+    "loading_time_mean": 6.311394929885864,
+    "loading_time_std": 0.0,
+    "loading_time_min": 6.311394929885864,
+    "loading_time_max": 6.311394929885864,
+    "loading_time_runs": [
+        6.311394929885864
+    ],
+    "loading_memory_mean": 0.4609375,
+    "loading_memory_std": 0.0,
+    "loading_memory_min": 0.4609375,
+    "loading_memory_max": 0.4609375,
+    "loading_memory_runs": [
+        0.4609375
+    ],
+    "cleaning_time_mean": 0.09857392311096191,
+    "cleaning_time_std": 0.0,
+    "cleaning_time_min": 0.09857392311096191,
+    "cleaning_time_max": 0.09857392311096191,
+    "cleaning_time_runs": [
+        0.09857392311096191
+    ],
+    "cleaning_memory_mean": 0.0,
+    "cleaning_memory_std": 0.0,
+    "cleaning_memory_min": 0.0,
+    "cleaning_memory_max": 0.0,
+    "cleaning_memory_runs": [
+        0.0
+    ],
+    "aggregation_time_mean": 0.22615265846252441,
+    "aggregation_time_std": 0.0,
+    "aggregation_time_min": 0.22615265846252441,
+    "aggregation_time_max": 0.22615265846252441,
+    "aggregation_time_runs": [
+        0.22615265846252441
+    ],
+    "aggregation_memory_mean": 0.0,
+    "aggregation_memory_std": 0.0,
+    "aggregation_memory_min": 0.0,
+    "aggregation_memory_max": 0.0,
+    "aggregation_memory_runs": [
+        0.0
+    ],
+    "sorting_time_mean": 0.03316020965576172,
+    "sorting_time_std": 0.0,
+    "sorting_time_min": 0.03316020965576172,
+    "sorting_time_max": 0.03316020965576172,
+    "sorting_time_runs": [
+        0.03316020965576172
+    ],
+    "sorting_memory_mean": 0.0,
+    "sorting_memory_std": 0.0,
+    "sorting_memory_min": 0.0,
+    "sorting_memory_max": 0.0,
+    "sorting_memory_runs": [
+        0.0
+    ],
+    "filtering_time_mean": 2.003657817840576,
+    "filtering_time_std": 0.0,
+    "filtering_time_min": 2.003657817840576,
+    "filtering_time_max": 2.003657817840576,
+    "filtering_time_runs": [
+        2.003657817840576
+    ],
+    "filtering_memory_mean": 0.0,
+    "filtering_memory_std": 0.0,
+    "filtering_memory_min": 0.0,
+    "filtering_memory_max": 0.0,
+    "filtering_memory_runs": [
+        0.0
+    ],
+    "correlation_time_mean": 24.67683982849121,
+    "correlation_time_std": 0.0,
+    "correlation_time_min": 24.67683982849121,
+    "correlation_time_max": 24.67683982849121,
+    "correlation_time_runs": [
+        24.67683982849121
+    ],
+    "correlation_memory_mean": 0.00390625,
+    "correlation_memory_std": 0.0,
+    "correlation_memory_min": 0.00390625,
+    "correlation_memory_max": 0.00390625,
+    "correlation_memory_runs": [
+        0.00390625
+    ]
+}

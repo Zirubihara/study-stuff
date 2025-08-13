@@ -194,7 +194,7 @@ def main():
     large_dataset = "../data/benchmark_10m.csv"  # 10M rows
 
     # Choose dataset to use (start with medium for reasonable performance)
-    csv_path = medium_dataset  # Change to large_dataset for maximum Spark advantage
+    csv_path = "../data/benchmark_1m.csv"  # 1M rows benchmark
 
     try:
         processor = PolarsDataProcessor(csv_path)
