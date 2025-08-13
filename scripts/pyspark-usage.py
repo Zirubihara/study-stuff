@@ -220,8 +220,8 @@ def main():
     large_dataset = "../data/benchmark_10m.csv"  # 10M rows
     massive_dataset = "../data/benchmark_50m.csv"  # 50M rows (~1GB)
 
-    # Choose dataset to use (Spark performs best with massive datasets)
-    csv_path = massive_dataset  # Spark excels with 50M+ rows for true distributed processing
+    # Choose dataset to use (using 1M for consistency with other benchmarks)
+    csv_path = small_dataset  # 1M rows for benchmark comparison
 
     try:
         processor = SparkDataProcessor(csv_path)
@@ -236,4 +236,16 @@ def main():
 
 
 if __name__ == "__main__":
+    import os
+    # Set Java environment for Spark
+    os.environ["JAVA_HOME"] = "C:\\Program Files\\Java\\jdk-17"
+    os.environ["PATH"] = "C:\\Program Files\\Java\\jdk-17\\bin;" + os.environ.get("PATH", "")
+    
+    # Clear any existing Spark context
+    import pyspark
+    if hasattr(pyspark, 'SparkContext'):
+        sc = pyspark.SparkContext._active_spark_context
+        if sc:
+            sc.stop()
+    
     main()

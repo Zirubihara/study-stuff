@@ -181,7 +181,7 @@ def main():
     massive_dataset = "../data/benchmark_50m.csv"  # 50M rows (~1GB)
 
     # Choose dataset to use (start with large for good performance comparison)
-    csv_path = large_dataset  # Use massive_dataset to test memory limits
+    csv_path = "../data/benchmark_1m.csv"  # 1M rows benchmark
 
     try:
         processor = DataProcessor(csv_path)
