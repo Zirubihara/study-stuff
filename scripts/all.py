@@ -1,7 +1,6 @@
 import gc
 import json
 import os
-import psutil
 import statistics
 import time
 from dataclasses import dataclass
@@ -12,6 +11,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import dask.dataframe as dd
 import pandas as pd
 import polars as pl
+import psutil
 import pyarrow as pa
 import pyarrow.compute as pc  # for compute functions
 from pyspark.sql import SparkSession
@@ -38,7 +38,7 @@ class ProcessingResults:
 @dataclass
 class BenchmarkStats:
     """Store statistical results from multiple runs."""
-    
+
     mean: float
     std_dev: float
     min_val: float
@@ -55,23 +55,23 @@ def time_operation(operation_name: str):
             # Memory before operation
             process = psutil.Process()
             memory_before = process.memory_info().rss / 1024 / 1024  # MB
-            
+
             start_time = time.time()
             result = func(self, *args, **kwargs)
             execution_time = time.time() - start_time
-            
+
             # Memory after operation
             memory_after = process.memory_info().rss / 1024 / 1024  # MB
             memory_used = memory_after - memory_before
-            
+
             # Store single run results
-            if not hasattr(self, 'run_results'):
+            if not hasattr(self, "run_results"):
                 self.run_results = {}
             if operation_name not in self.run_results:
-                self.run_results[operation_name] = {'times': [], 'memory': []}
-                
-            self.run_results[operation_name]['times'].append(execution_time)
-            self.run_results[operation_name]['memory'].append(memory_used)
+                self.run_results[operation_name] = {"times": [], "memory": []}
+
+            self.run_results[operation_name]["times"].append(execution_time)
+            self.run_results[operation_name]["memory"].append(memory_used)
 
             return ProcessingResults(
                 df=result[0] if isinstance(result, tuple) else result,
@@ -119,29 +119,29 @@ class BaseDataProcessor:
                 std_dev=0.0,
                 min_val=values[0] if values else 0.0,
                 max_val=values[0] if values else 0.0,
-                runs=values
+                runs=values,
             )
-        
+
         return BenchmarkStats(
             mean=statistics.mean(values),
             std_dev=statistics.stdev(values),
             min_val=min(values),
             max_val=max(values),
-            runs=values
+            runs=values,
         )
 
     def finalize_performance_metrics(self):
         """Calculate final performance metrics with statistical analysis."""
         for operation, data in self.run_results.items():
-            time_stats = self.calculate_statistics(data['times'])
-            memory_stats = self.calculate_statistics(data['memory'])
-            
+            time_stats = self.calculate_statistics(data["times"])
+            memory_stats = self.calculate_statistics(data["memory"])
+
             self.performance_metrics[f"{operation}_time_mean"] = time_stats.mean
             self.performance_metrics[f"{operation}_time_std"] = time_stats.std_dev
             self.performance_metrics[f"{operation}_time_min"] = time_stats.min_val
             self.performance_metrics[f"{operation}_time_max"] = time_stats.max_val
             self.performance_metrics[f"{operation}_time_runs"] = time_stats.runs
-            
+
             self.performance_metrics[f"{operation}_memory_mean"] = memory_stats.mean
             self.performance_metrics[f"{operation}_memory_std"] = memory_stats.std_dev
             self.performance_metrics[f"{operation}_memory_min"] = memory_stats.min_val
@@ -590,7 +590,7 @@ def run_single_iteration(processor, name: str, iteration: int):
     """Run a single iteration of all operations."""
     try:
         print(f"  Iteration {iteration + 1}...")
-        
+
         df_result = processor.load_data()
         df_clean = processor.clean_data(df_result.df)
         df_agg = processor.aggregate_data(df_clean.df)
@@ -600,12 +600,14 @@ def run_single_iteration(processor, name: str, iteration: int):
 
         # Store average filtered value (only from last iteration)
         if iteration == 0:  # Store from first iteration
-            processor.performance_metrics["average_filtered_value"] = df_filtered.additional_info
+            processor.performance_metrics["average_filtered_value"] = (
+                df_filtered.additional_info
+            )
 
         # Cleanup
         del df_result, df_clean, df_agg, df_sorted, df_filtered, correlation
         cleanup_memory()
-        
+
         return True
 
     except Exception as e:
@@ -613,10 +615,14 @@ def run_single_iteration(processor, name: str, iteration: int):
         return False
 
 
-def process_implementation(processor, name: str, num_runs: int = 5, warmup_runs: int = 1):
+def process_implementation(
+    processor, name: str, num_runs: int = 5, warmup_runs: int = 1
+):
     """Process implementation with multiple runs for statistical analysis."""
     try:
-        print(f"\nRunning {name} implementation with {num_runs} runs (+ {warmup_runs} warmup)...")
+        print(
+            f"\nRunning {name} implementation with {num_runs} runs (+ {warmup_runs} warmup)..."
+        )
         cleanup_memory()
         print(f"Memory cleaned before {name} implementation")
 
@@ -644,18 +650,24 @@ def process_implementation(processor, name: str, num_runs: int = 5, warmup_runs:
             return None
 
         # Calculate total operation time statistics
-        if hasattr(processor, 'run_results'):
+        if hasattr(processor, "run_results"):
             all_operation_times = []
             for operation, data in processor.run_results.items():
-                if 'times' in data:
-                    all_operation_times.extend(data['times'])
-            
+                if "times" in data:
+                    all_operation_times.extend(data["times"])
+
             if all_operation_times:
-                processor.performance_metrics["total_operation_time_mean"] = sum(all_operation_times) / len(all_operation_times) * len(processor.run_results)
+                processor.performance_metrics["total_operation_time_mean"] = (
+                    sum(all_operation_times)
+                    / len(all_operation_times)
+                    * len(processor.run_results)
+                )
 
         processor.save_performance_metrics(f"performance_metrics_{name}.json")
 
-        print(f"{name.capitalize()} processing completed successfully! ({successful_runs}/{num_runs} runs)")
+        print(
+            f"{name.capitalize()} processing completed successfully! ({successful_runs}/{num_runs} runs)"
+        )
         print(f"Memory cleaned after {name} implementation")
 
         return {"metrics": processor.performance_metrics.copy()}
@@ -663,6 +675,7 @@ def process_implementation(processor, name: str, num_runs: int = 5, warmup_runs:
     except Exception as e:
         print(f"Error in {name} implementation: {e}")
         import traceback
+
         traceback.print_exc()
         return None
     finally:
@@ -700,46 +713,57 @@ def run_comparison(file_path: str, skip_dask: bool = False, skip_spark: bool = F
 def generate_dataset(num_rows: int, output_path: str):
     """Generate dataset with specified number of rows using the existing generator."""
     print(f"Generating dataset with {num_rows:,} rows...")
-    
+
     import csv
     import random
     from pathlib import Path
-    
+
     # Define realistic data generation parameters
     years = list(range(1988, 2021))  # 33 years
     months = list(range(1, 13))  # 12 months
     categories1 = list(range(1, 21))  # 20 categories
     categories2 = list(range(1, 51))  # 50 categories
     categories3 = list(range(1, 11))  # 10 categories
-    
+
     # Pre-generate some commonly used codes for realism
     common_codes = [f"{i:04d}" for i in range(1, 1000)]
-    
+
     start_time = time.time()
-    
-    with open(output_path, 'w', newline='', encoding='utf-8') as csvfile:
+
+    with open(output_path, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
-        
+
         for i in range(num_rows):
             year = random.choice(years)
             month = random.choice(months)
             year_month = f"{year}{month:02d}"
-            
+
             category1 = random.choice(categories1)
             category2 = random.choice(categories2)
             category3 = random.choice(categories3)
-            
+
             code = random.choice(common_codes)
             flag = random.randint(0, 1)
             value1 = random.randint(1000, 999999)
             value2 = random.randint(100, 99999)
-            
-            writer.writerow([year_month, category1, category2, category3, code, flag, value1, value2])
-            
+
+            writer.writerow(
+                [
+                    year_month,
+                    category1,
+                    category2,
+                    category3,
+                    code,
+                    flag,
+                    value1,
+                    value2,
+                ]
+            )
+
             if (i + 1) % 100000 == 0:
                 elapsed = time.time() - start_time
                 print(f"  Generated {i + 1:,} rows in {elapsed:.1f}s...")
-    
+
     elapsed = time.time() - start_time
     file_size = Path(output_path).stat().st_size / 1024 / 1024  # MB
     print(f"Dataset generated: {output_path}")
@@ -756,11 +780,11 @@ def run_comprehensive_benchmark():
         {"rows": 10000000, "name": "10M", "file": "../data/benchmark_10m.csv"},
         {"rows": 50000000, "name": "50M", "file": "../data/benchmark_50m.csv"},
     ]
-    
+
     # Configuration
     num_runs = 5
     warmup_runs = 1
-    
+
     print("=" * 80)
     print("COMPREHENSIVE DATA PROCESSING BENCHMARK")
     print("=" * 80)
@@ -770,55 +794,57 @@ def run_comprehensive_benchmark():
     print(f"  - Dataset sizes: {[cfg['name'] for cfg in dataset_configs]}")
     print(f"  - Libraries: Pandas, Polars, PyArrow, Dask, Spark")
     print("=" * 80)
-    
+
     all_results = {}
-    
+
     for config in dataset_configs:
         print(f"\n{'=' * 60}")
         print(f"BENCHMARKING WITH {config['name']} ROWS DATASET")
         print(f"{'=' * 60}")
-        
+
         # Generate dataset if it doesn't exist
-        if not Path(config['file']).exists():
-            generate_dataset(config['rows'], config['file'])
+        if not Path(config["file"]).exists():
+            generate_dataset(config["rows"], config["file"])
         else:
             print(f"Using existing dataset: {config['file']}")
-        
+
         # Run benchmarks for this dataset size
         dataset_results = {}
-        
+
         # Test each library (excluding spark due to Java version issue)
         libraries = ["pandas", "polars", "pyarrow", "dask"]
-        
+
         for lib_name in libraries:
             try:
                 if lib_name == "pandas":
-                    processor = PandasDataProcessor(config['file'])
+                    processor = PandasDataProcessor(config["file"])
                 elif lib_name == "polars":
-                    processor = PolarsDataProcessor(config['file'])
+                    processor = PolarsDataProcessor(config["file"])
                 elif lib_name == "pyarrow":
-                    processor = PyArrowDataProcessor(config['file'])
+                    processor = PyArrowDataProcessor(config["file"])
                 elif lib_name == "dask":
-                    processor = DaskDataProcessor(config['file'])
+                    processor = DaskDataProcessor(config["file"])
                 elif lib_name == "spark":
-                    processor = SparkDataProcessor(config['file'])
-                
-                result = process_implementation(processor, f"{lib_name}_{config['name']}", num_runs, warmup_runs)
+                    processor = SparkDataProcessor(config["file"])
+
+                result = process_implementation(
+                    processor, f"{lib_name}_{config['name']}", num_runs, warmup_runs
+                )
                 if result:
                     dataset_results[lib_name] = result
-                
+
                 # Extra cleanup for memory-intensive operations
                 del processor
                 cleanup_memory()
-                
+
             except Exception as e:
                 print(f"Skipping {lib_name} for {config['name']} dataset: {e}")
-        
-        all_results[config['name']] = dataset_results
-        
+
+        all_results[config["name"]] = dataset_results
+
         print(f"\nCompleted benchmarking for {config['name']} dataset")
         print("-" * 60)
-    
+
     # Print summary
     print(f"\n{'=' * 80}")
     print("BENCHMARK COMPLETED")
@@ -828,7 +854,7 @@ def run_comprehensive_benchmark():
     print("  - Mean, std dev, min, max for execution times")
     print("  - Mean, std dev, min, max for memory usage")
     print("  - Individual run data for statistical analysis")
-    
+
     return all_results
 
 

@@ -23,22 +23,25 @@ from all import (
 )
 
 
-def process_implementation_with_custom_path(processor, name: str, num_runs: int = 5, warmup_runs: int = 1):
+def process_implementation_with_custom_path(
+    processor, name: str, num_runs: int = 5, warmup_runs: int = 1
+):
     """Process implementation with custom results path."""
     # Use the original process_implementation function
     result = process_implementation(processor, name, num_runs, warmup_runs)
-    
+
     # Move the generated file to the results directory
     if result:
         old_path = f"performance_metrics_{name}.json"
         new_path = f"../results/performance_metrics_{name}.json"
-        
+
         if os.path.exists(old_path):
             # Move file to results directory
             import shutil
+
             shutil.move(old_path, new_path)
             print(f"Moved results to: {new_path}")
-    
+
     return result
 
 

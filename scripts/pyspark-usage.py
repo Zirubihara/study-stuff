@@ -216,7 +216,7 @@ def main():
     """Main execution function."""
     # Dataset options
     small_dataset = "../data/benchmark_1m.csv"  # 1M rows
-    medium_dataset = "../data/benchmark_5m.csv"  # 5M rows  
+    medium_dataset = "../data/benchmark_5m.csv"  # 5M rows
     large_dataset = "../data/benchmark_10m.csv"  # 10M rows
     massive_dataset = "../data/benchmark_50m.csv"  # 50M rows (~1GB)
 
@@ -237,15 +237,19 @@ def main():
 
 if __name__ == "__main__":
     import os
+
     # Set Java environment for Spark
     os.environ["JAVA_HOME"] = "C:\\Program Files\\Java\\jdk-17"
-    os.environ["PATH"] = "C:\\Program Files\\Java\\jdk-17\\bin;" + os.environ.get("PATH", "")
-    
+    os.environ["PATH"] = "C:\\Program Files\\Java\\jdk-17\\bin;" + os.environ.get(
+        "PATH", ""
+    )
+
     # Clear any existing Spark context
     import pyspark
-    if hasattr(pyspark, 'SparkContext'):
+
+    if hasattr(pyspark, "SparkContext"):
         sc = pyspark.SparkContext._active_spark_context
         if sc:
             sc.stop()
-    
+
     main()

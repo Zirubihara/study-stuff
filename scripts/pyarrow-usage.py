@@ -245,7 +245,7 @@ def main():
     """Main execution function."""
     # Dataset options
     small_dataset = "../data/benchmark_1m.csv"  # 1M rows
-    medium_dataset = "../data/benchmark_5m.csv"  # 5M rows  
+    medium_dataset = "../data/benchmark_5m.csv"  # 5M rows
     large_dataset = "../data/benchmark_10m.csv"  # 10M rows
 
     # Choose dataset to use (start with medium for reasonable performance)
