@@ -163,7 +163,7 @@ class SparkDataProcessor:
         return correlation_df
 
     def save_performance_metrics(
-        self, output_path: str = "../results/performance_metrics_spark_50m.json"
+        self, output_path: str = "../results/performance_metrics_spark_100m.json"
     ):
         """Save performance metrics to JSON file."""
         try:
@@ -220,8 +220,8 @@ def main():
     large_dataset = "../data/benchmark_10m.csv"  # 10M rows
     massive_dataset = "../data/benchmark_50m.csv"  # 50M rows (~1GB)
 
-    # Choose dataset to use (using 50M for massive Spark performance demonstration)
-    csv_path = massive_dataset  # 50M rows (~1GB)
+    # Choose dataset to use (using 100M for ultimate Spark performance demonstration)
+    csv_path = "../data/benchmark_100m.csv"  # 100M rows (~3GB)
 
     try:
         processor = SparkDataProcessor(csv_path)

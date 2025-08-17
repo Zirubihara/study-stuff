@@ -1,0 +1,11 @@
+{
+    "memory_size_gb": 0.3119930624961853,
+    "row_count": 5000000,
+    "loading_time_seconds": 0.2251417636871338,
+    "cleaning_time_seconds": 0.0009822845458984375,
+    "aggregation_time_seconds": 1.2533833980560303,
+    "sorting_time_seconds": 1.259873867034912,
+    "filtering_time_seconds": 0.09678912162780762,
+    "correlation_time_seconds": 1.1146862506866455,
+    "total_operation_time_seconds": 3.9508566856384277
+}
