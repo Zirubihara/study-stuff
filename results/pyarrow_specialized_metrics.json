@@ -1,0 +1,15 @@
+{
+    "technology": "pyarrow_specialized",
+    "dataset_size_mb": 338.45038414001465,
+    "row_count": 5000000,
+    "load_time_seconds": 0.7347738742828369,
+    "filtering_time_seconds": 0.8290014266967773,
+    "vectorized_compute_time_seconds": 0.09541916847229004,
+    "groupby_operations_time_seconds": 0.13034462928771973,
+    "sorting_time_seconds": 2.4490456581115723,
+    "analytics_operations_time_seconds": 0.08320784568786621,
+    "total_time_seconds": 4.3217926025390625,
+    "average_transaction_amount": 1388.9572001520005,
+    "total_transactions": 5000000,
+    "high_value_customers": 999439
+}

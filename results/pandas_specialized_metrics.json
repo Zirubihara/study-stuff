@@ -1,0 +1,15 @@
+{
+    "technology": "pandas_specialized",
+    "dataset_size_mb": 102.40216159820557,
+    "row_count": 500000,
+    "load_time_seconds": 1.961498737335205,
+    "string_operations_time_seconds": 1.3712990283966064,
+    "datetime_operations_time_seconds": 0.3798222541809082,
+    "missing_data_handling_time_seconds": 0.29818129539489746,
+    "aggregation_time_seconds": 0.12379240989685059,
+    "pivot_operations_time_seconds": 0.09415006637573242,
+    "total_time_seconds": 4.2287437915802,
+    "missing_data_percentage": 1.8755333333333333,
+    "unique_departments": 6,
+    "average_salary": 94978.047203
+}
