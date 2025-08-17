@@ -1,0 +1,11 @@
+{
+    "row_count": 100000000,
+    "loading_time_seconds": 59.661534786224365,
+    "cleaning_time_seconds": 0.11688399314880371,
+    "aggregation_time_seconds": 0.1603395938873291,
+    "sorting_time_seconds": 0.031865596771240234,
+    "filtering_time_seconds": 1.8075335025787354,
+    "correlation_time_seconds": 37.556682109832764,
+    "average_filtered_value": 7525.259314526387,
+    "total_operation_time_seconds": 99.33483958244324
+}
