@@ -71,12 +71,12 @@ study-stuff/
 │   ├── benchmark_10m.csv              # 10M rows (large dataset)
 │   ├── benchmark_50m.csv              # 50M rows (~1GB, massive)
 │   ├── benchmark_100m.csv             # 100M rows (ultra-massive)
-│   └── specialized/                   # Specialized datasets
-│       ├── pandas_showcase.csv        # Complex employee data
-│       ├── pyarrow_showcase.csv       # Pure numerical transactions
-│       ├── polars_showcase.csv        # IoT timeseries data
-│       ├── spark_showcase.csv         # Distributed processing data
-│       └── dask_showcase.csv          # Out-of-core processing data
+│   └── specialized/                   # Specialized datasets optimized for each technology
+│       ├── pandas_showcase.csv        # 500K rows: Complex employee records
+│       ├── pyarrow_showcase.csv       # 5M rows: Pure numerical transactions  
+│       ├── polars_showcase.csv        # 2M rows: IoT timeseries sensor data
+│       ├── spark_showcase.csv         # 20M rows: Retail sales & customer data
+│       └── dask_showcase.csv          # 10M rows: Scientific experiment data
 ├── results/                           # Performance metrics JSON files
 ├── charts/                            # Generated charts and visualizations
 ├── requirements.txt                   # Python dependencies
@@ -128,6 +128,35 @@ Run technology-specific strength showcases:
 # Showcases each technology's optimal use cases
 python simple_specialized_benchmarks.py
 ```
+
+#### Specialized Dataset Details
+
+Each technology is tested on data optimized for its specific strengths:
+
+**Pandas Showcase (500K rows)** - Complex Employee Records
+- **Data**: Names, emails, phones, hire dates, salaries, skills, departments
+- **Tests**: String parsing, datetime operations, missing data handling, pivot tables
+- **Why Pandas excels**: Rich API for mixed data types, extensive string methods
+
+**PyArrow Showcase (5M rows)** - Pure Numerical Transactions  
+- **Data**: Transaction IDs, amounts, quantities, scores, timestamps
+- **Tests**: Vectorized filtering, mathematical computations, fast aggregations
+- **Why PyArrow excels**: Columnar format, SIMD vectorization, numerical optimization
+
+**Polars Showcase (2M rows)** - IoT Time Series Data
+- **Data**: Device sensors, measurements, locations, quality metrics, timestamps
+- **Tests**: Query optimization, rolling windows, time series operations, categorical processing
+- **Why Polars excels**: Lazy evaluation, query optimizer, memory efficiency
+
+**Spark Showcase (20M rows)** - Retail Sales Data
+- **Data**: Customer demographics, transactions, geography, product categories
+- **Tests**: Massive dataset processing, distributed aggregations, enterprise analytics
+- **Why Spark excels**: Distributed processing, fault tolerance, massive scale
+
+**Dask Showcase (10M rows)** - Scientific Experiment Data
+- **Data**: Lab measurements, experiments, samples, control groups, batch processing
+- **Tests**: Out-of-core processing, parallel computations, larger-than-memory operations
+- **Why Dask excels**: Scales Pandas operations, handles memory constraints
 
 ### Visualization
 
