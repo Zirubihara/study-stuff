@@ -1,0 +1,38 @@
+[
+    {
+        "technology": "pandas_specialized",
+        "dataset": "complex_employee_data",
+        "rows": 500000,
+        "load_time": 1.7111363410949707,
+        "string_ops_time": 2.843848943710327,
+        "datetime_ops_time": 0.4640529155731201,
+        "missing_data_time": 0.7279937267303467,
+        "pivot_ops_time": 0.14405512809753418,
+        "total_time": 5.892087459564209,
+        "strength": "Complex data wrangling, strings, dates, missing data"
+    },
+    {
+        "technology": "pyarrow_specialized",
+        "dataset": "pure_numerical_transactions",
+        "rows": 5000000,
+        "load_time": 0.6757166385650635,
+        "filtering_time": 0.15848088264465332,
+        "compute_time": 0.06700301170349121,
+        "aggregation_time": 0.05551624298095703,
+        "sorting_time": 3.65451717376709,
+        "total_time": 4.611233949661255,
+        "strength": "Columnar speed, vectorized operations, massive numerical data"
+    },
+    {
+        "technology": "polars_specialized",
+        "dataset": "iot_timeseries_data",
+        "rows": 2000000,
+        "load_time": 0.24789690971374512,
+        "query_optimization_time": 0.16361641883850098,
+        "timeseries_ops_time": 0.8015470504760742,
+        "aggregation_time": 0.06853604316711426,
+        "categorical_ops_time": 0.13653326034545898,
+        "total_time": 1.4251313209533691,
+        "strength": "Query optimization, time series, memory efficiency, lazy evaluation"
+    }
+]

@@ -25,7 +25,7 @@ def pandas_strength_benchmark():
     load_start = time.time()
     df = pd.read_csv("../data/specialized/pandas_showcase.csv")
     load_time = time.time() - load_start
-    print(f"✓ Loaded {len(df):,} rows in {load_time:.2f}s")
+    print(f"Loaded {len(df):,} rows in {load_time:.2f}s")
     
     # STRING OPERATIONS (Pandas specialty)
     string_start = time.time()
@@ -35,7 +35,7 @@ def pandas_strength_benchmark():
     df['phone_digits'] = df['phone'].str.replace(r'[^\d]', '', regex=True)
     df['phone_clean'] = df['phone_digits'].str.replace(r'(\d{3})(\d{3})(\d{4})', r'(\1) \2-\3', regex=True)
     string_time = time.time() - string_start
-    print(f"✓ String processing: {string_time:.2f}s")
+    print(f"SUCCESS: String processing: {string_time:.2f}s")
     
     # DATETIME OPERATIONS (Pandas specialty)
     datetime_start = time.time()
@@ -46,7 +46,7 @@ def pandas_strength_benchmark():
     df['hire_month'] = df['hire_date'].dt.month_name()
     df['birth_decade'] = (df['birth_date'].dt.year // 10) * 10
     datetime_time = time.time() - datetime_start
-    print(f"✓ DateTime processing: {datetime_time:.2f}s")
+    print(f"SUCCESS: DateTime processing: {datetime_time:.2f}s")
     
     # MISSING DATA HANDLING (Pandas specialty)
     missing_start = time.time()
@@ -56,7 +56,7 @@ def pandas_strength_benchmark():
     df['bonus_filled'] = df['bonus_filled'].fillna(0)
     print(f"  After filling: {df.isnull().sum().sum():,}")
     missing_time = time.time() - missing_start
-    print(f"✓ Missing data handling: {missing_time:.2f}s")
+    print(f"SUCCESS: Missing data handling: {missing_time:.2f}s")
     
     # COMPLEX PIVOT OPERATIONS (Pandas specialty)
     pivot_start = time.time()
@@ -67,10 +67,10 @@ def pandas_strength_benchmark():
                                  aggfunc=['mean', 'count'],
                                  fill_value=0)
     pivot_time = time.time() - pivot_start
-    print(f"✓ Pivot table creation: {pivot_time:.2f}s")
+    print(f"SUCCESS: Pivot table creation: {pivot_time:.2f}s")
     
     total_time = time.time() - start_time
-    print(f"🏆 PANDAS TOTAL: {total_time:.2f} seconds")
+    print(f"PANDAS TOTAL: {total_time:.2f} seconds")
     
     return {
         'technology': 'pandas_specialized',
@@ -98,7 +98,7 @@ def pyarrow_strength_benchmark():
     load_start = time.time()
     table = csv.read_csv("../data/specialized/pyarrow_showcase.csv")
     load_time = time.time() - load_start
-    print(f"✓ Loaded {len(table):,} rows in {load_time:.2f}s")
+    print(f"SUCCESS: Loaded {len(table):,} rows in {load_time:.2f}s")
     
     # VECTORIZED FILTERING (PyArrow specialty)
     filter_start = time.time()
@@ -108,7 +108,7 @@ def pyarrow_strength_benchmark():
     complex_filter = pc.and_(pc.and_(high_value, premium), high_score)
     filtered = table.filter(complex_filter)
     filter_time = time.time() - filter_start
-    print(f"✓ Complex filtering: {filter_time:.2f}s ({len(filtered):,} rows selected)")
+    print(f"SUCCESS: Complex filtering: {filter_time:.2f}s ({len(filtered):,} rows selected)")
     
     # VECTORIZED COMPUTATIONS (PyArrow specialty)
     compute_start = time.time()
@@ -122,7 +122,7 @@ def pyarrow_strength_benchmark():
     avg_transaction = pc.mean(table['total_amount'])
     transaction_std = pc.stddev(table['total_amount'])
     compute_time = time.time() - compute_start
-    print(f"✓ Vectorized computations: {compute_time:.2f}s")
+    print(f"SUCCESS: Vectorized computations: {compute_time:.2f}s")
     
     # LIGHTNING-FAST AGGREGATIONS (PyArrow specialty)
     agg_start = time.time()
@@ -134,7 +134,7 @@ def pyarrow_strength_benchmark():
         ('transaction_id', 'count')
     ])
     agg_time = time.time() - agg_start
-    print(f"✓ Group-by aggregations: {agg_time:.2f}s ({len(grouped):,} groups)")
+    print(f"SUCCESS: Group-by aggregations: {agg_time:.2f}s ({len(grouped):,} groups)")
     
     # COLUMNAR SORTING (PyArrow specialty)
     sort_start = time.time()
@@ -143,10 +143,10 @@ def pyarrow_strength_benchmark():
         ('customer_score', 'descending')
     ])
     sort_time = time.time() - sort_start
-    print(f"✓ Multi-column sorting: {sort_time:.2f}s")
+    print(f"SUCCESS: Multi-column sorting: {sort_time:.2f}s")
     
     total_time = time.time() - start_time
-    print(f"🚀 PYARROW TOTAL: {total_time:.2f} seconds")
+    print(f"PYARROW TOTAL: {total_time:.2f} seconds")
     
     return {
         'technology': 'pyarrow_specialized',
@@ -174,7 +174,7 @@ def polars_strength_benchmark():
     load_start = time.time()
     df = pl.read_csv("../data/specialized/polars_showcase.csv")
     load_time = time.time() - load_start
-    print(f"✓ Loaded {len(df):,} rows in {load_time:.2f}s")
+    print(f"Loaded {len(df):,} rows in {load_time:.2f}s")
     
     # COMPLEX QUERY OPTIMIZATION (Polars specialty)
     query_start = time.time()
@@ -203,7 +203,7 @@ def polars_strength_benchmark():
         .collect()
     )
     query_time = time.time() - query_start
-    print(f"✓ Complex optimized query: {query_time:.2f}s ({len(optimized_result):,} results)")
+    print(f"SUCCESS: Complex optimized query: {query_time:.2f}s ({len(optimized_result):,} results)")
     
     # TIME SERIES OPERATIONS (Polars specialty)
     timeseries_start = time.time()
@@ -218,7 +218,7 @@ def polars_strength_benchmark():
         (pl.col("measurement_value") - pl.col("measurement_value").shift(1)).alias("change")
     ])
     timeseries_time = time.time() - timeseries_start
-    print(f"✓ Time series + windowing: {timeseries_time:.2f}s")
+    print(f"SUCCESS: Time series + windowing: {timeseries_time:.2f}s")
     
     # MEMORY-EFFICIENT AGGREGATIONS (Polars specialty)
     agg_start = time.time()
@@ -235,7 +235,7 @@ def polars_strength_benchmark():
         ])
     )
     agg_time = time.time() - agg_start
-    print(f"✓ Device aggregations: {agg_time:.2f}s ({len(device_stats):,} devices)")
+    print(f"SUCCESS: Device aggregations: {agg_time:.2f}s ({len(device_stats):,} devices)")
     
     # CATEGORICAL OPERATIONS (Polars specialty)
     categorical_start = time.time()
@@ -252,10 +252,10 @@ def polars_strength_benchmark():
         .sort("avg_measurement", descending=True)
     )
     categorical_time = time.time() - categorical_start
-    print(f"✓ Categorical analysis: {categorical_time:.2f}s")
+    print(f"SUCCESS: Categorical analysis: {categorical_time:.2f}s")
     
     total_time = time.time() - start_time
-    print(f"⚡ POLARS TOTAL: {total_time:.2f} seconds")
+    print(f"POLARS TOTAL: {total_time:.2f} seconds")
     
     return {
         'technology': 'polars_specialized',
@@ -273,7 +273,7 @@ def polars_strength_benchmark():
 
 def main():
     """Run all specialized benchmarks and compare results."""
-    print("🎯 SPECIALIZED STRENGTH SHOWCASE")
+    print("SPECIALIZED STRENGTH SHOWCASE")
     print("Testing each technology on data optimized for its strengths")
     print("=" * 80)
     
@@ -302,9 +302,9 @@ def main():
         json.dump(results, f, indent=4)
     
     # Print comparison
-    print("\n" + "🏆" + "=" * 78 + "🏆")
+    print("\n" + "=" * 80)
     print("SPECIALIZED STRENGTH COMPARISON RESULTS")
-    print("🏆" + "=" * 78 + "🏆")
+    print("=" * 80)
     
     for result in results:
         tech = result['technology'].replace('_specialized', '').upper()
@@ -317,7 +317,7 @@ def main():
         print(f"                | Dataset:  {result['dataset']}")
     
     print("\n" + "=" * 80)
-    print("🎯 KEY INSIGHTS:")
+    print("KEY INSIGHTS:")
     print("- Each technology excels on data optimized for its strengths")
     print("- Choose the right tool for your specific data characteristics")
     print("- Performance varies dramatically based on data type and operations")
