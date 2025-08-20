@@ -105,7 +105,7 @@ def pandas_specialized_benchmark():
 if __name__ == "__main__":
     pandas_specialized_benchmark()
 '''
-    
+
     with open("temp_pandas_specialized.py", "w") as f:
         f.write(script_content)
     return "temp_pandas_specialized.py"
@@ -208,7 +208,7 @@ def pyarrow_specialized_benchmark():
 if __name__ == "__main__":
     pyarrow_specialized_benchmark()
 '''
-    
+
     with open("temp_pyarrow_specialized.py", "w") as f:
         f.write(script_content)
     return "temp_pyarrow_specialized.py"
@@ -344,7 +344,7 @@ def polars_specialized_benchmark():
 if __name__ == "__main__":
     polars_specialized_benchmark()
 '''
-    
+
     with open("temp_polars_specialized.py", "w") as f:
         f.write(script_content)
     return "temp_polars_specialized.py"
@@ -355,36 +355,40 @@ def run_specialized_benchmark(script_path, technology_name):
     print(f"\n{'='*60}")
     print(f"Running {technology_name.upper()} Specialized Benchmark")
     print(f"{'='*60}")
-    
+
     start_time = time.time()
-    
+
     try:
         result = subprocess.run(
             [sys.executable, script_path],
             capture_output=True,
             text=True,
-            timeout=300  # 5 minute timeout
+            timeout=300,  # 5 minute timeout
         )
-        
+
         execution_time = time.time() - start_time
-        
+
         if result.returncode == 0:
-            print(f"SUCCESS: {technology_name} completed in {execution_time:.2f} seconds")
+            print(
+                f"SUCCESS: {technology_name} completed in {execution_time:.2f} seconds"
+            )
             if result.stdout:
                 print("Output:")
                 print(result.stdout)
         else:
-            print(f"FAILED: {technology_name} failed with return code {result.returncode}")
+            print(
+                f"FAILED: {technology_name} failed with return code {result.returncode}"
+            )
             print("Error:", result.stderr)
             if result.stdout:
                 print("Output:", result.stdout)
-        
+
         # Clean up script
         if Path(script_path).exists():
             Path(script_path).unlink()
-            
+
         return result.returncode == 0, execution_time
-        
+
     except subprocess.TimeoutExpired:
         print(f"TIMEOUT: {technology_name} exceeded 5 minute limit")
         return False, time.time() - start_time
@@ -397,42 +401,41 @@ def main():
     """Run all specialized benchmarks."""
     print("SPECIALIZED BENCHMARKS - Each Technology On Its Optimal Data")
     print("=" * 80)
-    
+
     # Create specialized scripts
     benchmarks = [
         ("Pandas", create_pandas_specialized_script),
-        ("PyArrow", create_pyarrow_specialized_script), 
+        ("PyArrow", create_pyarrow_specialized_script),
         ("Polars", create_polars_specialized_script),
     ]
-    
+
     results = {}
     total_start = time.time()
-    
+
     for tech_name, script_creator in benchmarks:
         script_path = script_creator()
         success, exec_time = run_specialized_benchmark(script_path, tech_name)
-        results[tech_name.lower()] = {
-            'success': success,
-            'execution_time': exec_time
-        }
-    
+        results[tech_name.lower()] = {"success": success, "execution_time": exec_time}
+
     total_time = time.time() - total_start
-    
+
     # Print summary
-    print("\\n" + "="*80)
+    print("\\n" + "=" * 80)
     print("SPECIALIZED BENCHMARK RESULTS")
-    print("="*80)
-    
+    print("=" * 80)
+
     for tech_name, result in results.items():
-        status = "SUCCESS" if result['success'] else "FAILED"
-        print(f"{tech_name.upper():15} | {status:10} | {result['execution_time']:8.2f}s")
-    
+        status = "SUCCESS" if result["success"] else "FAILED"
+        print(
+            f"{tech_name.upper():15} | {status:10} | {result['execution_time']:8.2f}s"
+        )
+
     print(f"\\nTotal benchmark time: {total_time:.2f} seconds")
     print("\\nGenerated metrics files:")
     print("- ../results/pandas_specialized_metrics.json")
-    print("- ../results/pyarrow_specialized_metrics.json") 
+    print("- ../results/pyarrow_specialized_metrics.json")
     print("- ../results/polars_specialized_metrics.json")
-    
+
     print("\\nThese benchmarks showcase each technology's optimal use cases!")
 
 
