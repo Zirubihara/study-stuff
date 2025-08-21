@@ -3,15 +3,13 @@ Generate professional charts and visualizations for thesis from benchmark result
 """
 
 import json
-
-import matplotlib
-
-matplotlib.use("Agg")  # Use non-interactive backend
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+
+matplotlib.use("Agg")  # Use non-interactive backend
 
 # Set professional styling
 try:
