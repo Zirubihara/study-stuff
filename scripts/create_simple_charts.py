@@ -3,15 +3,13 @@ Generate simple, easy-to-read charts for thesis - one chart per concept.
 """
 
 import json
-
-import matplotlib
-
-matplotlib.use("Agg")
 from pathlib import Path
 
+import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+
+matplotlib.use("Agg")
 
 # Set clean, professional styling with better readability
 plt.rcParams["figure.figsize"] = (12, 8)
