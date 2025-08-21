@@ -49,9 +49,13 @@ def pandas_specialized_benchmark():
     
     # Missing data handling (Pandas strength)
     missing_start = time.time()
-    df['salary_filled'] = df['salary'].fillna(df.groupby('department')['salary'].transform('median'))
+    df['salary_filled'] = df['salary'].fillna(
+        df.groupby('department')['salary'].transform('median')
+    )
     df['bonus_filled'] = df['bonus'].fillna(0)
-    missing_data_pct = df.isnull().sum().sum() / (len(df) * len(df.columns)) * 100
+    missing_data_pct = (
+        df.isnull().sum().sum() / (len(df) * len(df.columns)) * 100
+    )
     missing_time = time.time() - missing_start
     
     # Complex aggregations
@@ -78,7 +82,10 @@ def pandas_specialized_benchmark():
     
     metrics = {
         'technology': 'pandas_specialized',
-        'dataset_size_mb': Path("../data/specialized/pandas_showcase.csv").stat().st_size / (1024**2),
+        'dataset_size_mb': (
+            Path("../data/specialized/pandas_showcase.csv").stat().st_size
+            / (1024**2)
+        ),
         'row_count': len(df),
         'load_time_seconds': load_time,
         'string_operations_time_seconds': string_time,
@@ -98,7 +105,7 @@ def pandas_specialized_benchmark():
     
     print(f"Pandas specialized benchmark completed in {total_time:.2f} seconds")
     print(f"String operations: {string_time:.2f}s")
-    print(f"DateTime operations: {datetime_time:.2f}s") 
+    print(f"DateTime operations: {datetime_time:.2f}s")
     print(f"Missing data handling: {missing_time:.2f}s")
     return metrics
 
@@ -181,7 +188,10 @@ def pyarrow_specialized_benchmark():
     
     metrics = {
         'technology': 'pyarrow_specialized',
-        'dataset_size_mb': Path("../data/specialized/pyarrow_showcase.csv").stat().st_size / (1024**2),
+        'dataset_size_mb': (
+            Path("../data/specialized/pyarrow_showcase.csv").stat().st_size
+            / (1024**2)
+        ),
         'row_count': len(table),
         'load_time_seconds': load_time,
         'filtering_time_seconds': filter_time,
@@ -318,7 +328,10 @@ def polars_specialized_benchmark():
     
     metrics = {
         'technology': 'polars_specialized',
-        'dataset_size_mb': Path("../data/specialized/polars_showcase.csv").stat().st_size / (1024**2),
+        'dataset_size_mb': (
+            Path("../data/specialized/polars_showcase.csv").stat().st_size
+            / (1024**2)
+        ),
         'row_count': len(df),
         'load_time_seconds': load_time,
         'complex_query_time_seconds': query_time,
