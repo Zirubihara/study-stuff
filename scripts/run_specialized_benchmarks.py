@@ -249,7 +249,7 @@ def polars_specialized_benchmark():
         df.lazy()
         .with_columns([
             pl.col("timestamp").str.to_datetime().alias("datetime"),
-            (pl.col("temperature") * 9/5 + 32).alias("temp_fahrenheit"),
+            (pl.col("temperature") * 9 / 5 + 32).alias("temp_fahrenheit"),
             pl.when(pl.col("battery_level") < 20).then("low")
             .when(pl.col("battery_level") < 50).then("medium")
             .otherwise("high").alias("battery_status")
@@ -284,10 +284,17 @@ def polars_specialized_benchmark():
         df_with_time
         .sort("datetime")
         .with_columns([
-            pl.col("measurement_value").rolling_mean(window_size=10).alias("rolling_avg_10"),
-            pl.col("temperature").rolling_std(window_size=5).alias("temp_volatility"),
+            pl.col("measurement_value")
+            .rolling_mean(window_size=10)
+            .alias("rolling_avg_10"),
+            pl.col("temperature")
+            .rolling_std(window_size=5)
+            .alias("temp_volatility"),
             pl.col("measurement_value").shift(1).alias("prev_measurement"),
-            (pl.col("measurement_value") - pl.col("measurement_value").shift(1)).alias("measurement_diff")
+            (
+                pl.col("measurement_value")
+                - pl.col("measurement_value").shift(1)
+            ).alias("measurement_diff")
         ])
     )
     timeseries_time = time.time() - timeseries_start
@@ -297,12 +304,18 @@ def polars_specialized_benchmark():
     device_summary = (
         df.group_by("device_id")
         .agg([
-            pl.col("measurement_value").quantile(0.95).alias("p95_measurement"),
+            pl.col("measurement_value")
+            .quantile(0.95)
+            .alias("p95_measurement"),
             pl.col("battery_level").first().alias("initial_battery"),
             pl.col("battery_level").last().alias("final_battery"),
             pl.col("temperature").std().alias("temp_stability"),
             pl.col("quality_score").mean().alias("avg_quality"),
-            pl.when(pl.col("error_code") > 0).then(1).otherwise(0).sum().alias("error_count")
+            pl.when(pl.col("error_code") > 0)
+            .then(1)
+            .otherwise(0)
+            .sum()
+            .alias("error_count")
         ])
     )
     agg_time = time.time() - agg_start
@@ -383,14 +396,16 @@ def run_specialized_benchmark(script_path, technology_name):
 
         if result.returncode == 0:
             print(
-                f"SUCCESS: {technology_name} completed in {execution_time:.2f} seconds"
+                f"SUCCESS: {technology_name} completed in "
+                f"{execution_time:.2f} seconds"
             )
             if result.stdout:
                 print("Output:")
                 print(result.stdout)
         else:
             print(
-                f"FAILED: {technology_name} failed with return code {result.returncode}"
+                f"FAILED: {technology_name} failed with return code "
+                f"{result.returncode}"
             )
             print("Error:", result.stderr)
             if result.stdout:
@@ -427,8 +442,13 @@ def main():
 
     for tech_name, script_creator in benchmarks:
         script_path = script_creator()
-        success, exec_time = run_specialized_benchmark(script_path, tech_name)
-        results[tech_name.lower()] = {"success": success, "execution_time": exec_time}
+        success, exec_time = run_specialized_benchmark(
+            script_path, tech_name
+        )
+        results[tech_name.lower()] = {
+            "success": success,
+            "execution_time": exec_time
+        }
 
     total_time = time.time() - total_start
 
@@ -440,7 +460,8 @@ def main():
     for tech_name, result in results.items():
         status = "SUCCESS" if result["success"] else "FAILED"
         print(
-            f"{tech_name.upper():15} | {status:10} | {result['execution_time']:8.2f}s"
+            f"{tech_name.upper():15} | {status:10} | "
+            f"{result['execution_time']:8.2f}s"
         )
 
     print(f"\\nTotal benchmark time: {total_time:.2f} seconds")
@@ -449,7 +470,9 @@ def main():
     print("- ../results/pyarrow_specialized_metrics.json")
     print("- ../results/polars_specialized_metrics.json")
 
-    print("\\nThese benchmarks showcase each technology's optimal use cases!")
+    print(
+        "\\nThese benchmarks showcase each technology's optimal use cases!"
+    )
 
 
 if __name__ == "__main__":
