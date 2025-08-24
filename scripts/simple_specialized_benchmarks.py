@@ -9,7 +9,6 @@ from pathlib import Path
 
 import pandas as pd
 import polars as pl
-import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.csv as csv
 
@@ -67,7 +66,7 @@ def pandas_strength_benchmark():
 
     # COMPLEX PIVOT OPERATIONS (Pandas specialty)
     pivot_start = time.time()
-    salary_pivot = pd.pivot_table(
+    _ = pd.pivot_table(
         df,
         values="salary_filled",
         index="department",
@@ -126,12 +125,12 @@ def pyarrow_strength_benchmark():
     # Revenue calculations
     net_amount = pc.subtract(table["total_amount"], table["discount"])
     final_amount = pc.add(net_amount, table["tax"])
-    profit_margin = pc.divide(table["discount"], table["total_amount"])
+    _ = pc.divide(table["discount"], table["total_amount"])
 
     # Statistical computations
-    total_revenue = pc.sum(final_amount)
-    avg_transaction = pc.mean(table["total_amount"])
-    transaction_std = pc.stddev(table["total_amount"])
+    _ = pc.sum(final_amount)
+    _ = pc.mean(table["total_amount"])
+    _ = pc.stddev(table["total_amount"])
     compute_time = time.time() - compute_start
     print(f"SUCCESS: Vectorized computations: {compute_time:.2f}s")
 
@@ -151,7 +150,7 @@ def pyarrow_strength_benchmark():
 
     # COLUMNAR SORTING (PyArrow specialty)
     sort_start = time.time()
-    sorted_table = table.sort_by(
+    _ = table.sort_by(
         [("total_amount", "descending"), ("customer_score", "descending")]
     )
     sort_time = time.time() - sort_start
@@ -229,7 +228,7 @@ def polars_strength_benchmark():
         "dt"
     )
 
-    windowed = ts_df.with_columns(
+    _ = ts_df.with_columns(
         [
             pl.col("measurement_value")
             .rolling_mean(window_size=100)
@@ -264,7 +263,7 @@ def polars_strength_benchmark():
 
     # CATEGORICAL OPERATIONS (Polars specialty)
     categorical_start = time.time()
-    sensor_summary = (
+    _ = (
         df.with_columns(
             [
                 pl.col("sensor_type").cast(pl.Categorical),

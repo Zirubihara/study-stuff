@@ -14,7 +14,7 @@ matplotlib.use("Agg")  # Use non-interactive backend
 # Set professional styling
 try:
     plt.style.use("seaborn-v0_8")
-except:
+except Exception:
     plt.style.use("default")
 
 plt.rcParams["figure.figsize"] = (12, 8)
@@ -401,12 +401,11 @@ def generate_all_visualizations():
     # Check if matplotlib is available
     try:
         import matplotlib.pyplot as plt
-        import seaborn as sns
 
         # Set seaborn style
         try:
             plt.style.use("seaborn-v0_8")
-        except:
+        except Exception:
             plt.style.use("default")
 
         create_execution_time_comparison()

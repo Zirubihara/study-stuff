@@ -3,7 +3,6 @@
 Simple progress checker for the comprehensive benchmark.
 """
 
-import os
 import time
 from pathlib import Path
 
@@ -42,13 +41,13 @@ def check_benchmark_progress():
             else:
                 print(f"  [ ] {pattern}: Not completed yet")
 
-    print(f"\nOVERALL PROGRESS:")
+    print("\nOVERALL PROGRESS:")
     print(
         f"   {found_count}/{total_expected} tests completed ({found_count/total_expected*100:.1f}%)"
     )
 
     # Check if benchmark process is still running
-    print(f"\nPROCESS STATUS:")
+    print("\nPROCESS STATUS:")
     try:
         # Simple check - look at recent file modifications
         recent_files = []
@@ -61,7 +60,7 @@ def check_benchmark_progress():
             print(f"   [ACTIVE] {len(recent_files)} files modified recently")
             print(f"   Latest: {recent_files[-1] if recent_files else 'None'}")
         else:
-            print(f"   [IDLE] No recent file activity (may be processing)")
+            print("   [IDLE] No recent file activity (may be processing)")
 
     except Exception as e:
         print(f"   [ERROR] Could not check file activity: {e}")
