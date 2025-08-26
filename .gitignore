@@ -170,5 +170,38 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Data files
-*.csv
+# Keep data files and results for study tracking
+
+# Spark temporary files
+spark-warehouse/
+.spark/
+metastore_db/
+derby.log
+
+# Dask temporary files
+dask-worker-space/
+.dask/
+
+# Jupyter notebook outputs
+*.ipynb_checkpoints
+
+# System files
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.directory
+.Trash-*
+
+# Performance profiling
+*.prof
+*.pstats
