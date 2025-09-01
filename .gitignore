@@ -170,7 +170,17 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Keep data files and results for study tracking
+# Large CSV data files (keep local, exclude from Git)
+data/benchmark_100m.csv
+data/benchmark_50m.csv
+data/benchmark_10m.csv
+data/benchmark_5m.csv
+data/large_data.csv
+data/specialized/polars_showcase.csv
+data/specialized/pyarrow_showcase.csv
+data/specialized/spark_showcase.csv
+
+# Keep small data files and results for study tracking
 
 # Spark temporary files
 spark-warehouse/
