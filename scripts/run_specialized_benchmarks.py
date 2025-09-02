@@ -442,13 +442,8 @@ def main():
 
     for tech_name, script_creator in benchmarks:
         script_path = script_creator()
-        success, exec_time = run_specialized_benchmark(
-            script_path, tech_name
-        )
-        results[tech_name.lower()] = {
-            "success": success,
-            "execution_time": exec_time
-        }
+        success, exec_time = run_specialized_benchmark(script_path, tech_name)
+        results[tech_name.lower()] = {"success": success, "execution_time": exec_time}
 
     total_time = time.time() - total_start
 
@@ -470,9 +465,7 @@ def main():
     print("- ../results/pyarrow_specialized_metrics.json")
     print("- ../results/polars_specialized_metrics.json")
 
-    print(
-        "\\nThese benchmarks showcase each technology's optimal use cases!"
-    )
+    print("\\nThese benchmarks showcase each technology's optimal use cases!")
 
 
 if __name__ == "__main__":
