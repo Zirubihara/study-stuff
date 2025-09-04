@@ -52,33 +52,45 @@ pip install -r requirements.txt
 
 ```
 study-stuff/
-├── scripts/                           # All Python scripts
+├── scripts/                           # All Python scripts (30+ files)
 │   ├── all.py                         # Unified implementation with all processors
 │   ├── pandas-usage.py                # Pandas-specific implementation
 │   ├── polars-usage.py                # Polars-specific implementation  
 │   ├── pyarrow-usage.py               # PyArrow-specific implementation
 │   ├── dask-usage.py                  # Dask-specific implementation
 │   ├── pyspark-usage.py               # PySpark-specific implementation
-│   ├── simple_specialized_benchmarks.py # Specialized strength showcases
-│   ├── generate_sample_data.py        # Generate test data files
-│   ├── generate_large_data.py         # Generate large datasets
+│   ├── pyspark-usage-compatible.py    # PySpark implementation (compatible version)
+│   ├── run_specialized_benchmarks.py  # Specialized strength showcases
+│   ├── simple_specialized_benchmarks.py # Simple specialized benchmarks
+│   ├── generate_sample_data.py        # Generate basic test data (50K rows)
+│   ├── generate_large_data.py         # Generate standard datasets
+│   ├── generate_big_datasets.py       # Generate 1M, 5M, 10M datasets
+│   ├── generate_50m_dataset.py        # Generate 50M row dataset
+│   ├── generate_massive_data.py       # Generate ultra-massive datasets
+│   ├── generate_specialized_datasets.py # Generate technology-optimized datasets
+│   ├── run_benchmarks.py              # Basic benchmark runner
+│   ├── run_1m_only.py                 # Run 1M row benchmarks only
+│   ├── run_1m_10m_benchmark.py        # Run 1M and 10M benchmarks
+│   ├── run_5m_benchmark.py            # Run 5M row benchmarks
+│   ├── run_50m_benchmark.py           # Run 50M row benchmarks
+│   ├── run_100m_benchmark.py          # Run 100M row benchmarks
 │   ├── create_simple_charts.py        # Generate simple charts
-│   └── visualize_results.py           # Generate detailed visualizations
-├── data/                              # CSV data files
-│   ├── sample_data.csv                # 50K rows test data
-│   ├── benchmark_1m.csv               # 1M rows (small dataset)
-│   ├── benchmark_5m.csv               # 5M rows (medium dataset)
-│   ├── benchmark_10m.csv              # 10M rows (large dataset)
-│   ├── benchmark_50m.csv              # 50M rows (~1GB, massive)
-│   ├── benchmark_100m.csv             # 100M rows (ultra-massive)
-│   └── specialized/                   # Specialized datasets optimized for each technology
-│       ├── pandas_showcase.csv        # 500K rows: Complex employee records
-│       ├── pyarrow_showcase.csv       # 5M rows: Pure numerical transactions  
-│       ├── polars_showcase.csv        # 2M rows: IoT timeseries sensor data
-│       ├── spark_showcase.csv         # 20M rows: Retail sales & customer data
-│       └── dask_showcase.csv          # 10M rows: Scientific experiment data
-├── results/                           # Performance metrics JSON files
-├── charts/                            # Generated charts and visualizations
+│   ├── visualize_results.py           # Generate detailed visualizations
+│   └── check_progress.py              # Monitor benchmark progress
+├── data/                              # CSV data files (~3.6GB total)
+│   ├── sample_data.csv                # 50K rows test data (~1.5MB)
+│   ├── benchmark_5m.csv               # 5M rows (medium, ~150MB)
+│   ├── benchmark_10m.csv              # 10M rows (large, ~300MB)
+│   ├── benchmark_100m.csv             # 100M rows (ultra-massive, ~3GB)
+│   └── specialized/                   # Technology-optimized datasets
+├── results/                           # Performance metrics JSON files (40+ files)
+│   ├── performance_metrics_*.json     # Standard benchmark results
+│   ├── *_specialized_metrics.json     # Technology-specific results
+│   └── specialized_strength_comparison.json # Cross-technology comparison
+├── charts/                            # Generated charts and visualizations (10+ PNG files)
+│   ├── *_comparison.png               # Performance comparison charts
+│   ├── *_analysis.png                 # Scalability and operation analysis
+│   └── *_rankings.png                 # Technology ranking visualizations
 ├── requirements.txt                   # Python dependencies
 ├── README.md                          # This file
 ├── CLAUDE.md                          # Project context for Claude Code
@@ -97,11 +109,14 @@ cd scripts
 # Generate basic test data
 python generate_sample_data.py
 
-# Generate large benchmark datasets (1M, 5M, 10M rows)
-python generate_large_data.py
+# Generate standard benchmark datasets
+python generate_large_data.py        # Creates basic datasets
+python generate_big_datasets.py      # Creates 1M, 5M, 10M row datasets
+python generate_50m_dataset.py       # Creates 50M row dataset (~1.5GB)
+python generate_massive_data.py      # Creates 100M+ row datasets
 
-# Generate massive datasets for serious testing
-python generate_big_datasets.py      # Creates 50M and 100M row datasets
+# Generate specialized datasets optimized for each technology
+python generate_specialized_datasets.py
 ```
 
 ### Standard Benchmarks
@@ -125,8 +140,18 @@ python all.py
 Run technology-specific strength showcases:
 
 ```bash
-# Showcases each technology's optimal use cases
+# Run comprehensive specialized benchmarks
+python run_specialized_benchmarks.py
+
+# Run simple specialized benchmarks
 python simple_specialized_benchmarks.py
+
+# Run specific dataset size benchmarks
+python run_1m_only.py               # 1M rows only
+python run_1m_10m_benchmark.py       # 1M and 10M rows
+python run_5m_benchmark.py           # 5M rows
+python run_50m_benchmark.py          # 50M rows
+python run_100m_benchmark.py         # 100M rows
 ```
 
 #### Specialized Dataset Details
@@ -240,12 +265,12 @@ Each technology excels in different scenarios:
 
 The project includes multiple dataset sizes for comprehensive testing:
 
-- **50K rows**: Quick testing and development
-- **1M rows (30MB)**: Small dataset comparison
-- **5M rows (150MB)**: Medium dataset for balanced testing
-- **10M rows (300MB)**: Large dataset where differences emerge
-- **50M rows (~1GB)**: Massive dataset for Spark advantages
-- **100M rows (~2GB)**: Ultra-massive for serious big data testing
+- **50K rows (~1.5MB)**: Quick testing and development
+- **5M rows (~150MB)**: Medium dataset for balanced testing
+- **10M rows (~300MB)**: Large dataset where differences emerge
+- **100M rows (~3GB)**: Ultra-massive for serious big data testing
+
+**Note**: Current available datasets are optimized for the actual system capabilities and storage constraints.
 
 ### Results Files
 
