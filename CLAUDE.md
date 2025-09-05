@@ -37,7 +37,7 @@ study-stuff/
 │   ├── benchmark_10m.csv              # 10M rows (large, ~300MB)
 │   ├── benchmark_100m.csv             # 100M rows (ultra-massive, ~3GB)
 │   └── specialized/                   # Technology-optimized datasets
-├── results/                           # Performance metrics JSON files (40+ files)
+├── results/                           # Performance metrics JSON files (51 files)
 │   ├── performance_metrics_*.json     # Standard benchmark results
 │   ├── *_specialized_metrics.json     # Technology-specific results
 │   └── specialized_strength_comparison.json # Cross-technology comparison
