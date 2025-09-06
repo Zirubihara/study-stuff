@@ -41,7 +41,7 @@ study-stuff/
 │   ├── performance_metrics_*.json     # Standard benchmark results
 │   ├── *_specialized_metrics.json     # Technology-specific results
 │   └── specialized_strength_comparison.json # Cross-technology comparison
-├── charts/                            # Generated charts and visualizations (10+ PNG files)
+├── charts/                            # Generated charts and visualizations (10 PNG files)
 │   ├── *_comparison.png               # Performance comparison charts
 │   ├── *_analysis.png                 # Scalability and operation analysis
 │   └── *_rankings.png                 # Technology ranking visualizations
@@ -139,7 +139,7 @@ No specific test framework is configured. To test:
 - Results are saved to ../results/ directory
 - Charts are saved to ../charts/ directory
 - **Spark performs best with massive datasets (100M+ rows, 3GB+)** - smaller datasets may not show Spark's distributed processing advantages
-- Current project has 40+ performance result files and 10+ visualization charts
+- Current project has 51 performance result files and 10 visualization charts
 - Specialized datasets available in data/specialized/ directory for technology-specific benchmarking
 - Dask and Spark implementations may require additional configuration for very large datasets
 - Performance varies significantly based on data size and system resources

@@ -87,7 +87,7 @@ study-stuff/
 │   ├── performance_metrics_*.json     # Standard benchmark results
 │   ├── *_specialized_metrics.json     # Technology-specific results
 │   └── specialized_strength_comparison.json # Cross-technology comparison
-├── charts/                            # Generated charts and visualizations (10+ PNG files)
+├── charts/                            # Generated charts and visualizations (10 PNG files)
 │   ├── *_comparison.png               # Performance comparison charts
 │   ├── *_analysis.png                 # Scalability and operation analysis
 │   └── *_rankings.png                 # Technology ranking visualizations
