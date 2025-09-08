@@ -6,7 +6,7 @@ This project benchmarks different Python data processing libraries (Pandas, Pola
 ## Project Structure
 ```
 study-stuff/
-├── scripts/                           # All Python scripts (30+ files)
+├── scripts/                           # All Python scripts (27 files)
 │   ├── all.py                         # Unified implementation with all processors
 │   ├── pandas-usage.py                # Pandas-specific implementation
 │   ├── polars-usage.py                # Polars-specific implementation  
