@@ -5,7 +5,8 @@
       "Bash(mv:*)",
       "Bash(python:*)",
       "Bash(where java)",
-      "Bash(flake8:*)"
+      "Bash(flake8:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }
