@@ -15,21 +15,25 @@ study-stuff/
 │   │   ├── generate_datasets_100m_plus.py     # Generate ultra-massive datasets
 │   │   └── generate_optimized_datasets.py     # Generate technology-optimized datasets
 │   ├── benchmarks/                           # Benchmark implementations and runners
-│   │   ├── benchmark_all_libraries.py         # Unified implementation with all processors
-│   │   ├── benchmark_pandas_implementation.py # Pandas-specific implementation
-│   │   ├── benchmark_polars_implementation.py # Polars-specific implementation  
-│   │   ├── benchmark_pyarrow_implementation.py # PyArrow-specific implementation
-│   │   ├── benchmark_dask_implementation.py   # Dask-specific implementation
-│   │   ├── benchmark_pyspark_implementation.py # PySpark-specific implementation
-│   │   ├── benchmark_pyspark_compatible.py    # PySpark implementation (compatible version)
-│   │   ├── benchmark_runner_basic.py          # Basic benchmark runner
-│   │   ├── benchmark_runner_specialized.py    # Main specialized benchmark runner
-│   │   ├── benchmark_strength_comparison.py   # Simple specialized benchmarks
-│   │   ├── benchmark_1million_only.py         # Run 1M row benchmarks only
-│   │   ├── benchmark_1m_10m_comparison.py     # Run 1M and 10M benchmarks
-│   │   ├── benchmark_5million_dataset.py      # Run 5M row benchmarks
-│   │   ├── benchmark_50million_dataset.py     # Run 50M row benchmarks
-│   │   └── benchmark_100million_dataset.py    # Run 100M row benchmarks
+│   │   ├── implementations/                   # Individual library implementations
+│   │   │   ├── benchmark_pandas_implementation.py # Pandas-specific implementation
+│   │   │   ├── benchmark_polars_implementation.py # Polars-specific implementation  
+│   │   │   ├── benchmark_pyarrow_implementation.py # PyArrow-specific implementation
+│   │   │   ├── benchmark_dask_implementation.py   # Dask-specific implementation
+│   │   │   ├── benchmark_pyspark_implementation.py # PySpark-specific implementation
+│   │   │   └── benchmark_pyspark_compatible.py    # PySpark implementation (compatible version)
+│   │   ├── runners/                          # Benchmark runners and orchestration
+│   │   │   ├── benchmark_runner_basic.py      # Basic benchmark runner
+│   │   │   ├── benchmark_runner_specialized.py # Main specialized benchmark runner
+│   │   │   └── benchmark_strength_comparison.py # Simple specialized benchmarks
+│   │   ├── dataset_specific/                 # Dataset size-specific benchmarks
+│   │   │   ├── benchmark_1million_only.py     # Run 1M row benchmarks only
+│   │   │   ├── benchmark_1m_10m_comparison.py # Run 1M and 10M benchmarks
+│   │   │   ├── benchmark_5million_dataset.py  # Run 5M row benchmarks
+│   │   │   ├── benchmark_50million_dataset.py # Run 50M row benchmarks
+│   │   │   └── benchmark_100million_dataset.py # Run 100M row benchmarks
+│   │   └── unified/                          # All-libraries unified benchmarks
+│   │       └── benchmark_all_libraries.py     # Unified implementation with all processors
 │   ├── visualization/                         # Chart and visualization creation
 │   │   ├── create_presentation_charts.py      # Generate simple charts
 │   │   └── create_detailed_visualizations.py  # Generate detailed visualizations
@@ -91,22 +95,25 @@ python generate_dataset_50million.py       # Creates 50M row dataset (~1.5GB)
 python generate_datasets_100m_plus.py      # Creates 100M+ row datasets
 python generate_optimized_datasets.py      # Creates technology-optimized datasets
 
-# Run individual implementations (from benchmarks subdirectory)
-cd ../benchmarks
+# Run individual implementations (from benchmarks/implementations subdirectory)
+cd ../benchmarks/implementations
 python benchmark_pandas_implementation.py
 python benchmark_polars_implementation.py
 python benchmark_pyarrow_implementation.py
 python benchmark_dask_implementation.py
 python benchmark_pyspark_implementation.py
 
-# Run all implementations (unified)
+# Run all implementations (unified from benchmarks/unified subdirectory)
+cd ../unified
 python benchmark_all_libraries.py
 
-# Run specialized benchmarks
+# Run specialized benchmarks (from benchmarks/runners subdirectory)
+cd ../runners
 python benchmark_runner_specialized.py     # Main specialized benchmark runner
 python benchmark_strength_comparison.py    # Simple specialized benchmarks
 
-# Run specific dataset size benchmarks
+# Run specific dataset size benchmarks (from benchmarks/dataset_specific subdirectory)
+cd ../dataset_specific
 python benchmark_1million_only.py          # 1M rows only
 python benchmark_1m_10m_comparison.py      # 1M and 10M rows
 python benchmark_5million_dataset.py       # 5M rows
@@ -114,7 +121,7 @@ python benchmark_50million_dataset.py      # 50M rows
 python benchmark_100million_dataset.py     # 100M rows
 
 # Generate visualizations (from visualization subdirectory)
-cd ../visualization
+cd ../../visualization
 python create_presentation_charts.py       # Simple charts for thesis
 python create_detailed_visualizations.py   # Detailed analysis charts
 
@@ -142,11 +149,15 @@ No specific test framework is configured. To test:
 ## Notes
 - Scripts are now organized into logical subfolders for better project management
 - Data generation scripts are in scripts/data_generation/
-- Benchmark scripts are in scripts/benchmarks/
+- Benchmark scripts are organized in scripts/benchmarks/ with subfolders:
+  - implementations/ (individual library benchmarks)
+  - runners/ (benchmark orchestration)
+  - dataset_specific/ (size-specific benchmarks)
+  - unified/ (all-libraries benchmarks)
 - Visualization scripts are in scripts/visualization/
 - Monitoring scripts are in scripts/monitoring/
 - Data files are automatically saved to ../../data/ directory (from subfolders)
-- Results are saved to ../../results/ directory (from subfolders)
+- Results are saved to ../../results/ directory (from subfolders)  
 - Charts are saved to ../../charts/ directory (from subfolders)
 - **Spark performs best with massive datasets (100M+ rows, 3GB+)** - smaller datasets may not show Spark's distributed processing advantages
 - Current project has 51 performance result files and 10 visualization charts
