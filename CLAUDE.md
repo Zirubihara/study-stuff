@@ -6,31 +6,35 @@ This project benchmarks different Python data processing libraries (Pandas, Pola
 ## Project Structure
 ```
 study-stuff/
-├── scripts/                                    # All Python scripts (24 files)
-│   ├── benchmark_all_libraries.py             # Unified implementation with all processors
-│   ├── benchmark_pandas_implementation.py     # Pandas-specific implementation
-│   ├── benchmark_polars_implementation.py     # Polars-specific implementation  
-│   ├── benchmark_pyarrow_implementation.py    # PyArrow-specific implementation
-│   ├── benchmark_dask_implementation.py       # Dask-specific implementation
-│   ├── benchmark_pyspark_implementation.py    # PySpark-specific implementation
-│   ├── benchmark_pyspark_compatible.py        # PySpark implementation (compatible version)
-│   ├── benchmark_runner_specialized.py        # Main specialized benchmark runner
-│   ├── benchmark_strength_comparison.py       # Simple specialized benchmarks
-│   ├── generate_test_data_50k.py              # Generate basic test data (50K rows)
-│   ├── generate_standard_datasets.py          # Generate standard datasets
-│   ├── generate_datasets_1m_5m_10m.py         # Generate 1M, 5M, 10M datasets
-│   ├── generate_dataset_50million.py          # Generate 50M row dataset
-│   ├── generate_datasets_100m_plus.py         # Generate ultra-massive datasets
-│   ├── generate_optimized_datasets.py         # Generate technology-optimized datasets
-│   ├── benchmark_runner_basic.py              # Basic benchmark runner
-│   ├── benchmark_1million_only.py             # Run 1M row benchmarks only
-│   ├── benchmark_1m_10m_comparison.py         # Run 1M and 10M benchmarks
-│   ├── benchmark_5million_dataset.py          # Run 5M row benchmarks
-│   ├── benchmark_50million_dataset.py         # Run 50M row benchmarks
-│   ├── benchmark_100million_dataset.py        # Run 100M row benchmarks
-│   ├── create_presentation_charts.py          # Generate simple charts
-│   ├── create_detailed_visualizations.py      # Generate detailed visualizations
-│   └── monitor_benchmark_progress.py          # Monitor benchmark progress
+├── scripts/                                    # Organized Python scripts (24 files)
+│   ├── data_generation/                       # Data generation scripts
+│   │   ├── generate_test_data_50k.py          # Generate basic test data (50K rows)
+│   │   ├── generate_standard_datasets.py      # Generate standard datasets
+│   │   ├── generate_datasets_1m_5m_10m.py     # Generate 1M, 5M, 10M datasets
+│   │   ├── generate_dataset_50million.py      # Generate 50M row dataset
+│   │   ├── generate_datasets_100m_plus.py     # Generate ultra-massive datasets
+│   │   └── generate_optimized_datasets.py     # Generate technology-optimized datasets
+│   ├── benchmarks/                           # Benchmark implementations and runners
+│   │   ├── benchmark_all_libraries.py         # Unified implementation with all processors
+│   │   ├── benchmark_pandas_implementation.py # Pandas-specific implementation
+│   │   ├── benchmark_polars_implementation.py # Polars-specific implementation  
+│   │   ├── benchmark_pyarrow_implementation.py # PyArrow-specific implementation
+│   │   ├── benchmark_dask_implementation.py   # Dask-specific implementation
+│   │   ├── benchmark_pyspark_implementation.py # PySpark-specific implementation
+│   │   ├── benchmark_pyspark_compatible.py    # PySpark implementation (compatible version)
+│   │   ├── benchmark_runner_basic.py          # Basic benchmark runner
+│   │   ├── benchmark_runner_specialized.py    # Main specialized benchmark runner
+│   │   ├── benchmark_strength_comparison.py   # Simple specialized benchmarks
+│   │   ├── benchmark_1million_only.py         # Run 1M row benchmarks only
+│   │   ├── benchmark_1m_10m_comparison.py     # Run 1M and 10M benchmarks
+│   │   ├── benchmark_5million_dataset.py      # Run 5M row benchmarks
+│   │   ├── benchmark_50million_dataset.py     # Run 50M row benchmarks
+│   │   └── benchmark_100million_dataset.py    # Run 100M row benchmarks
+│   ├── visualization/                         # Chart and visualization creation
+│   │   ├── create_presentation_charts.py      # Generate simple charts
+│   │   └── create_detailed_visualizations.py  # Generate detailed visualizations
+│   └── monitoring/                           # Monitoring and utilities
+│       └── monitor_benchmark_progress.py      # Monitor benchmark progress
 ├── data/                              # CSV data files (~3.6GB total)
 │   ├── sample_data.csv                # 50K rows test data (~1.5MB)
 │   ├── benchmark_5m.csv               # 5M rows (medium, ~150MB)
@@ -79,7 +83,7 @@ The CSV files processed have these columns:
 pip install -r requirements.txt
 
 # Generate data files (from scripts directory)
-cd scripts
+cd scripts/data_generation
 python generate_test_data_50k.py           # Creates 50K row sample
 python generate_standard_datasets.py       # Creates standard datasets
 python generate_datasets_1m_5m_10m.py      # Creates 1M, 5M, 10M row datasets
@@ -87,7 +91,8 @@ python generate_dataset_50million.py       # Creates 50M row dataset (~1.5GB)
 python generate_datasets_100m_plus.py      # Creates 100M+ row datasets
 python generate_optimized_datasets.py      # Creates technology-optimized datasets
 
-# Run individual implementations (from scripts directory)
+# Run individual implementations (from benchmarks subdirectory)
+cd ../benchmarks
 python benchmark_pandas_implementation.py
 python benchmark_polars_implementation.py
 python benchmark_pyarrow_implementation.py
@@ -108,11 +113,13 @@ python benchmark_5million_dataset.py       # 5M rows
 python benchmark_50million_dataset.py      # 50M rows
 python benchmark_100million_dataset.py     # 100M rows
 
-# Generate visualizations
+# Generate visualizations (from visualization subdirectory)
+cd ../visualization
 python create_presentation_charts.py       # Simple charts for thesis
 python create_detailed_visualizations.py   # Detailed analysis charts
 
-# Monitor progress
+# Monitor progress (from monitoring subdirectory)
+cd ../monitoring
 python monitor_benchmark_progress.py       # Check benchmark progress
 ```
 
@@ -133,11 +140,14 @@ No specific test framework is configured. To test:
 - **Recommendation**: Use 100M row dataset for Spark to see true big data performance benefits
 
 ## Notes
-- All file paths have been updated to use the organized directory structure
-- Scripts should be run from the scripts/ directory
-- Data files are automatically saved to ../data/ directory
-- Results are saved to ../results/ directory
-- Charts are saved to ../charts/ directory
+- Scripts are now organized into logical subfolders for better project management
+- Data generation scripts are in scripts/data_generation/
+- Benchmark scripts are in scripts/benchmarks/
+- Visualization scripts are in scripts/visualization/
+- Monitoring scripts are in scripts/monitoring/
+- Data files are automatically saved to ../../data/ directory (from subfolders)
+- Results are saved to ../../results/ directory (from subfolders)
+- Charts are saved to ../../charts/ directory (from subfolders)
 - **Spark performs best with massive datasets (100M+ rows, 3GB+)** - smaller datasets may not show Spark's distributed processing advantages
 - Current project has 51 performance result files and 10 visualization charts
 - Specialized datasets available in data/specialized/ directory for technology-specific benchmarking
