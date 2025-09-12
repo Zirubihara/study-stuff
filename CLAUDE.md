@@ -21,11 +21,11 @@ study-stuff/
 │   │   │   ├── benchmark_pyarrow_implementation.py # PyArrow-specific implementation
 │   │   │   ├── benchmark_dask_implementation.py   # Dask-specific implementation
 │   │   │   ├── benchmark_pyspark_implementation.py # PySpark-specific implementation
-│   │   │   └── benchmark_pyspark_compatible.py    # PySpark implementation (compatible version)
+│   │   │   └── benchmark_pyspark_optimized.py     # PySpark implementation (optimized version)
 │   │   ├── runners/                          # Benchmark runners and orchestration
-│   │   │   ├── benchmark_runner_basic.py      # Basic benchmark runner
-│   │   │   ├── benchmark_runner_specialized.py # Main specialized benchmark runner
-│   │   │   └── benchmark_strength_comparison.py # Simple specialized benchmarks
+│   │   │   ├── benchmark_runner_simple.py       # Simple benchmark runner
+│   │   │   ├── benchmark_runner_comprehensive.py # Main comprehensive benchmark runner
+│   │   │   └── benchmark_library_comparison.py   # Library comparison benchmarks
 │   │   ├── dataset_specific/                 # Dataset size-specific benchmarks
 │   │   │   ├── benchmark_1million_only.py     # Run 1M row benchmarks only
 │   │   │   ├── benchmark_1m_10m_comparison.py # Run 1M and 10M benchmarks
@@ -107,10 +107,10 @@ python benchmark_pyspark_implementation.py
 cd ../unified
 python benchmark_all_libraries.py
 
-# Run specialized benchmarks (from benchmarks/runners subdirectory)
+# Run comprehensive benchmarks (from benchmarks/runners subdirectory)
 cd ../runners
-python benchmark_runner_specialized.py     # Main specialized benchmark runner
-python benchmark_strength_comparison.py    # Simple specialized benchmarks
+python benchmark_runner_comprehensive.py   # Main comprehensive benchmark runner
+python benchmark_library_comparison.py     # Library comparison benchmarks
 
 # Run specific dataset size benchmarks (from benchmarks/dataset_specific subdirectory)
 cd ../dataset_specific
@@ -165,5 +165,5 @@ No specific test framework is configured. To test:
 - Dask and Spark implementations may require additional configuration for very large datasets
 - Performance varies significantly based on data size and system resources
 - Each implementation optimizes for different use cases (memory vs speed vs scalability)
-- Use benchmark_runner_specialized.py for comprehensive technology-specific testing
+- Use benchmark_runner_comprehensive.py for comprehensive technology-specific testing
 - Multiple benchmark runners available for different dataset sizes and use cases
