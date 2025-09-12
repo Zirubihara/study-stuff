@@ -52,31 +52,39 @@ pip install -r requirements.txt
 
 ```
 study-stuff/
-├── scripts/                           # All Python scripts (27 files)
-│   ├── all.py                         # Unified implementation with all processors
-│   ├── pandas-usage.py                # Pandas-specific implementation
-│   ├── polars-usage.py                # Polars-specific implementation  
-│   ├── pyarrow-usage.py               # PyArrow-specific implementation
-│   ├── dask-usage.py                  # Dask-specific implementation
-│   ├── pyspark-usage.py               # PySpark-specific implementation
-│   ├── pyspark-usage-compatible.py    # PySpark implementation (compatible version)
-│   ├── run_specialized_benchmarks.py  # Specialized strength showcases
-│   ├── simple_specialized_benchmarks.py # Simple specialized benchmarks
-│   ├── generate_sample_data.py        # Generate basic test data (50K rows)
-│   ├── generate_large_data.py         # Generate standard datasets
-│   ├── generate_big_datasets.py       # Generate 1M, 5M, 10M datasets
-│   ├── generate_50m_dataset.py        # Generate 50M row dataset
-│   ├── generate_massive_data.py       # Generate ultra-massive datasets
-│   ├── generate_specialized_datasets.py # Generate technology-optimized datasets
-│   ├── run_benchmarks.py              # Basic benchmark runner
-│   ├── run_1m_only.py                 # Run 1M row benchmarks only
-│   ├── run_1m_10m_benchmark.py        # Run 1M and 10M benchmarks
-│   ├── run_5m_benchmark.py            # Run 5M row benchmarks
-│   ├── run_50m_benchmark.py           # Run 50M row benchmarks
-│   ├── run_100m_benchmark.py          # Run 100M row benchmarks
-│   ├── create_simple_charts.py        # Generate simple charts
-│   ├── visualize_results.py           # Generate detailed visualizations
-│   └── check_progress.py              # Monitor benchmark progress
+├── scripts/                                    # Organized Python scripts (24 files)
+│   ├── data_generation/                       # Data generation scripts
+│   │   ├── generate_test_data_50k.py          # Generate basic test data (50K rows)
+│   │   ├── generate_standard_datasets.py      # Generate standard datasets
+│   │   ├── generate_datasets_1m_5m_10m.py     # Generate 1M, 5M, 10M datasets
+│   │   ├── generate_dataset_50million.py      # Generate 50M row dataset
+│   │   ├── generate_datasets_100m_plus.py     # Generate ultra-massive datasets
+│   │   └── generate_optimized_datasets.py     # Generate technology-optimized datasets
+│   ├── benchmarks/                           # Benchmark implementations and runners
+│   │   ├── implementations/                   # Individual library implementations
+│   │   │   ├── benchmark_pandas_implementation.py # Pandas-specific implementation
+│   │   │   ├── benchmark_polars_implementation.py # Polars-specific implementation  
+│   │   │   ├── benchmark_pyarrow_implementation.py # PyArrow-specific implementation
+│   │   │   ├── benchmark_dask_implementation.py   # Dask-specific implementation
+│   │   │   ├── benchmark_pyspark_implementation.py # PySpark-specific implementation
+│   │   │   └── benchmark_pyspark_optimized.py     # PySpark implementation (optimized version)
+│   │   ├── runners/                          # Benchmark runners and orchestration
+│   │   │   ├── benchmark_runner_simple.py       # Simple benchmark runner
+│   │   │   ├── benchmark_runner_comprehensive.py # Main comprehensive benchmark runner
+│   │   │   └── benchmark_library_comparison.py   # Library comparison benchmarks
+│   │   ├── dataset_specific/                 # Dataset size-specific benchmarks
+│   │   │   ├── benchmark_1million_only.py     # Run 1M row benchmarks only
+│   │   │   ├── benchmark_1m_10m_comparison.py # Run 1M and 10M benchmarks
+│   │   │   ├── benchmark_5million_dataset.py  # Run 5M row benchmarks
+│   │   │   ├── benchmark_50million_dataset.py # Run 50M row benchmarks
+│   │   │   └── benchmark_100million_dataset.py # Run 100M row benchmarks
+│   │   └── unified/                          # All-libraries unified benchmarks
+│   │       └── benchmark_all_libraries.py     # Unified implementation with all processors
+│   ├── visualization/                         # Chart and visualization creation
+│   │   ├── create_presentation_charts.py      # Generate simple charts
+│   │   └── create_detailed_visualizations.py  # Generate detailed visualizations
+│   └── monitoring/                           # Monitoring and utilities
+│       └── monitor_benchmark_progress.py      # Monitor benchmark progress
 ├── data/                              # CSV data files (~3.6GB total)
 │   ├── sample_data.csv                # 50K rows test data (~1.5MB)
 │   ├── benchmark_5m.csv               # 5M rows (medium, ~150MB)
@@ -101,38 +109,41 @@ study-stuff/
 
 ### Data Generation
 
-First, generate the datasets (run from the scripts directory):
+First, generate the datasets (run from the scripts/data_generation directory):
 
 ```bash
-cd scripts
+cd scripts/data_generation
 
 # Generate basic test data
-python generate_sample_data.py
+python generate_test_data_50k.py
 
 # Generate standard benchmark datasets
-python generate_large_data.py        # Creates basic datasets
-python generate_big_datasets.py      # Creates 1M, 5M, 10M row datasets
-python generate_50m_dataset.py       # Creates 50M row dataset (~1.5GB)
-python generate_massive_data.py      # Creates 100M+ row datasets
+python generate_standard_datasets.py      # Creates basic datasets
+python generate_datasets_1m_5m_10m.py     # Creates 1M, 5M, 10M row datasets
+python generate_dataset_50million.py      # Creates 50M row dataset (~1.5GB)
+python generate_datasets_100m_plus.py     # Creates 100M+ row datasets
 
 # Generate specialized datasets optimized for each technology
-python generate_specialized_datasets.py
+python generate_optimized_datasets.py
 ```
 
 ### Standard Benchmarks
 
-Run individual implementations (from scripts directory):
+Run individual implementations (from scripts/benchmarks/implementations directory):
 
 ```bash
-# Individual implementations
-python pandas-usage.py
-python polars-usage.py
-python pyarrow-usage.py
-python dask-usage.py
-python pyspark-usage.py
+cd ../benchmarks/implementations
 
-# All implementations together
-python all.py
+# Individual implementations
+python benchmark_pandas_implementation.py
+python benchmark_polars_implementation.py
+python benchmark_pyarrow_implementation.py
+python benchmark_dask_implementation.py
+python benchmark_pyspark_implementation.py
+
+# All implementations together (from unified directory)
+cd ../unified
+python benchmark_all_libraries.py
 ```
 
 ### Specialized Benchmarks
@@ -140,18 +151,18 @@ python all.py
 Run technology-specific strength showcases:
 
 ```bash
-# Run comprehensive specialized benchmarks
-python run_specialized_benchmarks.py
+# Run comprehensive benchmarks (from runners directory)
+cd ../runners
+python benchmark_runner_comprehensive.py   # Main comprehensive benchmark runner
+python benchmark_library_comparison.py     # Library comparison benchmarks
 
-# Run simple specialized benchmarks
-python simple_specialized_benchmarks.py
-
-# Run specific dataset size benchmarks
-python run_1m_only.py               # 1M rows only
-python run_1m_10m_benchmark.py       # 1M and 10M rows
-python run_5m_benchmark.py           # 5M rows
-python run_50m_benchmark.py          # 50M rows
-python run_100m_benchmark.py         # 100M rows
+# Run specific dataset size benchmarks (from dataset_specific directory)
+cd ../dataset_specific
+python benchmark_1million_only.py          # 1M rows only
+python benchmark_1m_10m_comparison.py      # 1M and 10M rows
+python benchmark_5million_dataset.py       # 5M rows
+python benchmark_50million_dataset.py      # 50M rows
+python benchmark_100million_dataset.py     # 100M rows
 ```
 
 #### Specialized Dataset Details
@@ -185,21 +196,23 @@ Each technology is tested on data optimized for its specific strengths:
 
 ### Visualization
 
-Generate charts and analysis:
+Generate charts and analysis (from visualization directory):
 
 ```bash
+cd ../../visualization
+
 # Simple charts for presentations
-python create_simple_charts.py
+python create_presentation_charts.py
 
 # Detailed analysis and comparisons
-python visualize_results.py
+python create_detailed_visualizations.py
 ```
 
 ### Using as Library
 
 ```python
-# Import individual processors from all.py
-from all import PandasDataProcessor, PolarsDataProcessor, PyArrowDataProcessor
+# Import individual processors from benchmark_all_libraries.py
+from scripts.benchmarks.unified.benchmark_all_libraries import PandasDataProcessor, PolarsDataProcessor, PyArrowDataProcessor
 
 # Example usage
 processor = PandasDataProcessor("path/to/your/data.csv")
