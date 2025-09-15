@@ -1,0 +1,38 @@
+[
+  {
+    "library": "Pandas",
+    "load_time": 1.275193452835083,
+    "clean_time": 0.05680370330810547,
+    "agg_time": 0.3799319267272949,
+    "sort_time": 0.8377106189727783,
+    "filter_time": 0.06881403923034668,
+    "total_time": 2.6184537410736084,
+    "memory_mb": 824.50390625,
+    "rows": 5000000,
+    "filtered_rows": 2500226
+  },
+  {
+    "library": "Polars",
+    "load_time": 0.11170649528503418,
+    "clean_time": 0.001975536346435547,
+    "agg_time": 0.14856743812561035,
+    "sort_time": 0.20495295524597168,
+    "filter_time": 0.029494524002075195,
+    "total_time": 0.49669694900512695,
+    "memory_mb": 1402.09765625,
+    "rows": 5000000,
+    "filtered_rows": 2500226
+  },
+  {
+    "library": "Dask",
+    "load_time": 0.006012678146362305,
+    "clean_time": 0.0,
+    "agg_time": 2.5468711853027344,
+    "sort_time": 1.6955771446228027,
+    "filter_time": 1.6538691520690918,
+    "total_time": 5.902330160140991,
+    "memory_mb": 517.50390625,
+    "rows": 5000000,
+    "filtered_rows": 2500226
+  }
+]
