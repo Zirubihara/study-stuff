@@ -1,0 +1,138 @@
+{
+    "memory_size_gb": 1.2386591471731663,
+    "row_count": 10000000,
+    "average_filtered_value": 7502.053136843133,
+    "total_operation_time_mean": 15.29017505645752,
+    "loading_time_mean": 9.210450839996337,
+    "loading_time_std": 0.5772602772697835,
+    "loading_time_min": 8.453618288040161,
+    "loading_time_max": 9.937086582183838,
+    "loading_time_runs": [
+        8.827414989471436,
+        8.453618288040161,
+        9.937086582183838,
+        9.42064619064331,
+        9.413488149642944
+    ],
+    "loading_memory_mean": 560.60078125,
+    "loading_memory_std": 26.44332026630814,
+    "loading_memory_min": 533.25,
+    "loading_memory_max": 598.328125,
+    "loading_memory_runs": [
+        598.328125,
+        575.48828125,
+        554.48046875,
+        541.45703125,
+        533.25
+    ],
+    "cleaning_time_mean": 0.8384389400482177,
+    "cleaning_time_std": 0.07726572299286225,
+    "cleaning_time_min": 0.768322229385376,
+    "cleaning_time_max": 0.9294426441192627,
+    "cleaning_time_runs": [
+        0.768322229385376,
+        0.7736051082611084,
+        0.9129140377044678,
+        0.9294426441192627,
+        0.807910680770874
+    ],
+    "cleaning_memory_mean": 381.4765625,
+    "cleaning_memory_std": 0.0,
+    "cleaning_memory_min": 381.4765625,
+    "cleaning_memory_max": 381.4765625,
+    "cleaning_memory_runs": [
+        381.4765625,
+        381.4765625,
+        381.4765625,
+        381.4765625,
+        381.4765625
+    ],
+    "aggregation_time_mean": 1.2016678333282471,
+    "aggregation_time_std": 0.0751765321997793,
+    "aggregation_time_min": 1.0747451782226562,
+    "aggregation_time_max": 1.2592048645019531,
+    "aggregation_time_runs": [
+        1.1928510665893555,
+        1.0747451782226562,
+        1.245800495147705,
+        1.2357375621795654,
+        1.2592048645019531
+    ],
+    "aggregation_memory_mean": 0.04453125,
+    "aggregation_memory_std": 0.0995749021230375,
+    "aggregation_memory_min": 0.0,
+    "aggregation_memory_max": 0.22265625,
+    "aggregation_memory_runs": [
+        0.0,
+        0.0,
+        0.0,
+        0.22265625,
+        0.0
+    ],
+    "sorting_time_mean": 2.4865034103393553,
+    "sorting_time_std": 0.2503423159460793,
+    "sorting_time_min": 2.213271141052246,
+    "sorting_time_max": 2.815912961959839,
+    "sorting_time_runs": [
+        2.271854877471924,
+        2.213271141052246,
+        2.6324024200439453,
+        2.4990756511688232,
+        2.815912961959839
+    ],
+    "sorting_memory_mean": 457.7734375,
+    "sorting_memory_std": 0.0,
+    "sorting_memory_min": 457.7734375,
+    "sorting_memory_max": 457.7734375,
+    "sorting_memory_runs": [
+        457.7734375,
+        457.7734375,
+        457.7734375,
+        457.7734375,
+        457.7734375
+    ],
+    "filtering_time_mean": 0.22576045989990234,
+    "filtering_time_std": 0.02159075130181015,
+    "filtering_time_min": 0.19811320304870605,
+    "filtering_time_max": 0.254270076751709,
+    "filtering_time_runs": [
+        0.21680116653442383,
+        0.19811320304870605,
+        0.23914766311645508,
+        0.22047019004821777,
+        0.254270076751709
+    ],
+    "filtering_memory_mean": 228.86328125,
+    "filtering_memory_std": 0.0,
+    "filtering_memory_min": 228.86328125,
+    "filtering_memory_max": 228.86328125,
+    "filtering_memory_runs": [
+        228.86328125,
+        228.86328125,
+        228.86328125,
+        228.86328125,
+        228.86328125
+    ],
+    "correlation_time_mean": 1.327353572845459,
+    "correlation_time_std": 0.08966806459208336,
+    "correlation_time_min": 1.1809484958648682,
+    "correlation_time_max": 1.4154715538024902,
+    "correlation_time_runs": [
+        1.3569698333740234,
+        1.3127572536468506,
+        1.3706207275390625,
+        1.4154715538024902,
+        1.1809484958648682
+    ],
+    "correlation_memory_mean": 0.0,
+    "correlation_memory_std": 0.0,
+    "correlation_memory_min": 0.0,
+    "correlation_memory_max": 0.0,
+    "correlation_memory_runs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ]
+}

@@ -1,0 +1,138 @@
+{
+    "memory_size_gb": 0.4377216100692749,
+    "row_count": 10000000,
+    "average_filtered_value": 7502.053136843133,
+    "total_operation_time_mean": 7.8264199733734126,
+    "loading_time_mean": 0.4949228286743164,
+    "loading_time_std": 0.06142094333432341,
+    "loading_time_min": 0.42006397247314453,
+    "loading_time_max": 0.5788905620574951,
+    "loading_time_runs": [
+        0.5788905620574951,
+        0.5057358741760254,
+        0.5175220966339111,
+        0.45240163803100586,
+        0.42006397247314453
+    ],
+    "loading_memory_mean": -97.053125,
+    "loading_memory_std": 252.2699987856116,
+    "loading_memory_min": -537.984375,
+    "loading_memory_max": 70.10546875,
+    "loading_memory_runs": [
+        -537.984375,
+        70.10546875,
+        -48.1875,
+        -32.1328125,
+        62.93359375
+    ],
+    "cleaning_time_mean": 0.087101411819458,
+    "cleaning_time_std": 0.036271454044214044,
+    "cleaning_time_min": 0.05374741554260254,
+    "cleaning_time_max": 0.1363353729248047,
+    "cleaning_time_runs": [
+        0.1363353729248047,
+        0.11141228675842285,
+        0.07979917526245117,
+        0.05421280860900879,
+        0.05374741554260254
+    ],
+    "cleaning_memory_mean": 39.734375,
+    "cleaning_memory_std": 71.12390811665324,
+    "cleaning_memory_min": -22.171875,
+    "cleaning_memory_max": 136.92578125,
+    "cleaning_memory_runs": [
+        136.92578125,
+        91.90234375,
+        -18.31640625,
+        10.33203125,
+        -22.171875
+    ],
+    "aggregation_time_mean": 3.534027862548828,
+    "aggregation_time_std": 0.7643290081213798,
+    "aggregation_time_min": 2.6564207077026367,
+    "aggregation_time_max": 4.733081340789795,
+    "aggregation_time_runs": [
+        4.733081340789795,
+        3.543058156967163,
+        3.1761982440948486,
+        3.5613808631896973,
+        2.6564207077026367
+    ],
+    "aggregation_memory_mean": -5.56328125,
+    "aggregation_memory_std": 10.616810018468906,
+    "aggregation_memory_min": -22.80859375,
+    "aggregation_memory_max": 3.60546875,
+    "aggregation_memory_runs": [
+        1.1015625,
+        3.60546875,
+        -1.39453125,
+        -8.3203125,
+        -22.80859375
+    ],
+    "sorting_time_mean": 2.898729944229126,
+    "sorting_time_std": 0.1499029789327008,
+    "sorting_time_min": 2.7361037731170654,
+    "sorting_time_max": 3.1247079372406006,
+    "sorting_time_runs": [
+        2.963223457336426,
+        2.7361037731170654,
+        2.8304107189178467,
+        3.1247079372406006,
+        2.8392038345336914
+    ],
+    "sorting_memory_mean": 75.37578125,
+    "sorting_memory_std": 128.04098767639402,
+    "sorting_memory_min": 0.546875,
+    "sorting_memory_max": 297.6953125,
+    "sorting_memory_runs": [
+        297.6953125,
+        73.125,
+        2.390625,
+        3.12109375,
+        0.546875
+    ],
+    "filtering_time_mean": 0.20722479820251466,
+    "filtering_time_std": 0.017332124742486014,
+    "filtering_time_min": 0.1883072853088379,
+    "filtering_time_max": 0.22849702835083008,
+    "filtering_time_runs": [
+        0.20533275604248047,
+        0.22849702835083008,
+        0.19307327270507812,
+        0.22091364860534668,
+        0.1883072853088379
+    ],
+    "filtering_memory_mean": 50.39765625,
+    "filtering_memory_std": 44.29920752787409,
+    "filtering_memory_min": 1.6484375,
+    "filtering_memory_max": 118.671875,
+    "filtering_memory_runs": [
+        118.671875,
+        46.32421875,
+        61.0546875,
+        1.6484375,
+        24.2890625
+    ],
+    "correlation_time_mean": 0.6044131278991699,
+    "correlation_time_std": 0.0866736230008607,
+    "correlation_time_min": 0.4981973171234131,
+    "correlation_time_max": 0.740077018737793,
+    "correlation_time_runs": [
+        0.740077018737793,
+        0.5997962951660156,
+        0.5879251956939697,
+        0.4981973171234131,
+        0.5960698127746582
+    ],
+    "correlation_memory_mean": 0.0,
+    "correlation_memory_std": 0.0,
+    "correlation_memory_min": 0.0,
+    "correlation_memory_max": 0.0,
+    "correlation_memory_runs": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+    ]
+}
