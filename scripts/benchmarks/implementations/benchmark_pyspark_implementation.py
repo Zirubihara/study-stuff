@@ -220,8 +220,8 @@ def main():
     large_dataset = "../data/benchmark_10m.csv"  # 10M rows
     massive_dataset = "../data/benchmark_50m.csv"  # 50M rows (~1GB)
 
-    # Choose dataset to use (using 100M for ultimate Spark performance demonstration)
-    csv_path = "../data/benchmark_100m.csv"  # 100M rows (~3GB)
+    # Choose dataset to use (using 5M for comparison with other libraries)
+    csv_path = "data/benchmark_5m.csv"  # 5M rows
 
     try:
         processor = SparkDataProcessor(csv_path)
