@@ -122,16 +122,12 @@ def main():
 
     # Define technologies and their scripts
     technologies = {
-        "pandas": Path("pandas-usage.py"),
-        "polars": Path("polars-usage.py"),
-        "pyarrow": Path("pyarrow-usage.py"),
-        "dask": Path("dask-usage.py"),
+        "pandas": Path("../implementations/benchmark_pandas_implementation.py"),
+        "polars": Path("../implementations/benchmark_polars_implementation.py"),
+        "pyarrow": Path("../implementations/benchmark_pyarrow_implementation.py"),
+        "dask": Path("../implementations/benchmark_dask_implementation.py"),
+        "pyspark": Path("../implementations/benchmark_pyspark_implementation.py"),
     }
-
-    # PySpark is already configured for 5M, so we'll run it separately
-    print(
-        "Note: PySpark 5M results already available in performance_metrics_spark_5m.json"
-    )
 
     results = {}
     total_start_time = time.time()
