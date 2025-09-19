@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
 Benchmark script to run all data processing technologies on 5M row dataset.
-This script runs Pandas, Polars, PyArrow, Dask, and PySpark on the same 5M dataset for comparison.
+This script runs Pandas, Polars, PyArrow, Dask, and PySpark on the same
+5M dataset for comparison.
 """
 
-import json
 import os
 import subprocess
 import sys
@@ -15,41 +15,68 @@ from pathlib import Path
 def modify_script_for_5m(script_path, technology_name):
     """Modify a script to use 5M dataset and save with _5m suffix."""
 
-    with open(script_path, "r") as f:
+    with open(script_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # Replace dataset path
-    content = content.replace(
-        'csv_path = "../data/benchmark_1m.csv"', 'csv_path = "../data/benchmark_5m.csv"'
-    )
+    # Replace dataset path patterns - handle different path patterns
+    # found in implementation files
+    dataset_replacements = [
+        (
+            'csv_path = "../data/benchmark_1m.csv"',
+            'csv_path = "../../../data/benchmark_5m.csv"',
+        ),
+        ("csv_path = small_dataset", "csv_path = medium_dataset"),
+        ("csv_path = medium_dataset", 'csv_path = "../../../data/benchmark_5m.csv"'),
+        (
+            'csv_path = "data/benchmark_5m.csv"',  # PySpark case
+            'csv_path = "../../../data/benchmark_5m.csv"',
+        ),
+    ]
+
+    for old_path, new_path in dataset_replacements:
+        content = content.replace(old_path, new_path)
 
     # Replace output file path based on technology
-    replacements = {
-        "pandas": (
-            'output_path: str = "../results/performance_metrics_pandas.json"',
-            'output_path: str = "../results/performance_metrics_pandas_5m.json"',
-        ),
-        "polars": (
-            'output_path: str = "../results/performance_metrics_polars.json"',
-            'output_path: str = "../results/performance_metrics_polars_5m.json"',
-        ),
-        "pyarrow": (
-            'output_path: str = "../results/performance_metrics_arrow.json"',
-            'output_path: str = "../results/performance_metrics_arrow_5m.json"',
-        ),
-        "dask": (
-            'output_path: str = "../results/performance_metrics_dask.json"',
-            'output_path: str = "../results/performance_metrics_dask_5m.json"',
-        ),
+    output_replacements = {
+        "pandas": [
+            (
+                'output_path: str = "../results/performance_metrics_pandas.json"',
+                'output_path: str = "../../../results/performance_metrics_pandas_5m.json"',
+            ),  # noqa: E501
+        ],
+        "polars": [
+            (
+                'output_path: str = "../results/performance_metrics_polars.json"',
+                'output_path: str = "../../../results/performance_metrics_polars_5m.json"',
+            ),  # noqa: E501
+        ],
+        "pyarrow": [
+            (
+                'output_path: str = "../results/performance_metrics_arrow.json"',
+                'output_path: str = "../../../results/performance_metrics_arrow_5m.json"',
+            ),  # noqa: E501
+        ],
+        "dask": [
+            (
+                'output_path: str = "../results/performance_metrics_dask.json"',
+                'output_path: str = "../../../results/performance_metrics_dask_5m.json"',
+            ),  # noqa: E501
+        ],
+        "pyspark": [
+            (
+                'output_path: str = "../results/performance_metrics_spark_100m.json"',  # noqa: E501
+                'output_path: str = "../../../results/performance_metrics_spark_5m.json"',
+            ),  # noqa: E501
+        ],
     }
 
-    if technology_name in replacements:
-        old_str, new_str = replacements[technology_name]
-        content = content.replace(old_str, new_str)
+    if technology_name in output_replacements:
+        for old_str, new_str in output_replacements[technology_name]:
+            content = content.replace(old_str, new_str)
 
     # Create temporary script
     temp_script = script_path.parent / f"temp_{technology_name}_5m.py"
-    with open(temp_script, "w") as f:
+    with open(temp_script, "w", encoding="utf-8") as f:
         f.write(content)
 
     return temp_script
@@ -73,23 +100,26 @@ def run_technology(script_path, technology_name):
             capture_output=True,
             text=True,
             timeout=1800,  # 30 minute timeout
+            check=False,  # We handle return codes manually
         )
 
         execution_time = time.time() - start_time
 
         if result.returncode == 0:
             print(
-                f"SUCCESS: {technology_name.upper()} completed successfully in {execution_time:.2f} seconds"
+                f"SUCCESS: {technology_name.upper()} completed successfully "
+                f"in {execution_time:.2f} seconds"
             )
-            print(
-                "Output:",
-                result.stdout.strip() if result.stdout.strip() else "No output",
+            output_text = (
+                result.stdout.strip() if result.stdout.strip() else "No output"
             )
+            print("Output:", output_text)
             if result.stderr.strip():
                 print("Warnings:", result.stderr.strip())
         else:
             print(
-                f"FAILED: {technology_name.upper()} failed with return code {result.returncode}"
+                f"FAILED: {technology_name.upper()} failed with return code "
+                f"{result.returncode}"
             )
             print("Error:", result.stderr)
             print("Output:", result.stdout)
@@ -103,7 +133,7 @@ def run_technology(script_path, technology_name):
     except subprocess.TimeoutExpired:
         print(f"TIMEOUT: {technology_name.upper()} timed out after 30 minutes")
         return False, time.time() - start_time
-    except Exception as e:
+    except (OSError, ValueError) as e:
         print(f"CRASHED: {technology_name.upper()} crashed with error: {e}")
         return False, time.time() - start_time
 
@@ -114,19 +144,20 @@ def main():
     print("=" * 80)
 
     # Check if 5M dataset exists
-    dataset_path = Path("../data/benchmark_5m.csv")
+    dataset_path = Path("../../../data/benchmark_5m.csv")
     if not dataset_path.exists():
         print(f"Dataset not found: {dataset_path}")
         print("Please run generate_large_data.py first to create the 5M dataset")
         return False
 
     # Define technologies and their scripts
+    impl_base = "../implementations/"
     technologies = {
-        "pandas": Path("../implementations/benchmark_pandas_implementation.py"),
-        "polars": Path("../implementations/benchmark_polars_implementation.py"),
-        "pyarrow": Path("../implementations/benchmark_pyarrow_implementation.py"),
-        "dask": Path("../implementations/benchmark_dask_implementation.py"),
-        "pyspark": Path("../implementations/benchmark_pyspark_implementation.py"),
+        "pandas": Path(f"{impl_base}benchmark_pandas_implementation.py"),
+        "polars": Path(f"{impl_base}benchmark_polars_implementation.py"),
+        "pyarrow": Path(f"{impl_base}benchmark_pyarrow_implementation.py"),
+        "dask": Path(f"{impl_base}benchmark_dask_implementation.py"),
+        "pyspark": Path(f"{impl_base}benchmark_pyspark_implementation.py"),
     }
 
     results = {}
@@ -138,8 +169,8 @@ def main():
             print(f"❌ Script not found: {script_path}")
             continue
 
-        success, exec_time = run_technology(script_path, tech_name)
-        results[tech_name] = {"success": success, "execution_time": exec_time}
+        tech_success, exec_time = run_technology(script_path, tech_name)
+        results[tech_name] = {"success": tech_success, "execution_time": exec_time}
 
     total_time = time.time() - total_start_time
 
@@ -152,25 +183,27 @@ def main():
     for tech_name, result in results.items():
         status = "SUCCESS" if result["success"] else "FAILED"
         print(
-            f"{tech_name.upper():10} | {status:12} | {result['execution_time']:8.2f}s"
+            f"{tech_name.upper():10} | {status:12} | "
+            f"{result['execution_time']:8.2f}s"
         )
         if result["success"]:
             successful_runs += 1
 
-    print(f"\nPySpark:     SUCCESS     | Already completed")
     print("-" * 80)
-    print(f"Successfully completed: {successful_runs}/4 technologies")
+    print(f"Successfully completed: {successful_runs}/5 technologies")
     print(f"Total benchmark time: {total_time:.2f} seconds")
 
     # List generated files
     print("\nGenerated Performance Metrics Files:")
-    results_dir = Path("../results")
+    results_dir = Path("../../../results")
     for file in results_dir.glob("performance_metrics_*_5m.json"):
         print(f"  - {file.name}")
 
-    print("\nUse create_simple_charts.py or visualize_results.py to analyze results!")
+    print(
+        "\nUse create_simple_charts.py or visualize_results.py to " "analyze results!"
+    )  # noqa: E501
 
-    return successful_runs >= 3  # Consider success if at least 3/4 technologies work
+    return successful_runs >= 3  # Consider success if at least 3/5 work
 
 
 if __name__ == "__main__":
