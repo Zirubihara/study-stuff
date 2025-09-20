@@ -18,33 +18,58 @@ def modify_script_for_50m(script_path, technology_name):
     with open(script_path, "r") as f:
         content = f.read()
 
-    # Replace dataset path
-    content = content.replace(
-        'csv_path = "../data/benchmark_1m.csv"',
-        'csv_path = "../data/benchmark_50m.csv"',
-    )
-    content = content.replace(
-        'csv_path = "../data/benchmark_5m.csv"',
-        'csv_path = "../data/benchmark_50m.csv"',
-    )
+    # Replace dataset path patterns - handle different path patterns
+    dataset_replacements = [
+        (
+            'csv_path = "../data/benchmark_1m.csv"',
+            'csv_path = "../../../data/benchmark_50m.csv"',
+        ),
+        (
+            'csv_path = "../data/benchmark_5m.csv"',
+            'csv_path = "../../../data/benchmark_50m.csv"',
+        ),
+        (
+            'csv_path = "data/benchmark_5m.csv"',  # PySpark case
+            'csv_path = "../../../data/benchmark_50m.csv"',
+        ),
+        (
+            'medium_dataset = "../data/benchmark_5m.csv"',  # PySpark medium dataset
+            'medium_dataset = "../../../data/benchmark_50m.csv"',
+        ),
+        (
+            'large_dataset = "../data/benchmark_10m.csv"',
+            'large_dataset = "../../../data/benchmark_50m.csv"',
+        ),
+        (
+            'massive_dataset = "../data/benchmark_50m.csv"',
+            'massive_dataset = "../../../data/benchmark_50m.csv"',
+        ),
+    ]
+
+    for old_path, new_path in dataset_replacements:
+        content = content.replace(old_path, new_path)
 
     # Replace output file path based on technology
     replacements = {
         "pandas": (
             'output_path: str = "../results/performance_metrics_pandas.json"',
-            'output_path: str = "../results/performance_metrics_pandas_50m.json"',
+            'output_path: str = "../../../results/performance_metrics_pandas_50m.json"',
         ),
         "polars": (
             'output_path: str = "../results/performance_metrics_polars.json"',
-            'output_path: str = "../results/performance_metrics_polars_50m.json"',
+            'output_path: str = "../../../results/performance_metrics_polars_50m.json"',
         ),
         "pyarrow": (
             'output_path: str = "../results/performance_metrics_arrow.json"',
-            'output_path: str = "../results/performance_metrics_arrow_50m.json"',
+            'output_path: str = "../../../results/performance_metrics_arrow_50m.json"',
         ),
         "dask": (
             'output_path: str = "../results/performance_metrics_dask.json"',
-            'output_path: str = "../results/performance_metrics_dask_50m.json"',
+            'output_path: str = "../../../results/performance_metrics_dask_50m.json"',
+        ),
+        "pyspark": (
+            'output_path: str = "../results/performance_metrics_spark_100m.json"',
+            'output_path: str = "../../../results/performance_metrics_spark_50m.json"',
         ),
     }
 
@@ -135,7 +160,7 @@ def main():
     print("=" * 80)
 
     # Check if 50M dataset exists
-    dataset_path = Path("../data/benchmark_50m.csv")
+    dataset_path = Path("../../../data/benchmark_50m.csv")
     if not dataset_path.exists():
         print(f"Dataset not found: {dataset_path}")
         print("Please run generate_large_data.py first to create the 50M dataset")
@@ -201,7 +226,7 @@ def main():
 
     # List generated files
     print("\nGenerated Performance Metrics Files:")
-    results_dir = Path("../results")
+    results_dir = Path("../../../results")
     for file in results_dir.glob("performance_metrics_*_50m.json"):
         print(f"  - {file.name}")
 
