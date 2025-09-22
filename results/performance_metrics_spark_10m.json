@@ -1,11 +1,11 @@
 {
     "row_count": 10000000,
-    "loading_time_seconds": 12.679592609405518,
-    "cleaning_time_seconds": 0.08475422859191895,
-    "aggregation_time_seconds": 0.18684840202331543,
-    "sorting_time_seconds": 0.0342404842376709,
-    "filtering_time_seconds": 1.1907124519348145,
-    "correlation_time_seconds": 8.160857915878296,
+    "loading_time_seconds": 13.562538146972656,
+    "cleaning_time_seconds": 0.09688758850097656,
+    "aggregation_time_seconds": 0.2214198112487793,
+    "sorting_time_seconds": 0.0323033332824707,
+    "filtering_time_seconds": 1.3921968936920166,
+    "correlation_time_seconds": 7.723553657531738,
     "average_filtered_value": 7502.053136843133,
-    "total_operation_time_seconds": 22.337006092071533
+    "total_operation_time_seconds": 23.028899431228638
 }
