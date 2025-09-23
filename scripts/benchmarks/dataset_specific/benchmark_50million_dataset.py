@@ -172,10 +172,10 @@ def main():
 
     # Define technologies and their scripts
     technologies = {
-        "polars": Path("polars-usage.py"),  # Should be fastest
-        "pyarrow": Path("pyarrow-usage.py"),  # Good performance
-        "pandas": Path("pandas-usage.py"),  # Will be slower but should work
-        "dask": Path("dask-usage.py"),  # Distributed processing
+        "polars": Path("../implementations/benchmark_polars_implementation.py"),  # Should be fastest
+        "pyarrow": Path("../implementations/benchmark_pyarrow_implementation.py"),  # Good performance
+        "pandas": Path("../implementations/benchmark_pandas_implementation.py"),  # Will be slower but should work
+        "dask": Path("../implementations/benchmark_dask_implementation.py"),  # Distributed processing
     }
 
     # PySpark is already configured for 50M
