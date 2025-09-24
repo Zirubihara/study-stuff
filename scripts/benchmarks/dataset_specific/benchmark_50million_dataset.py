@@ -29,6 +29,18 @@ def modify_script_for_50m(script_path, technology_name):
             'csv_path = "../../../data/benchmark_50m.csv"',
         ),
         (
+            'csv_path = medium_dataset',
+            'csv_path = "../../../data/benchmark_50m.csv"',
+        ),
+        (
+            'csv_path = small_dataset',
+            'csv_path = "../../../data/benchmark_50m.csv"',
+        ),
+        (
+            'csv_path = large_dataset',
+            'csv_path = "../../../data/benchmark_50m.csv"',
+        ),
+        (
             'csv_path = "data/benchmark_5m.csv"',  # PySpark case
             'csv_path = "../../../data/benchmark_50m.csv"',
         ),
@@ -43,6 +55,16 @@ def modify_script_for_50m(script_path, technology_name):
         (
             'massive_dataset = "../data/benchmark_50m.csv"',
             'massive_dataset = "../../../data/benchmark_50m.csv"',
+        ),
+        # Handle pandas data loading issues
+        (
+            'dtype=self.DTYPE_MAP',
+            'dtype=self.DTYPE_MAP, na_filter=False',
+        ),
+        # Handle pyarrow CSV reading
+        (
+            'read_options = csv.ReadOptions(column_names=self.COLUMN_NAMES)',
+            'read_options = csv.ReadOptions(column_names=self.COLUMN_NAMES, autogenerate_column_names=False)',
         ),
     ]
 
