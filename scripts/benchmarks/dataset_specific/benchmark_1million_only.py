@@ -73,7 +73,6 @@ def run_1m_benchmark():
         return
 
     results = {}
-
     for lib_name in libraries:
         print(f"\n--- Running {lib_name.upper()} ---")
 
