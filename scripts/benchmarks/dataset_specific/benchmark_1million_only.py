@@ -9,10 +9,11 @@ import sys
 sys.path.append(".")
 
 # Create results directory if it doesn't exist
-os.makedirs("../results", exist_ok=True)
+os.makedirs("../../results", exist_ok=True)
 
-# Import all processors from all.py
-from all import (
+# Import all processors from unified benchmark
+sys.path.append("../unified")
+from benchmark_all_libraries import (
     DaskDataProcessor,
     PandasDataProcessor,
     PolarsDataProcessor,
@@ -33,7 +34,7 @@ def process_implementation_with_custom_path(
     # Move the generated file to the results directory
     if result:
         old_path = f"performance_metrics_{name}.json"
-        new_path = f"../results/performance_metrics_{name}.json"
+        new_path = f"../../results/performance_metrics_{name}.json"
 
         if os.path.exists(old_path):
             # Move file to results directory
@@ -49,7 +50,7 @@ def run_1m_benchmark():
     """Run benchmarks on 1M dataset for all libraries"""
 
     # Only 1M dataset
-    dataset_config = {"rows": 1000000, "name": "1M", "file": "../data/benchmark_1m.csv"}
+    dataset_config = {"rows": 1000000, "name": "1M", "file": "../../data/benchmark_1m.csv"}
 
     # Library configurations
     libraries = ["pandas", "polars", "pyarrow", "dask", "spark"]
@@ -120,7 +121,7 @@ def run_1m_benchmark():
         memory_gb = metrics.get("memory_size_gb_mean", 0)
         print(f"{lib_name:<10} {total_time:<10.2f} {memory_gb:<12.3f}")
 
-    print(f"\nFiles saved to: ../results/performance_metrics_<library>_1M_test.json")
+    print(f"\nFiles saved to: ../../results/performance_metrics_<library>_1M_test.json")
     return results
 
 
