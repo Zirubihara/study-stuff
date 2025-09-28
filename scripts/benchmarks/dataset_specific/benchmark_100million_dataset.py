@@ -27,7 +27,7 @@ def modify_script_for_100m(script_path, technology_name):
     ]
 
     for old_path in replacements_from:
-        content = content.replace(old_path, 'csv_path = "../data/benchmark_100m.csv"')
+        content = content.replace(old_path, 'csv_path = "../../../data/benchmark_100m.csv"')
 
     # Replace output file path based on technology
     output_replacements = {
@@ -160,7 +160,7 @@ def check_system_resources():
     print("Checking system resources...")
 
     # Check available disk space
-    dataset_path = Path("../data/benchmark_100m.csv")
+    dataset_path = Path("../../../data/benchmark_100m.csv")
     if dataset_path.exists():
         size_gb = dataset_path.stat().st_size / (1024**3)
         print(f"Dataset size: {size_gb:.2f} GB")
@@ -186,7 +186,7 @@ def main():
     print("=" * 80)
 
     # Check if 100M dataset exists
-    dataset_path = Path("../data/benchmark_100m.csv")
+    dataset_path = Path("../../../data/benchmark_100m.csv")
     if not dataset_path.exists():
         print(f"Dataset not found: {dataset_path}")
         print("Please run generate_massive_data.py first to create the 100M dataset")

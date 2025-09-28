@@ -1,0 +1,6 @@
+{
+  "technology": "pandas",
+  "status": "failed",
+  "error": "'PandasDataProcessor' object has no attribute 'process_data'",
+  "timestamp": 1759091851.3730245
+}

@@ -1,0 +1,6 @@
+{
+  "technology": "dask",
+  "status": "failed",
+  "error": "'DaskDataProcessor' object has no attribute 'process_data'",
+  "timestamp": 1759091856.380405
+}

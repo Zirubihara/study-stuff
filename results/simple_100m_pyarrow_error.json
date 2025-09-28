@@ -1,0 +1,6 @@
+{
+  "technology": "pyarrow",
+  "status": "failed",
+  "error": "'PyArrowDataProcessor' object has no attribute 'process_data'",
+  "timestamp": 1759091846.3718796
+}

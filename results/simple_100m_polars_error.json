@@ -1,0 +1,6 @@
+{
+  "technology": "polars",
+  "status": "failed",
+  "error": "'PolarsDataProcessor' object has no attribute 'process_data'",
+  "timestamp": 1759091841.370957
+}
