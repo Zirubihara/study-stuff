@@ -12,7 +12,7 @@ sys.path.append(".")
 os.makedirs("../../results", exist_ok=True)
 
 # Import all processors from unified benchmark
-sys.path.append("../unified")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "unified"))
 from benchmark_all_libraries import (
     DaskDataProcessor,
     PandasDataProcessor,
