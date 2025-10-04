@@ -1,13 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(move all.py pandas-usage.py polars-usage.py pyarrow-usage.py dask-usage.py pyspark-usage.py create_simple_charts.py generate_large_data.py generate_sample_data.py visualize_results.py scripts/)",
-      "Bash(mv:*)",
-      "Bash(python:*)",
-      "Bash(where java)",
-      "Bash(flake8:*)",
-      "Bash(rm:*)"
+      "Bash(venv_py310/Scripts/python:*)",
+      "Bash(venv_py310/Scripts/pip install:*)",
+      "Bash(../../../venv_py310/Scripts/python benchmark_50m_simple.py)",
+      "Bash(../../../venv_py310/Scripts/python benchmark_100m_simple.py)"
     ],
-    "deny": []
+    "deny": [],
+    "ask": []
   }
 }
