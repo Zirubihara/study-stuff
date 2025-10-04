@@ -27,11 +27,12 @@ study-stuff/
 │   │   │   ├── benchmark_runner_comprehensive.py # Main comprehensive benchmark runner
 │   │   │   └── benchmark_library_comparison.py   # Library comparison benchmarks
 │   │   ├── dataset_specific/                 # Dataset size-specific benchmarks
-│   │   │   ├── benchmark_1million_only.py     # Run 1M row benchmarks only
-│   │   │   ├── benchmark_1m_10m_comparison.py # Run 1M and 10M benchmarks
-│   │   │   ├── benchmark_5million_dataset.py  # Run 5M row benchmarks
-│   │   │   ├── benchmark_50million_dataset.py # Run 50M row benchmarks
-│   │   │   └── benchmark_100million_dataset.py # Run 100M row benchmarks
+│   │   │   ├── benchmark_1m_simple.py         # Run 1M row benchmarks (simple/fast)
+│   │   │   ├── benchmark_5m_simple.py         # Run 5M row benchmarks (simple/fast)
+│   │   │   ├── benchmark_10m_simple.py        # Run 10M row benchmarks (simple/fast)
+│   │   │   ├── benchmark_50m_simple.py        # Run 50M row benchmarks (simple/fast)
+│   │   │   ├── benchmark_100m_simple.py       # Run 100M row benchmarks (simple/fast)
+│   │   │   └── archived/                      # Older benchmark variants (non-simple versions)
 │   │   └── unified/                          # All-libraries unified benchmarks
 │   │       └── benchmark_all_libraries.py     # Unified implementation with all processors
 │   ├── visualization/                         # Chart and visualization creation
@@ -55,7 +56,8 @@ study-stuff/
 │   └── *_rankings.png                 # Technology ranking visualizations
 ├── requirements.txt                   # Python dependencies
 ├── README.md                          # Project documentation
-└── venv/                             # Virtual environment
+├── venv_py310/                        # Virtual environment (Python 3.10, with PySpark support)
+└── venv_py311_pyspark/               # Virtual environment (Python 3.11, PySpark testing)
 ```
 
 ## Data Schema
@@ -114,11 +116,11 @@ python benchmark_library_comparison.py     # Library comparison benchmarks
 
 # Run specific dataset size benchmarks (from benchmarks/dataset_specific subdirectory)
 cd ../dataset_specific
-python benchmark_1million_only.py          # 1M rows only
-python benchmark_1m_10m_comparison.py      # 1M and 10M rows
-python benchmark_5million_dataset.py       # 5M rows
-python benchmark_50million_dataset.py      # 50M rows
-python benchmark_100million_dataset.py     # 100M rows
+python benchmark_1m_simple.py              # 1M rows only
+python benchmark_5m_simple.py              # 5M rows
+python benchmark_10m_simple.py             # 10M rows
+python benchmark_50m_simple.py             # 50M rows
+python benchmark_100m_simple.py            # 100M rows
 
 # Generate visualizations (from visualization subdirectory)
 cd ../../visualization

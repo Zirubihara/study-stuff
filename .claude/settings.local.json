@@ -4,7 +4,8 @@
       "Bash(venv_py310/Scripts/python:*)",
       "Bash(venv_py310/Scripts/pip install:*)",
       "Bash(../../../venv_py310/Scripts/python benchmark_50m_simple.py)",
-      "Bash(../../../venv_py310/Scripts/python benchmark_100m_simple.py)"
+      "Bash(../../../venv_py310/Scripts/python benchmark_100m_simple.py)",
+      "Bash(../../../venv_py310/Scripts/python benchmark_1m_simple.py)"
     ],
     "deny": [],
     "ask": []

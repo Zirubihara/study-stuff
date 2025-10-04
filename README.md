@@ -90,10 +90,11 @@ pip install -r requirements.txt
 cd scripts/benchmarks/dataset_specific
 
 # Run tests on different dataset sizes
-python benchmark_1million_only.py     # Takes ~30 seconds
-python benchmark_5million_dataset.py  # Takes ~2 minutes
-python benchmark_10million_dataset.py # Takes ~3 minutes
-python benchmark_50million_dataset.py # Takes ~8 minutes
+python benchmark_1m_simple.py     # Takes ~30 seconds
+python benchmark_5m_simple.py     # Takes ~2 minutes
+python benchmark_10m_simple.py    # Takes ~3 minutes
+python benchmark_50m_simple.py    # Takes ~8 minutes
+python benchmark_100m_simple.py   # Takes ~15 minutes (for big data comparison)
 ```
 
 ### Step 3: See Your Results
