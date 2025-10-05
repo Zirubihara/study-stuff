@@ -52,9 +52,8 @@ def run_100m_benchmark():
     # Only 100M dataset
     dataset_config = {"rows": 100000000, "name": "100M", "file": "../../../data/benchmark_100m.csv"}
 
-    # Library configurations - only test Polars and Spark for 100M due to memory constraints
-    # Pandas/PyArrow will likely fail or be very slow on 100M rows
-    libraries = ["polars", "spark"]
+    # Library configurations - test all 5 libraries
+    libraries = ["pandas", "polars", "pyarrow", "dask", "spark"]
 
     # Reduced runs for faster testing
     num_runs = 1
@@ -67,7 +66,7 @@ def run_100m_benchmark():
     print(f"Dataset: 100M rows (3.1GB)")
     print(f"File: {dataset_config['file']}")
     print(f"Runs: {num_runs}")
-    print(f"Note: Dask skipped due to OOM on 50M dataset")
+    print(f"Warning: Pandas/Dask may be slow or run out of memory")
     print(f"{'=' * 60}")
 
     # Check if dataset exists
