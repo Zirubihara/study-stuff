@@ -173,6 +173,7 @@ cython_debug/
 .pypirc
 
 # Large CSV data files (keep local, exclude from Git)
+custom_1988_2020.csv
 data/benchmark_100m.csv
 data/benchmark_50m.csv
 data/benchmark_10m.csv
