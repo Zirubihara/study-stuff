@@ -35,29 +35,49 @@ models/
 **Status:** COMPLETE
 **Implementation:** [anomaly_detection_sklearn.py](anomaly_detection_sklearn.py)
 
-**Results (1M sample):**
+**Results (5M sample):**
 - **Isolation Forest:**
-  - Training: 7.71s
-  - Inference: 1.36s (109,941 samples/sec)
-  - Memory: 0.005 GB
-  - Anomalies: 1,488 (0.99%)
+  - Training: 21.61s
+  - Inference: 5.05s (148,662 samples/sec)
+  - Memory: 0.63 GB
+  - Anomalies: 7,552 (1.01%)
 
 - **Local Outlier Factor (LOF):**
-  - Training: 49.29s
-  - Inference: 8.67s (17,293 samples/sec)
-  - Memory: 0.13 GB
-  - Anomalies: 1,539 (1.03%)
+  - Training: 435.72s (7.3 minutes)
+  - Inference: 39.06s (19,200 samples/sec)
+  - Memory: 0.63 GB
+  - Anomalies: 7,529 (1.00%)
 
 **Key Findings:**
-- Isolation Forest is 6.4x faster than LOF
+- Isolation Forest is **20x faster** than LOF in training (21s vs 436s)
 - Models agree 98% of the time
 - Both detect ~1% anomaly rate (as configured)
+- 45 high-confidence anomalies detected by both models
+- Test set: 750,000 samples for robust evaluation
+
+## Completed Implementations (continued)
+
+### ✅ PyTorch (MLP Autoencoder)
+
+**Status:** COMPLETE
+**Implementation:** [anomaly_detection_pytorch.py](anomaly_detection_pytorch.py)
+
+**Results (1M sample, 10 epochs):**
+- Training: 195.26s (3.3 minutes)
+- Inference: 1.71s (87,967 samples/sec)
+- Memory: 0.03 GB
+- Anomalies: 1,428 (0.95%)
+- Model Parameters: 6,747
+- Device: CPU
+
+**Key Features:**
+- Deep learning autoencoder (64→32→16 bottleneck)
+- Reconstruction error-based anomaly detection
+- Batch processing with DataLoaders
+- Dropout regularization (0.2)
+- Adam optimizer
 
 ## Planned Implementations
-
-### 🔄 PyTorch (MLP Autoencoder)
-**Status:** PENDING
-Deep learning approach with flexible neural network architecture
 
 ### 🔄 TensorFlow/Keras (MLP Autoencoder)
 **Status:** PENDING
@@ -75,7 +95,8 @@ Modern, high-performance deep learning
 
 **Source:** Japanese customs/trade data (1988-2020)
 **Original Size:** 113.6M rows, 4.23GB
-**Preprocessed Sample:** 1M rows for model training
+**Preprocessed Dataset:** 10M rows available
+**Current Analysis:** 5M rows for balanced performance
 
 **Features (11 total):**
 - `category1`, `category2`, `category3` - Product categories
@@ -116,14 +137,14 @@ Charts saved to `charts/` directory.
 ## Configuration
 
 ### Sample Size
-Default: 1M rows (for faster processing)
+Default: 5M rows (balanced performance and accuracy)
 Modify in `anomaly_detection_sklearn.py`:
 
 ```python
 results = detector.run_full_comparison(
     data_path,
     output_dir,
-    sample_size=1_000_000  # Change this value
+    sample_size=5_000_000  # Change this value (max 10M available)
 )
 ```
 
@@ -164,14 +185,25 @@ This project aims to provide:
 3. **Performance benchmarks** on large-scale data
 4. **Reproducible results** for academic research
 
+## Framework Comparison
+
+**Use compare_all_results.py to compare all completed frameworks:**
+
+```bash
+cd models
+python compare_all_results.py
+```
+
+This generates comprehensive comparison charts across all implemented frameworks.
+
 ## Next Steps
 
 1. ✅ Complete scikit-learn baseline (DONE)
-2. 🔄 Implement PyTorch autoencoder
+2. ✅ Implement PyTorch autoencoder (DONE)
 3. 🔄 Implement TensorFlow/Keras autoencoder
 4. 🔄 Implement MXNet autoencoder
 5. 🔄 Implement JAX autoencoder
-6. 🔄 Create comprehensive framework comparison
+6. ✅ Create comprehensive framework comparison (DONE)
 7. 🔄 Generate final research visualizations
 
 ## Output Files

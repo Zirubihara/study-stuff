@@ -299,9 +299,9 @@ if __name__ == "__main__":
     data_path = "processed/processed_data.parquet"
     output_dir = "results"
 
-    # Use 1M sample for faster processing (adjust as needed)
+    # Use 5M sample for better results than 1M (10M takes too long for LOF)
     detector = AnomalyDetectorSklearn(contamination=0.01, random_state=42)
-    results = detector.run_full_comparison(data_path, output_dir, sample_size=1_000_000)
+    results = detector.run_full_comparison(data_path, output_dir, sample_size=5_000_000)
 
     print("\n[SUCCESS] Scikit-learn anomaly detection complete!")
     print(f"[NEXT] Implement PyTorch, TensorFlow, MXNet, JAX models")

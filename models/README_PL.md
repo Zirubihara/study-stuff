@@ -36,29 +36,49 @@ models/
 **Status:** UKOŃCZONE
 **Implementacja:** [anomaly_detection_sklearn.py](anomaly_detection_sklearn.py)
 
-**Wyniki (próbka 1M wierszy):**
+**Wyniki (próbka 5M wierszy):**
 - **Isolation Forest:**
-  - Trenowanie: 7.71s
-  - Predykcja: 1.36s (109,941 próbek/sekundę)
-  - Pamięć: 0.005 GB
-  - Anomalie: 1,488 (0.99%)
+  - Trenowanie: 21.61s
+  - Predykcja: 5.05s (148,662 próbek/sekundę)
+  - Pamięć: 0.63 GB
+  - Anomalie: 7,552 (1.01%)
 
 - **Local Outlier Factor (LOF):**
-  - Trenowanie: 49.29s
-  - Predykcja: 8.67s (17,293 próbek/sekundę)
-  - Pamięć: 0.13 GB
-  - Anomalie: 1,539 (1.03%)
+  - Trenowanie: 435.72s (7.3 minuty)
+  - Predykcja: 39.06s (19,200 próbek/sekundę)
+  - Pamięć: 0.63 GB
+  - Anomalie: 7,529 (1.00%)
 
 **Kluczowe Wnioski:**
-- Isolation Forest jest 6.4x szybszy niż LOF
+- Isolation Forest jest **20x szybszy** niż LOF w trenowaniu (21s vs 436s)
 - Modele zgadzają się w 98% przypadków
 - Oba wykrywają ~1% anomalii (zgodnie z konfiguracją)
+- 45 anomalii o wysokim poziomie pewności wykrytych przez oba modele
+- Zbiór testowy: 750,000 próbek dla solidnej ewaluacji
+
+## Ukończone Implementacje (ciąg dalszy)
+
+### ✅ PyTorch (MLP Autoencoder)
+
+**Status:** UKOŃCZONE
+**Implementacja:** [anomaly_detection_pytorch.py](anomaly_detection_pytorch.py)
+
+**Wyniki (próbka 1M, 10 epok):**
+- Trenowanie: 195.26s (3.3 minuty)
+- Predykcja: 1.71s (87,967 próbek/sekundę)
+- Pamięć: 0.03 GB
+- Anomalie: 1,428 (0.95%)
+- Parametry modelu: 6,747
+- Urządzenie: CPU
+
+**Kluczowe Cechy:**
+- Głęboki autoenkoder (64→32→16 wąskie gardło)
+- Wykrywanie anomalii oparte na błędzie rekonstrukcji
+- Przetwarzanie wsadowe z DataLoaders
+- Regularyzacja Dropout (0.2)
+- Optymalizator Adam
 
 ## Planowane Implementacje
-
-### 🔄 PyTorch (MLP Autoencoder)
-**Status:** DO ZROBIENIA
-Podejście głębokiego uczenia z elastyczną architekturą sieci neuronowej
 
 ### 🔄 TensorFlow/Keras (MLP Autoencoder)
 **Status:** DO ZROBIENIA
@@ -76,7 +96,8 @@ Nowoczesne, wysokowydajne głębokie uczenie
 
 **Źródło:** Dane celne/handlowe Japonii (1988-2020)
 **Oryginalny Rozmiar:** 113.6M wierszy, 4.23GB
-**Przetworzona Próbka:** 1M wierszy do trenowania modeli
+**Przetworzony Zbiór:** 10M wierszy dostępnych
+**Aktualna Analiza:** 5M wierszy dla zbalansowanej wydajności
 
 **Cechy (11 łącznie):**
 - `category1`, `category2`, `category3` - Kategorie produktów
@@ -117,14 +138,14 @@ Wykresy zapisane w katalogu `charts/`.
 ## Konfiguracja
 
 ### Rozmiar Próbki
-Domyślnie: 1M wierszy (dla szybszego przetwarzania)
+Domyślnie: 5M wierszy (zbalansowana wydajność i dokładność)
 Modyfikuj w `anomaly_detection_sklearn.py`:
 
 ```python
 results = detector.run_full_comparison(
     data_path,
     output_dir,
-    sample_size=1_000_000  # Zmień tę wartość
+    sample_size=5_000_000  # Zmień tę wartość (max 10M dostępnych)
 )
 ```
 
