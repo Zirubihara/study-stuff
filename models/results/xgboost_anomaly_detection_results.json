@@ -1,0 +1,43 @@
+{
+  "dataset_info": {
+    "data_path": "../processed/processed_data.parquet",
+    "total_samples": 9999999,
+    "n_features": 11,
+    "feature_names": [
+      "category1",
+      "category2",
+      "category3",
+      "flag",
+      "value1_normalized",
+      "value2_normalized",
+      "year",
+      "month",
+      "quarter",
+      "year_month_encoded",
+      "code_encoded"
+    ],
+    "train_samples": 6999999,
+    "val_samples": 1500000,
+    "test_samples": 1500000
+  },
+  "xgboost_detector": {
+    "model_name": "XGBoost Anomaly Detector",
+    "n_samples": 1500000,
+    "n_anomalies": 15053,
+    "anomaly_rate": 1.0035333333333334,
+    "inference_time": 0.7572059631347656,
+    "inference_speed": 1980966.966755165,
+    "mean_anomaly_score": 0.43475582060415474,
+    "max_anomaly_score": 2.420312486772432,
+    "threshold": 1.9290884196239368,
+    "training_time": 26.829730987548828,
+    "memory_usage_gb": 0.4162750244140625
+  },
+  "configuration": {
+    "contamination": 0.01,
+    "random_state": 42,
+    "max_depth": 6,
+    "n_estimators": 100,
+    "xgboost_version": "3.0.5"
+  }
+}

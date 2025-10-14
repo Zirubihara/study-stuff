@@ -401,7 +401,7 @@ if __name__ == "__main__":
 
     # Use 1M sample (same as PyTorch/TensorFlow for fair comparison)
     detector = AnomalyDetectorJAX(contamination=0.01, random_state=42)
-    results = detector.run_full_comparison(data_path, output_dir, sample_size=5_000_000)
+    results = detector.run_full_comparison(data_path, output_dir, sample_size=10_000_000)
 
     print("\n[SUCCESS] JAX anomaly detection complete!")
     print("[COMPLETE] All frameworks implemented!")

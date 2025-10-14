@@ -1,0 +1,47 @@
+{
+  "dataset_info": {
+    "data_path": "../processed/processed_data.parquet",
+    "total_samples": 9999999,
+    "n_features": 11,
+    "feature_names": [
+      "category1",
+      "category2",
+      "category3",
+      "flag",
+      "value1_normalized",
+      "value2_normalized",
+      "year",
+      "month",
+      "quarter",
+      "year_month_encoded",
+      "code_encoded"
+    ],
+    "train_samples": 6999999,
+    "val_samples": 1500000,
+    "test_samples": 1500000
+  },
+  "isolation_forest": {
+    "model_name": "Isolation Forest",
+    "n_samples": 1500000,
+    "n_anomalies": 14886,
+    "anomaly_rate": 0.9924000000000001,
+    "inference_time": 11.792165040969849,
+    "inference_speed": 127203.104331436,
+    "training_time": 64.0738275051117,
+    "memory_usage_gb": -0.2664756774902344
+  },
+  "local_outlier_factor": {
+    "model_name": "Local Outlier Factor",
+    "n_samples": 1500000,
+    "n_anomalies": 15151,
+    "anomaly_rate": 1.0100666666666667,
+    "inference_time": 90.8084454536438,
+    "inference_speed": 16518.2873961401,
+    "training_time": 526.4305820465088,
+    "memory_usage_gb": 1.251251220703125
+  },
+  "configuration": {
+    "contamination": 0.01,
+    "random_state": 42
+  }
+}

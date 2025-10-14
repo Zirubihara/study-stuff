@@ -1,0 +1,43 @@
+{
+  "dataset_info": {
+    "data_path": "../processed/processed_data.parquet",
+    "total_samples": 9999999,
+    "n_features": 11,
+    "feature_names": [
+      "category1",
+      "category2",
+      "category3",
+      "flag",
+      "value1_normalized",
+      "value2_normalized",
+      "year",
+      "month",
+      "quarter",
+      "year_month_encoded",
+      "code_encoded"
+    ],
+    "train_samples": 6999999,
+    "val_samples": 1500000,
+    "test_samples": 1500000
+  },
+  "tensorflow_autoencoder": {
+    "model_name": "TensorFlow/Keras MLP Autoencoder",
+    "n_samples": 1500000,
+    "n_anomalies": 15125,
+    "anomaly_rate": 1.0083333333333333,
+    "inference_time": 80.20891547203064,
+    "inference_speed": 18701.162971378904,
+    "mean_reconstruction_error": 0.12631152297827106,
+    "max_reconstruction_error": 1207.5529242881485,
+    "threshold": 0.6998518189492531,
+    "training_time": 252.59642052650452,
+    "memory_usage_gb": 0.586761474609375
+  },
+  "configuration": {
+    "contamination": 0.01,
+    "random_state": 42,
+    "epochs": 10,
+    "batch_size": 1024,
+    "tensorflow_version": "2.20.0"
+  }
+}

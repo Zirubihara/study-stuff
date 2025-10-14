@@ -6,7 +6,16 @@
       "Bash(../../../venv_py310/Scripts/python benchmark_50m_simple.py)",
       "Bash(../../../venv_py310/Scripts/python benchmark_100m_simple.py)",
       "Bash(../../../venv_py310/Scripts/python benchmark_1m_simple.py)",
-      "Bash(../venv_py310/Scripts/python preprocess_polars.py:*)"
+      "Bash(../venv_py310/Scripts/python preprocess_polars.py:*)",
+      "Bash(../venv_py310/Scripts/python anomaly_detection_sklearn.py)",
+      "Bash(../venv_py310/Scripts/python:*)",
+      "Bash(dir:*)",
+      "Bash(../../venv_py310/Scripts/python anomaly_detection_sklearn.py)",
+      "Bash(tree:*)",
+      "Bash(../../venv_py310/Scripts/python anomaly_detection_pytorch.py)",
+      "Bash(../../venv_py310/Scripts/python:*)",
+      "Bash(../venv_py310/Scripts/pip install --force-reinstall requests==2.31.0 urllib3==2.0.7)",
+      "Bash(timeout:*)"
     ],
     "deny": [],
     "ask": []

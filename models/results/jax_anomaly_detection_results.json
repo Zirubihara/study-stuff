@@ -1,0 +1,44 @@
+{
+  "dataset_info": {
+    "data_path": "../processed/processed_data.parquet",
+    "total_samples": 9999999,
+    "n_features": 11,
+    "feature_names": [
+      "category1",
+      "category2",
+      "category3",
+      "flag",
+      "value1_normalized",
+      "value2_normalized",
+      "year",
+      "month",
+      "quarter",
+      "year_month_encoded",
+      "code_encoded"
+    ],
+    "train_samples": 6999999,
+    "val_samples": 1500000,
+    "test_samples": 1500000
+  },
+  "jax_autoencoder": {
+    "model_name": "JAX MLP Autoencoder",
+    "n_samples": 1500000,
+    "n_anomalies": 14835,
+    "anomaly_rate": 0.989,
+    "inference_time": 6.3772196769714355,
+    "inference_speed": 235212.22036879172,
+    "mean_reconstruction_error": 0.003391141422104052,
+    "max_reconstruction_error": 345.6797180175781,
+    "threshold": 0.010438507590442904,
+    "training_time": 141.291921377182,
+    "memory_usage_gb": 0.484527587890625
+  },
+  "configuration": {
+    "contamination": 0.01,
+    "random_state": 42,
+    "epochs": 10,
+    "batch_size": 1024,
+    "jax_version": "0.6.2",
+    "backend": "cpu"
+  }
+}

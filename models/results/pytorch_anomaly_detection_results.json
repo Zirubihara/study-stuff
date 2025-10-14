@@ -1,0 +1,44 @@
+{
+  "dataset_info": {
+    "data_path": "../processed/processed_data.parquet",
+    "total_samples": 9999999,
+    "n_features": 11,
+    "feature_names": [
+      "category1",
+      "category2",
+      "category3",
+      "flag",
+      "value1_normalized",
+      "value2_normalized",
+      "year",
+      "month",
+      "quarter",
+      "year_month_encoded",
+      "code_encoded"
+    ],
+    "train_samples": 6999999,
+    "val_samples": 1500000,
+    "test_samples": 1500000
+  },
+  "pytorch_autoencoder": {
+    "model_name": "PyTorch MLP Autoencoder",
+    "n_samples": 1500000,
+    "n_anomalies": 15082,
+    "anomaly_rate": 1.0054666666666667,
+    "inference_time": 7.845461130142212,
+    "inference_speed": 191193.350539589,
+    "mean_reconstruction_error": 0.10044743865728378,
+    "max_reconstruction_error": 1114.653076171875,
+    "threshold": 0.7047542333602905,
+    "training_time": 1183.869374036789,
+    "memory_usage_gb": 0.11739730834960938,
+    "device": "cpu"
+  },
+  "configuration": {
+    "contamination": 0.01,
+    "random_state": 42,
+    "device": "cpu",
+    "epochs": 10,
+    "batch_size": 1024
+  }
+}
