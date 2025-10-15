@@ -15,7 +15,10 @@
       "Bash(../../venv_py310/Scripts/python anomaly_detection_pytorch.py)",
       "Bash(../../venv_py310/Scripts/python:*)",
       "Bash(../venv_py310/Scripts/pip install --force-reinstall requests==2.31.0 urllib3==2.0.7)",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd comprehensive ML/DL framework comparison analysis for 10M dataset\n\nDetailed performance comparison of 5 frameworks (scikit-learn, XGBoost, TensorFlow, PyTorch, JAX) on 10M row anomaly detection task. Analysis includes training/inference metrics, framework rankings, and use case recommendations.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
