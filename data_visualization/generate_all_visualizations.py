@@ -7,6 +7,12 @@ import subprocess
 import sys
 from pathlib import Path
 import time
+import io
+
+# Fix encoding for Windows console
+if sys.platform == 'win32':
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 
 def run_visualization(lib_name, script_path, description):
     """Run a single visualization script"""
