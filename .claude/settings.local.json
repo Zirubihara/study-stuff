@@ -18,7 +18,10 @@
       "Bash(timeout:*)",
       "Bash(git add:*)",
       "Bash(git commit -m \"$(cat <<''EOF''\nAdd comprehensive ML/DL framework comparison analysis for 10M dataset\n\nDetailed performance comparison of 5 frameworks (scikit-learn, XGBoost, TensorFlow, PyTorch, JAX) on 10M row anomaly detection task. Analysis includes training/inference metrics, framework rankings, and use case recommendations.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
