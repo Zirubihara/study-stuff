@@ -13,7 +13,7 @@ import numpy as np
 class DataProcessingVisualizerPlotly:
     """Plotly interactive visualizations for data processing benchmarks"""
 
-    def __init__(self, results_dir="../results", output_dir="./charts_plotly"):
+    def __init__(self, results_dir="../../results", output_dir="./output"):
         self.results_dir = Path(results_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -92,7 +92,7 @@ class DataProcessingVisualizerPlotly:
             legend=dict(title='Library')
         )
 
-        output_file = self.output_dir / 'execution_time_interactive.html'
+        output_file = self.output_dir / 'dp_execution_time.html'
         fig.write_html(str(output_file))
         print(f"  Saved: {output_file}")
 
@@ -133,7 +133,7 @@ class DataProcessingVisualizerPlotly:
             template='plotly_white'
         )
 
-        output_file = self.output_dir / 'operation_heatmap.html'
+        output_file = self.output_dir / 'dp_operation_breakdown.html'
         fig.write_html(str(output_file))
         print(f"  Saved: {output_file}")
 
@@ -190,7 +190,7 @@ class DataProcessingVisualizerPlotly:
             legend=dict(title='Library')
         )
 
-        output_file = self.output_dir / 'scalability_interactive.html'
+        output_file = self.output_dir / 'dp_scalability.html'
         fig.write_html(str(output_file))
         print(f"  Saved: {output_file}")
 

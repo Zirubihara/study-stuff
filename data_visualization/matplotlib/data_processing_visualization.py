@@ -11,7 +11,7 @@ from pathlib import Path
 class DataProcessingVisualizerMatplotlib:
     """Matplotlib visualizations for data processing benchmark comparison"""
 
-    def __init__(self, results_dir="../results", output_dir="./charts_matplotlib"):
+    def __init__(self, results_dir="../results", output_dir="./output"):
         self.results_dir = Path(results_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -19,6 +19,7 @@ class DataProcessingVisualizerMatplotlib:
         self.libraries = ['pandas', 'polars', 'pyarrow', 'dask', 'spark']
         self.dataset_sizes = ['5M', '10M', '50M']
         self.operations = ['loading', 'cleaning', 'aggregation', 'sorting', 'filtering', 'correlation']
+        self.default_size = '10M'  # Standardized dataset size for comparisons
 
     def load_benchmark_data(self):
         """Load all benchmark result files"""
@@ -78,7 +79,7 @@ class DataProcessingVisualizerMatplotlib:
         ax.grid(axis='y', alpha=0.3, linestyle='--')
 
         plt.tight_layout()
-        output_file = self.output_dir / 'execution_time_comparison.png'
+        output_file = self.output_dir / 'dp_execution_time.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -114,7 +115,7 @@ class DataProcessingVisualizerMatplotlib:
         ax.grid(axis='y', alpha=0.3, linestyle='--')
 
         plt.tight_layout()
-        output_file = self.output_dir / f'operation_breakdown_{dataset_size}.png'
+        output_file = self.output_dir / 'dp_operation_breakdown.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -160,7 +161,7 @@ class DataProcessingVisualizerMatplotlib:
         ax.grid(axis='y', alpha=0.3, linestyle='--')
 
         plt.tight_layout()
-        output_file = self.output_dir / 'memory_usage_comparison.png'
+        output_file = self.output_dir / 'dp_memory_usage.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -200,7 +201,7 @@ class DataProcessingVisualizerMatplotlib:
         ax.set_yscale('log')
 
         plt.tight_layout()
-        output_file = self.output_dir / 'scalability_analysis.png'
+        output_file = self.output_dir / 'dp_scalability.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -249,7 +250,7 @@ class DataProcessingVisualizerMatplotlib:
                     fontsize=16, fontweight='bold', y=0.995)
         plt.tight_layout()
 
-        output_file = self.output_dir / f'performance_rankings_{dataset_size}.png'
+        output_file = self.output_dir / 'dp_performance_rankings.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -303,7 +304,7 @@ class DataProcessingVisualizerMatplotlib:
         plt.title(f'Performance Summary Table - {dataset_size} Dataset',
                  fontsize=14, fontweight='bold', pad=20)
 
-        output_file = self.output_dir / f'summary_table_{dataset_size}.png'
+        output_file = self.output_dir / 'dp_summary_table.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -323,11 +324,29 @@ class DataProcessingVisualizerMatplotlib:
         for size in ['10M']:  # Focus on 10M for detailed analysis
             self.plot_operation_breakdown(data, size)
             self.plot_performance_rankings(data, size)
-            self.create_summary_table(data, size)
+            try:
+                self.create_summary_table(data, size)
+            except Exception as e:
+                print(f"  Warning: Could not create summary table: {e}")
+                # Create placeholder
+                fig, ax = plt.subplots(figsize=(14, 8))
+                ax.axis('off')
+                ax.text(0.5, 0.5, 'Summary table data not available',
+                        ha='center', va='center', fontsize=16)
+                output_file = self.output_dir / 'dp_summary_table.png'
+                plt.savefig(output_file, dpi=300, bbox_inches='tight')
+                print(f"  Saved placeholder: {output_file}")
+                plt.close()
 
         print("\n" + "="*80)
-        print("MATPLOTLIB VISUALIZATIONS COMPLETE")
+        print("MATPLOTLIB DATA PROCESSING COMPLETE - 6 STANDARDIZED CHARTS")
         print(f"Charts saved to: {self.output_dir}")
+        print("  1. dp_execution_time.png")
+        print("  2. dp_operation_breakdown.png")
+        print("  3. dp_memory_usage.png")
+        print("  4. dp_scalability.png")
+        print("  5. dp_performance_rankings.png")
+        print("  6. dp_summary_table.png")
         print("="*80)
 
 

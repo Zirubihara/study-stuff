@@ -12,7 +12,7 @@ from pathlib import Path
 class MLFrameworkVisualizerPlotly:
     """Plotly interactive visualizations for ML/DL frameworks"""
 
-    def __init__(self, results_dir="../models/results", output_dir="./charts_plotly"):
+    def __init__(self, results_dir="../../models/results", output_dir="./output"):
         self.results_dir = Path(results_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)

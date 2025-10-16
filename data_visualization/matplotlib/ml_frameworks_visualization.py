@@ -11,7 +11,7 @@ from pathlib import Path
 class MLFrameworkVisualizerMatplotlib:
     """Matplotlib visualizations for ML/DL framework comparison"""
 
-    def __init__(self, results_dir="../models/results", output_dir="./charts_matplotlib"):
+    def __init__(self, results_dir="../../models/results", output_dir="./output"):
         self.results_dir = Path(results_dir)
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -91,7 +91,7 @@ class MLFrameworkVisualizerMatplotlib:
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
 
-        output_file = self.output_dir / 'ml_training_time_comparison.png'
+        output_file = self.output_dir / 'ml_training_time.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -143,7 +143,7 @@ class MLFrameworkVisualizerMatplotlib:
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
 
-        output_file = self.output_dir / 'ml_inference_speed_comparison.png'
+        output_file = self.output_dir / 'ml_inference_speed.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -195,7 +195,7 @@ class MLFrameworkVisualizerMatplotlib:
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
 
-        output_file = self.output_dir / 'ml_memory_usage_comparison.png'
+        output_file = self.output_dir / 'ml_memory_usage.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -249,7 +249,7 @@ class MLFrameworkVisualizerMatplotlib:
         plt.xticks(rotation=45, ha='right')
         plt.tight_layout()
 
-        output_file = self.output_dir / 'ml_anomaly_rate_comparison.png'
+        output_file = self.output_dir / 'ml_anomaly_rate.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -315,7 +315,7 @@ class MLFrameworkVisualizerMatplotlib:
         plt.suptitle('ML/DL Framework Comprehensive Comparison', fontsize=16, fontweight='bold')
         plt.tight_layout()
 
-        output_file = self.output_dir / 'ml_framework_comparison_matrix.png'
+        output_file = self.output_dir / 'ml_comparison_matrix.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -374,7 +374,7 @@ class MLFrameworkVisualizerMatplotlib:
 
         plt.title('ML/DL Framework Performance Summary', fontsize=16, fontweight='bold', pad=20)
 
-        output_file = self.output_dir / 'ml_performance_summary_table.png'
+        output_file = self.output_dir / 'ml_summary_table.png'
         plt.savefig(output_file, dpi=300, bbox_inches='tight')
         print(f"  Saved: {output_file}")
         plt.close()
@@ -399,8 +399,14 @@ class MLFrameworkVisualizerMatplotlib:
         self.plot_performance_summary_table(data)
 
         print("\n" + "="*80)
-        print("MATPLOTLIB ML/DL VISUALIZATIONS COMPLETE")
+        print("MATPLOTLIB ML/DL COMPLETE - 6 STANDARDIZED CHARTS")
         print(f"Charts saved to: {self.output_dir}")
+        print("  1. ml_training_time.png")
+        print("  2. ml_inference_speed.png")
+        print("  3. ml_memory_usage.png")
+        print("  4. ml_anomaly_rate.png")
+        print("  5. ml_comparison_matrix.png")
+        print("  6. ml_summary_table.png")
         print("="*80)
 
 

@@ -15,9 +15,9 @@ class BokehVisualizer:
     """Bokeh visualizations for thesis comparisons"""
 
     def __init__(self,
-                 dp_results_dir="../results",
-                 ml_results_dir="../models/results",
-                 output_dir="./charts_bokeh"):
+                 dp_results_dir="../../results",
+                 ml_results_dir="../../models/results",
+                 output_dir="./output"):
         self.dp_results_dir = Path(dp_results_dir)
         self.ml_results_dir = Path(ml_results_dir)
         self.output_dir = Path(output_dir)
