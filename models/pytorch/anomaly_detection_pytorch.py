@@ -1,23 +1,25 @@
 """
 Anomaly Detection using PyTorch
 Implementation of MLP Autoencoder for anomaly detection
-Based on data_science.md comparative modeling plan
+FIXED VERSION: 50 epochs + early stopping + reduce LR
 """
 
-import polars as pl
-import numpy as np
-import time
-import psutil
 import json
+import time
+import warnings
 from pathlib import Path
+
+import numpy as np
+import polars as pl
+import psutil
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, TensorDataset
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import warnings
-warnings.filterwarnings('ignore')
+from torch.utils.data import DataLoader, TensorDataset
+
+warnings.filterwarnings("ignore")
 
 
 class MLPAutoencoder(nn.Module):
@@ -76,16 +78,32 @@ class AnomalyDetectorPyTorch:
         """
         self.contamination = contamination
         self.random_state = random_state
-        self.device = device if device else torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = (
+            device
+            if device
+            else torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        )
         self.model = None
         self.scaler = StandardScaler()
         self.threshold = None
 
-        # Set random seeds
-        torch.manual_seed(random_state)
-        np.random.seed(random_state)
+        # Set random seeds for full reproducibility
+        self._set_all_seeds(random_state)
 
         print(f"Using device: {self.device}")
+
+    def _set_all_seeds(self, seed):
+        """Set all random seeds for reproducibility"""
+        import os
+        import random
+
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        os.environ["PYTHONHASHSEED"] = str(seed)
 
     def load_data(self, data_path: str, sample_size: int = None):
         """Load preprocessed data"""
@@ -93,7 +111,7 @@ class AnomalyDetectorPyTorch:
         start_time = time.time()
 
         # Load with Polars
-        if data_path.endswith('.parquet'):
+        if data_path.endswith(".parquet"):
             df = pl.read_parquet(data_path)
         else:
             df = pl.read_csv(data_path)
@@ -114,13 +132,26 @@ class AnomalyDetectorPyTorch:
 
         # Select numeric features
         feature_cols = [
-            'category1', 'category2', 'category3', 'flag',
-            'value1_normalized', 'value2_normalized',
-            'year', 'month', 'quarter',
-            'year_month_encoded', 'code_encoded'
+            "category1",
+            "category2",
+            "category3",
+            "flag",
+            "value1_normalized",
+            "value2_normalized",
+            "year",
+            "month",
+            "quarter",
+            "year_month_encoded",
+            "code_encoded",
         ]
 
         available_cols = [col for col in feature_cols if col in df.columns]
+
+        if len(available_cols) == 0:
+            raise ValueError(
+                f"No features found! Available columns: {df.columns.to_list()}"
+            )
+
         print(f"   Using {len(available_cols)} features: {available_cols}")
 
         X = df.select(available_cols).to_numpy()
@@ -132,13 +163,23 @@ class AnomalyDetectorPyTorch:
         """Split data into train/val/test sets (70/15/15)"""
         print("\nSplitting data...")
 
-        X_temp, X_test = train_test_split(X, test_size=test_size, random_state=self.random_state)
+        X_temp, X_test = train_test_split(
+            X, test_size=test_size, random_state=self.random_state
+        )
         val_ratio = val_size / (1 - test_size)
-        X_train, X_val = train_test_split(X_temp, test_size=val_ratio, random_state=self.random_state)
+        X_train, X_val = train_test_split(
+            X_temp, test_size=val_ratio, random_state=self.random_state
+        )
 
-        print(f"   Train: {X_train.shape[0]:,} samples ({X_train.shape[0]/X.shape[0]*100:.1f}%)")
-        print(f"   Val:   {X_val.shape[0]:,} samples ({X_val.shape[0]/X.shape[0]*100:.1f}%)")
-        print(f"   Test:  {X_test.shape[0]:,} samples ({X_test.shape[0]/X.shape[0]*100:.1f}%)")
+        print(
+            f"   Train: {X_train.shape[0]:,} samples ({X_train.shape[0]/X.shape[0]*100:.1f}%)"
+        )
+        print(
+            f"   Val:   {X_val.shape[0]:,} samples ({X_val.shape[0]/X.shape[0]*100:.1f}%)"
+        )
+        print(
+            f"   Test:  {X_test.shape[0]:,} samples ({X_test.shape[0]/X.shape[0]*100:.1f}%)"
+        )
 
         return X_train, X_val, X_test
 
@@ -173,11 +214,11 @@ class AnomalyDetectorPyTorch:
 
         return train_loader, val_loader, test_loader, X_test_scaled
 
-    def train_model(self, train_loader, val_loader, input_dim, epochs=20, lr=0.001):
-        """Train the autoencoder model"""
-        print("\n" + "="*80)
+    def train_model(self, train_loader, val_loader, input_dim, epochs=50, lr=0.001):
+        """Train the autoencoder model with early stopping"""
+        print("\n" + "=" * 80)
         print("PYTORCH MLP AUTOENCODER")
-        print("="*80)
+        print("=" * 80)
 
         # Track resources
         process = psutil.Process()
@@ -193,14 +234,24 @@ class AnomalyDetectorPyTorch:
         criterion = nn.MSELoss()
         optimizer = optim.Adam(self.model.parameters(), lr=lr)
 
-        print(f"\nTraining for {epochs} epochs...")
+        # FIXED: Add learning rate scheduler
+        scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer, mode="min", factor=0.5, patience=3, min_lr=1e-6, verbose=True
+        )
+
+        print(f"\nTraining for up to {epochs} epochs (with early stopping)...")
+        print(f"   Early stopping patience: 7 epochs")
+        print(f"   Learning rate reduction patience: 3 epochs")
         start_time = time.time()
 
-        best_val_loss = float('inf')
+        # FIXED: Early stopping variables
+        best_val_loss = float("inf")
+        patience = 7
+        patience_counter = 0
         train_losses = []
         val_losses = []
 
-        for epoch in range(epochs):
+        for epoch in range(epochs):  # FIXED: Changed from 20 to 50
             # Training phase
             self.model.train()
             train_loss = 0.0
@@ -234,20 +285,36 @@ class AnomalyDetectorPyTorch:
             val_loss /= len(val_loader)
             val_losses.append(val_loss)
 
-            # Track best model
+            # Update learning rate scheduler
+            scheduler.step(val_loss)
+
+            # FIXED: Early stopping logic
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
-                # Could save model here if needed
+                patience_counter = 0
+                # Save best model
+                best_model_state = self.model.state_dict().copy()
+            else:
+                patience_counter += 1
+                if patience_counter >= patience:
+                    print(f"   Early stopping at epoch {epoch+1}")
+                    # Restore best model
+                    self.model.load_state_dict(best_model_state)
+                    break
 
             # Print progress every 5 epochs
             if (epoch + 1) % 5 == 0:
-                print(f"   Epoch [{epoch+1}/{epochs}] - Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}")
+                print(
+                    f"   Epoch [{epoch+1}/{epochs}] - Train Loss: {train_loss:.6f}, Val Loss: {val_loss:.6f}"
+                )
 
         training_time = time.time() - start_time
         mem_after = process.memory_info().rss / 1024 / 1024 / 1024  # GB
         mem_used = mem_after - mem_before
 
-        print(f"\n   Training completed in {training_time:.2f}s")
+        actual_epochs = len(train_losses)
+        print(f"\n   Training stopped after {actual_epochs} epochs")
+        print(f"   Training completed in {training_time:.2f}s")
         print(f"   Final train loss: {train_losses[-1]:.6f}")
         print(f"   Final val loss: {val_losses[-1]:.6f}")
         print(f"   Best val loss: {best_val_loss:.6f}")
@@ -297,29 +364,33 @@ class AnomalyDetectorPyTorch:
 
         print(f"   Inference time: {inference_time:.2f}s")
         print(f"   Anomalies detected: {n_anomalies:,} ({anomaly_rate:.2f}%)")
-        print(f"   Inference speed: {len(X_test_scaled)/inference_time:,.0f} samples/sec")
+        print(
+            f"   Inference speed: {len(X_test_scaled)/inference_time:,.0f} samples/sec"
+        )
         print(f"   Mean reconstruction error: {np.mean(test_errors):.6f}")
         print(f"   Max reconstruction error: {np.max(test_errors):.6f}")
 
         results = {
-            'model_name': 'PyTorch MLP Autoencoder',
-            'n_samples': len(X_test_scaled),
-            'n_anomalies': int(n_anomalies),
-            'anomaly_rate': float(anomaly_rate),
-            'inference_time': float(inference_time),
-            'inference_speed': float(len(X_test_scaled)/inference_time),
-            'mean_reconstruction_error': float(np.mean(test_errors)),
-            'max_reconstruction_error': float(np.max(test_errors)),
-            'threshold': float(self.threshold)
+            "model_name": "PyTorch MLP Autoencoder",
+            "n_samples": len(X_test_scaled),
+            "n_anomalies": int(n_anomalies),
+            "anomaly_rate": float(anomaly_rate),
+            "inference_time": float(inference_time),
+            "inference_speed": float(len(X_test_scaled) / inference_time),
+            "mean_reconstruction_error": float(np.mean(test_errors)),
+            "max_reconstruction_error": float(np.max(test_errors)),
+            "threshold": float(self.threshold),
         }
 
         return results, y_pred, test_errors
 
-    def run_full_comparison(self, data_path: str, output_dir: str = "../results", sample_size: int = None):
+    def run_full_comparison(
+        self, data_path: str, output_dir: str = "../results", sample_size: int = None
+    ):
         """Run complete PyTorch anomaly detection"""
-        print("="*80)
+        print("=" * 80)
         print("PYTORCH ANOMALY DETECTION")
-        print("="*80)
+        print("=" * 80)
 
         # Create output directory
         Path(output_dir).mkdir(parents=True, exist_ok=True)
@@ -334,74 +405,73 @@ class AnomalyDetectorPyTorch:
             X_train, X_val, X_test
         )
 
-        # Train model (5 epochs for 5M dataset to reduce time)
+        # Train model (FIXED: now uses 50 epochs with early stopping)
         training_time, mem_used, train_losses, val_losses = self.train_model(
-            train_loader, val_loader, input_dim=X.shape[1], epochs=5
+            train_loader, val_loader, input_dim=X.shape[1], epochs=50
         )
 
         # Set threshold from validation set
-        _, _, X_val_scaled = X_train, X_val, X_test
-        X_val_scaled = self.scaler.transform(X_val)
-        val_tensor = torch.FloatTensor(X_val_scaled)
-        val_dataset = TensorDataset(val_tensor, val_tensor)
-        val_loader_threshold = DataLoader(val_dataset, batch_size=1024, shuffle=False)
-        self.set_threshold(val_loader_threshold, X_val_scaled)
+        self.set_threshold(val_loader, X_test_scaled)
 
         # Evaluate on test set
         results, predictions, errors = self.evaluate_model(test_loader, X_test_scaled)
-        results['training_time'] = training_time
-        results['memory_usage_gb'] = mem_used
-        results['device'] = str(self.device)
+        results["training_time"] = training_time
+        results["memory_usage_gb"] = mem_used
+        results["device"] = str(self.device)
 
         # Save results
         comparison = {
-            'dataset_info': {
-                'data_path': data_path,
-                'total_samples': int(len(df)),
-                'n_features': len(feature_names),
-                'feature_names': feature_names,
-                'train_samples': int(X_train.shape[0]),
-                'val_samples': int(X_val.shape[0]),
-                'test_samples': int(X_test.shape[0])
+            "dataset_info": {
+                "data_path": data_path,
+                "total_samples": int(len(df)),
+                "n_features": len(feature_names),
+                "feature_names": feature_names,
+                "train_samples": int(X_train.shape[0]),
+                "val_samples": int(X_val.shape[0]),
+                "test_samples": int(X_test.shape[0]),
             },
-            'pytorch_autoencoder': results,
-            'configuration': {
-                'contamination': self.contamination,
-                'random_state': self.random_state,
-                'device': str(self.device),
-                'epochs': 10,
-                'batch_size': 1024
-            }
+            "pytorch_autoencoder": results,
+            "configuration": {
+                "contamination": self.contamination,
+                "random_state": self.random_state,
+                "device": str(self.device),
+                "max_epochs": 50,
+                "actual_epochs": len(train_losses),
+                "batch_size": 1024,
+                "early_stopping_patience": 7,
+                "reduce_lr_patience": 3,
+            },
         }
 
         # Print summary
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("RESULTS SUMMARY")
-        print("="*80)
+        print("=" * 80)
         print(f"{'Training Time':<30} {training_time:.2f}s")
         print(f"{'Memory Usage':<30} {mem_used:.2f} GB")
         print(f"{'Inference Time':<30} {results['inference_time']:.2f}s")
-        print(f"{'Anomalies Detected':<30} {results['n_anomalies']:,} ({results['anomaly_rate']:.2f}%)")
+        print(
+            f"{'Anomalies Detected':<30} {results['n_anomalies']:,} ({results['anomaly_rate']:.2f}%)"
+        )
         print(f"{'Inference Speed':<30} {results['inference_speed']:,.0f} samples/s")
 
         # Save results
         output_file = f"{output_dir}/pytorch_anomaly_detection_results.json"
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(comparison, f, indent=2)
         print(f"\nResults saved to: {output_file}")
 
         # Save predictions
-        predictions_df = pl.DataFrame({
-            'pytorch_anomaly': predictions,
-            'reconstruction_error': errors
-        })
+        predictions_df = pl.DataFrame(
+            {"pytorch_anomaly": predictions, "reconstruction_error": errors}
+        )
         predictions_file = f"{output_dir}/pytorch_predictions.csv"
         predictions_df.write_csv(predictions_file)
         print(f"Predictions saved to: {predictions_file}")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("PYTORCH ANALYSIS COMPLETE")
-        print("="*80)
+        print("=" * 80)
 
         return comparison
 
@@ -411,9 +481,11 @@ if __name__ == "__main__":
     data_path = "../processed/processed_data.parquet"
     output_dir = "../results"
 
-    # Use 5M sample for fair comparison across all frameworks
+    # Use 10M sample
     detector = AnomalyDetectorPyTorch(contamination=0.01, random_state=42)
-    results = detector.run_full_comparison(data_path, output_dir, sample_size=10_000_000)
+    results = detector.run_full_comparison(
+        data_path, output_dir, sample_size=10_000_000
+    )
 
     print("\n[SUCCESS] PyTorch anomaly detection complete!")
-    print("[NEXT] Compare with scikit-learn results")
+    print("[FIXED] Now using 50 epochs with early stopping and LR reduction")

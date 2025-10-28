@@ -1,7 +1,7 @@
 """
 Anomaly Detection using TensorFlow/Keras
 Implementation of MLP Autoencoder for anomaly detection
-Based on data_science.md comparative modeling plan
+FIXED VERSION: 50 epochs + early stopping + reduce LR
 """
 
 import polars as pl
@@ -13,12 +13,15 @@ from pathlib import Path
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers, Model
+from tensorflow.keras.callbacks import EarlyStopping, ReduceLROnPlateau
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 import warnings
-warnings.filterwarnings('ignore')
+
+warnings.filterwarnings("ignore")
 import os
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'  # Reduce TensorFlow logging
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"  # Reduce TensorFlow logging
 
 
 class MLPAutoencoderKeras(Model):
@@ -37,7 +40,7 @@ class MLPAutoencoderKeras(Model):
         # Encoder
         self.encoder_layers = []
         for hidden_dim in hidden_dims:
-            self.encoder_layers.append(layers.Dense(hidden_dim, activation='relu'))
+            self.encoder_layers.append(layers.Dense(hidden_dim, activation="relu"))
             self.encoder_layers.append(layers.Dropout(0.2))
 
         # Decoder (mirror of encoder)
@@ -45,10 +48,12 @@ class MLPAutoencoderKeras(Model):
         reversed_dims = list(reversed(hidden_dims[:-1])) + [input_dim]
         for i, hidden_dim in enumerate(reversed_dims):
             if i < len(reversed_dims) - 1:
-                self.decoder_layers.append(layers.Dense(hidden_dim, activation='relu'))
+                self.decoder_layers.append(layers.Dense(hidden_dim, activation="relu"))
                 self.decoder_layers.append(layers.Dropout(0.2))
             else:
-                self.decoder_layers.append(layers.Dense(hidden_dim, activation='linear'))
+                self.decoder_layers.append(
+                    layers.Dense(hidden_dim, activation="linear")
+                )
 
     def call(self, x, training=False):
         """Forward pass through autoencoder"""
@@ -80,12 +85,21 @@ class AnomalyDetectorTensorFlow:
         self.scaler = StandardScaler()
         self.threshold = None
 
-        # Set random seeds
-        tf.random.set_seed(random_state)
-        np.random.seed(random_state)
+        # Set random seeds for full reproducibility
+        self._set_all_seeds(random_state)
 
         print(f"TensorFlow version: {tf.__version__}")
         print(f"GPU available: {len(tf.config.list_physical_devices('GPU')) > 0}")
+
+    def _set_all_seeds(self, seed):
+        """Set all random seeds for reproducibility"""
+        import random
+
+        random.seed(seed)
+        np.random.seed(seed)
+        tf.random.set_seed(seed)
+        os.environ["PYTHONHASHSEED"] = str(seed)
+        os.environ["TF_DETERMINISTIC_OPS"] = "1"
 
     def load_data(self, data_path: str, sample_size: int = None):
         """Load preprocessed data"""
@@ -93,7 +107,7 @@ class AnomalyDetectorTensorFlow:
         start_time = time.time()
 
         # Load with Polars
-        if data_path.endswith('.parquet'):
+        if data_path.endswith(".parquet"):
             df = pl.read_parquet(data_path)
         else:
             df = pl.read_csv(data_path)
@@ -114,13 +128,26 @@ class AnomalyDetectorTensorFlow:
 
         # Select numeric features
         feature_cols = [
-            'category1', 'category2', 'category3', 'flag',
-            'value1_normalized', 'value2_normalized',
-            'year', 'month', 'quarter',
-            'year_month_encoded', 'code_encoded'
+            "category1",
+            "category2",
+            "category3",
+            "flag",
+            "value1_normalized",
+            "value2_normalized",
+            "year",
+            "month",
+            "quarter",
+            "year_month_encoded",
+            "code_encoded",
         ]
 
         available_cols = [col for col in feature_cols if col in df.columns]
+
+        if len(available_cols) == 0:
+            raise ValueError(
+                f"No features found! Available columns: {df.columns.to_list()}"
+            )
+
         print(f"   Using {len(available_cols)} features: {available_cols}")
 
         X = df.select(available_cols).to_numpy()
@@ -132,21 +159,31 @@ class AnomalyDetectorTensorFlow:
         """Split data into train/val/test sets (70/15/15)"""
         print("\nSplitting data...")
 
-        X_temp, X_test = train_test_split(X, test_size=test_size, random_state=self.random_state)
+        X_temp, X_test = train_test_split(
+            X, test_size=test_size, random_state=self.random_state
+        )
         val_ratio = val_size / (1 - test_size)
-        X_train, X_val = train_test_split(X_temp, test_size=val_ratio, random_state=self.random_state)
+        X_train, X_val = train_test_split(
+            X_temp, test_size=val_ratio, random_state=self.random_state
+        )
 
-        print(f"   Train: {X_train.shape[0]:,} samples ({X_train.shape[0]/X.shape[0]*100:.1f}%)")
-        print(f"   Val:   {X_val.shape[0]:,} samples ({X_val.shape[0]/X.shape[0]*100:.1f}%)")
-        print(f"   Test:  {X_test.shape[0]:,} samples ({X_test.shape[0]/X.shape[0]*100:.1f}%)")
+        print(
+            f"   Train: {X_train.shape[0]:,} samples ({X_train.shape[0]/X.shape[0]*100:.1f}%)"
+        )
+        print(
+            f"   Val:   {X_val.shape[0]:,} samples ({X_val.shape[0]/X.shape[0]*100:.1f}%)"
+        )
+        print(
+            f"   Test:  {X_test.shape[0]:,} samples ({X_test.shape[0]/X.shape[0]*100:.1f}%)"
+        )
 
         return X_train, X_val, X_test
 
-    def train_model(self, X_train, X_val, input_dim, epochs=5, batch_size=1024):
-        """Train the autoencoder model"""
-        print("\n" + "="*80)
+    def train_model(self, X_train, X_val, input_dim, epochs=50, batch_size=1024):
+        """Train the autoencoder model with early stopping"""
+        print("\n" + "=" * 80)
         print("TENSORFLOW/KERAS MLP AUTOENCODER")
-        print("="*80)
+        print("=" * 80)
 
         # Track resources
         process = psutil.Process()
@@ -163,8 +200,7 @@ class AnomalyDetectorTensorFlow:
 
         # Compile model
         self.model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=0.001),
-            loss='mse'
+            optimizer=keras.optimizers.Adam(learning_rate=0.001), loss="mse"
         )
 
         # Build the model by calling it once
@@ -174,17 +210,39 @@ class AnomalyDetectorTensorFlow:
         total_params = self.model.count_params()
         print(f"   Total parameters: {total_params:,}")
 
-        print(f"\nTraining for {epochs} epochs...")
+        # FIXED: Add callbacks for early stopping and learning rate reduction
+        early_stop = EarlyStopping(
+            monitor="val_loss",
+            patience=7,
+            restore_best_weights=True,
+            verbose=1,
+            mode="min",
+        )
+
+        reduce_lr = ReduceLROnPlateau(
+            monitor="val_loss",
+            factor=0.5,
+            patience=3,
+            min_lr=1e-6,
+            verbose=1,
+            mode="min",
+        )
+
+        print(f"\nTraining for up to {epochs} epochs (with early stopping)...")
+        print(f"   Early stopping patience: 7 epochs")
+        print(f"   Learning rate reduction patience: 3 epochs")
         start_time = time.time()
 
         # Train model
         history = self.model.fit(
-            X_train_scaled, X_train_scaled,
-            epochs=epochs,
+            X_train_scaled,
+            X_train_scaled,
+            epochs=epochs,  # FIXED: Changed from 5 to 50
             batch_size=batch_size,
             validation_data=(X_val_scaled, X_val_scaled),
+            callbacks=[early_stop, reduce_lr],  # FIXED: Added callbacks
             verbose=0,
-            shuffle=True
+            shuffle=True,
         )
 
         training_time = time.time() - start_time
@@ -192,11 +250,21 @@ class AnomalyDetectorTensorFlow:
         mem_used = mem_after - mem_before
 
         # Print training progress
-        train_losses = history.history['loss']
-        val_losses = history.history['val_loss']
+        train_losses = history.history["loss"]
+        val_losses = history.history["val_loss"]
+        actual_epochs = len(train_losses)
 
-        print(f"   Epoch [5/{epochs}] - Train Loss: {train_losses[4]:.6f}, Val Loss: {val_losses[4]:.6f}")
-        print(f"   Epoch [{epochs}/{epochs}] - Train Loss: {train_losses[-1]:.6f}, Val Loss: {val_losses[-1]:.6f}")
+        print(f"\n   Training stopped after {actual_epochs} epochs")
+        print(
+            f"   Epoch [5/{actual_epochs}] - Train Loss: {train_losses[4]:.6f}, Val Loss: {val_losses[4]:.6f}"
+        )
+        if actual_epochs >= 10:
+            print(
+                f"   Epoch [10/{actual_epochs}] - Train Loss: {train_losses[9]:.6f}, Val Loss: {val_losses[9]:.6f}"
+            )
+        print(
+            f"   Epoch [{actual_epochs}/{actual_epochs}] - Train Loss: {train_losses[-1]:.6f}, Val Loss: {val_losses[-1]:.6f}"
+        )
 
         print(f"\n   Training completed in {training_time:.2f}s")
         print(f"   Final train loss: {train_losses[-1]:.6f}")
@@ -204,7 +272,14 @@ class AnomalyDetectorTensorFlow:
         print(f"   Best val loss: {min(val_losses):.6f}")
         print(f"   Memory used: {mem_used:.2f} GB")
 
-        return training_time, mem_used, train_losses, val_losses, X_train_scaled, X_val_scaled
+        return (
+            training_time,
+            mem_used,
+            train_losses,
+            val_losses,
+            X_train_scaled,
+            X_val_scaled,
+        )
 
     def calculate_reconstruction_errors(self, X_scaled):
         """Calculate reconstruction errors for anomaly detection"""
@@ -238,29 +313,33 @@ class AnomalyDetectorTensorFlow:
 
         print(f"   Inference time: {inference_time:.2f}s")
         print(f"   Anomalies detected: {n_anomalies:,} ({anomaly_rate:.2f}%)")
-        print(f"   Inference speed: {len(X_test_scaled)/inference_time:,.0f} samples/sec")
+        print(
+            f"   Inference speed: {len(X_test_scaled)/inference_time:,.0f} samples/sec"
+        )
         print(f"   Mean reconstruction error: {np.mean(test_errors):.6f}")
         print(f"   Max reconstruction error: {np.max(test_errors):.6f}")
 
         results = {
-            'model_name': 'TensorFlow/Keras MLP Autoencoder',
-            'n_samples': len(X_test_scaled),
-            'n_anomalies': int(n_anomalies),
-            'anomaly_rate': float(anomaly_rate),
-            'inference_time': float(inference_time),
-            'inference_speed': float(len(X_test_scaled)/inference_time),
-            'mean_reconstruction_error': float(np.mean(test_errors)),
-            'max_reconstruction_error': float(np.max(test_errors)),
-            'threshold': float(self.threshold)
+            "model_name": "TensorFlow/Keras MLP Autoencoder",
+            "n_samples": len(X_test_scaled),
+            "n_anomalies": int(n_anomalies),
+            "anomaly_rate": float(anomaly_rate),
+            "inference_time": float(inference_time),
+            "inference_speed": float(len(X_test_scaled) / inference_time),
+            "mean_reconstruction_error": float(np.mean(test_errors)),
+            "max_reconstruction_error": float(np.max(test_errors)),
+            "threshold": float(self.threshold),
         }
 
         return results, y_pred, test_errors
 
-    def run_full_comparison(self, data_path: str, output_dir: str = "../results", sample_size: int = None):
+    def run_full_comparison(
+        self, data_path: str, output_dir: str = "../results", sample_size: int = None
+    ):
         """Run complete TensorFlow anomaly detection"""
-        print("="*80)
+        print("=" * 80)
         print("TENSORFLOW/KERAS ANOMALY DETECTION")
-        print("="*80)
+        print("=" * 80)
 
         # Create output directory
         Path(output_dir).mkdir(parents=True, exist_ok=True)
@@ -270,10 +349,15 @@ class AnomalyDetectorTensorFlow:
         X, feature_names = self.prepare_features(df)
         X_train, X_val, X_test = self.split_data(X)
 
-        # Train model
-        training_time, mem_used, train_losses, val_losses, X_train_scaled, X_val_scaled = self.train_model(
-            X_train, X_val, input_dim=X.shape[1], epochs=5
-        )
+        # Train model (FIXED: now uses 50 epochs with early stopping)
+        (
+            training_time,
+            mem_used,
+            train_losses,
+            val_losses,
+            X_train_scaled,
+            X_val_scaled,
+        ) = self.train_model(X_train, X_val, input_dim=X.shape[1], epochs=50)
 
         # Set threshold from validation set
         self.set_threshold(X_val_scaled)
@@ -281,58 +365,62 @@ class AnomalyDetectorTensorFlow:
         # Evaluate on test set
         X_test_scaled = self.scaler.transform(X_test)
         results, predictions, errors = self.evaluate_model(X_test_scaled)
-        results['training_time'] = training_time
-        results['memory_usage_gb'] = mem_used
+        results["training_time"] = training_time
+        results["memory_usage_gb"] = mem_used
 
         # Save results
         comparison = {
-            'dataset_info': {
-                'data_path': data_path,
-                'total_samples': int(len(df)),
-                'n_features': len(feature_names),
-                'feature_names': feature_names,
-                'train_samples': int(X_train.shape[0]),
-                'val_samples': int(X_val.shape[0]),
-                'test_samples': int(X_test.shape[0])
+            "dataset_info": {
+                "data_path": data_path,
+                "total_samples": int(len(df)),
+                "n_features": len(feature_names),
+                "feature_names": feature_names,
+                "train_samples": int(X_train.shape[0]),
+                "val_samples": int(X_val.shape[0]),
+                "test_samples": int(X_test.shape[0]),
             },
-            'tensorflow_autoencoder': results,
-            'configuration': {
-                'contamination': self.contamination,
-                'random_state': self.random_state,
-                'epochs': 10,
-                'batch_size': 1024,
-                'tensorflow_version': tf.__version__
-            }
+            "tensorflow_autoencoder": results,
+            "configuration": {
+                "contamination": self.contamination,
+                "random_state": self.random_state,
+                "max_epochs": 50,
+                "actual_epochs": len(train_losses),
+                "batch_size": 1024,
+                "early_stopping_patience": 7,
+                "reduce_lr_patience": 3,
+                "tensorflow_version": tf.__version__,
+            },
         }
 
         # Print summary
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("RESULTS SUMMARY")
-        print("="*80)
+        print("=" * 80)
         print(f"{'Training Time':<30} {training_time:.2f}s")
         print(f"{'Memory Usage':<30} {mem_used:.2f} GB")
         print(f"{'Inference Time':<30} {results['inference_time']:.2f}s")
-        print(f"{'Anomalies Detected':<30} {results['n_anomalies']:,} ({results['anomaly_rate']:.2f}%)")
+        print(
+            f"{'Anomalies Detected':<30} {results['n_anomalies']:,} ({results['anomaly_rate']:.2f}%)"
+        )
         print(f"{'Inference Speed':<30} {results['inference_speed']:,.0f} samples/s")
 
         # Save results
         output_file = f"{output_dir}/tensorflow_anomaly_detection_results.json"
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(comparison, f, indent=2)
         print(f"\nResults saved to: {output_file}")
 
         # Save predictions
-        predictions_df = pl.DataFrame({
-            'tensorflow_anomaly': predictions,
-            'reconstruction_error': errors
-        })
+        predictions_df = pl.DataFrame(
+            {"tensorflow_anomaly": predictions, "reconstruction_error": errors}
+        )
         predictions_file = f"{output_dir}/tensorflow_predictions.csv"
         predictions_df.write_csv(predictions_file)
         print(f"Predictions saved to: {predictions_file}")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("TENSORFLOW/KERAS ANALYSIS COMPLETE")
-        print("="*80)
+        print("=" * 80)
 
         return comparison
 
@@ -342,9 +430,11 @@ if __name__ == "__main__":
     data_path = "../processed/processed_data.parquet"
     output_dir = "../results"
 
-    # Use 1M sample (same as PyTorch for fair comparison)
+    # Use 10M sample
     detector = AnomalyDetectorTensorFlow(contamination=0.01, random_state=42)
-    results = detector.run_full_comparison(data_path, output_dir, sample_size=10_000_000)
+    results = detector.run_full_comparison(
+        data_path, output_dir, sample_size=10_000_000
+    )
 
     print("\n[SUCCESS] TensorFlow/Keras anomaly detection complete!")
-    print("[NEXT] Compare with scikit-learn and PyTorch results")
+    print("[FIXED] Now using 50 epochs with early stopping and LR reduction")

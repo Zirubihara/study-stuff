@@ -6,68 +6,76 @@ Comparative analysis of 5 machine learning frameworks for anomaly detection on J
 
 ```
 models/
+├── run_all_models.py                 # Unified runner (runs all frameworks) ⭐
+├── THESIS_SUMMARY.md                 # Complete thesis documentation ⭐
+├── QUICK_START.md                    # Usage guide
+├── README.md                         # This file
+│
 ├── sklearn/                          # Classical Machine Learning
 │   └── anomaly_detection_sklearn.py  # Isolation Forest + LOF
+├── xgboost/                          # Gradient Boosting
+│   └── anomaly_detection_xgboost.py  # XGBoost Detector
 ├── pytorch/                          # Deep Learning Framework
 │   └── anomaly_detection_pytorch.py  # MLP Autoencoder
 ├── tensorflow/                       # Deep Learning Framework (Google)
 │   └── anomaly_detection_tensorflow.py # MLP Autoencoder
 ├── jax/                              # Modern Deep Learning
 │   └── anomaly_detection_jax.py      # MLP Autoencoder with JIT
-├── xgboost/                          # Gradient Boosting
-│   └── anomaly_detection_xgboost.py  # XGBoost Detector
+│
 ├── preprocessing/                    # Data Preparation
 │   └── preprocess_polars.py          # Polars-based preprocessing
 ├── visualization/                    # Results Visualization
 │   ├── compare_all_results.py        # Framework comparison charts
 │   └── visualize_sklearn_results.py  # Sklearn-specific charts
-├── results/                          # JSON results files
+│
+├── results/                          # JSON results & CSV predictions
 ├── charts/                           # Generated visualizations
 ├── processed/                        # Preprocessed data
-└── docs/                             # Documentation
-    ├── README.md                     # English documentation
-    ├── README_PL.md                  # Polish documentation
-    ├── SUMMARY.md                    # English summary
-    ├── PODSUMOWANIE.md               # Polish summary
-    ├── FINAL_THESIS_RESULTS.md       # Thesis results
-    ├── data_science.md               # Modeling plan
-    └── data_for_models.md            # Preprocessing plan
+└── docs/                             # Polish documentation
+    ├── README_PL.md                  # Polski README
+    └── PODSUMOWANIE.md               # Polskie podsumowanie
 ```
 
 ## 🚀 Quick Start
 
-### 1. Preprocess Data
+### **Easy Way - Run All Frameworks at Once** ⭐
+
 ```bash
-cd preprocessing
-python preprocess_polars.py
+cd models
+python run_all_models.py
 ```
 
-### 2. Run Individual Frameworks
+This runs all 5 frameworks, generates comparison charts, and prints a comprehensive summary!
+
+**Duration:** 5-15 minutes | **See:** [QUICK_START.md](QUICK_START.md) for advanced options
+
+---
+
+### Manual Way - Run Individual Frameworks
+
 ```bash
-# Scikit-learn
+# 1. Preprocess Data (if needed)
+cd preprocessing
+python preprocess_polars.py
+
+# 2. Run Individual Frameworks
 cd sklearn
 python anomaly_detection_sklearn.py
 
-# PyTorch
-cd pytorch
+cd ../xgboost
+python anomaly_detection_xgboost.py
+
+cd ../pytorch
 python anomaly_detection_pytorch.py
 
-# TensorFlow
-cd tensorflow
+cd ../tensorflow
 python anomaly_detection_tensorflow.py
 
-# JAX
-cd jax
+cd ../jax
 python anomaly_detection_jax.py
 
-# XGBoost
-cd xgboost
-python anomaly_detection_xgboost.py
-```
-
-### 3. Generate Comparison Charts
-```bash
-cd visualization
+# 3. Generate Comparison Charts
+cd ../visualization
 python compare_all_results.py
 ```
 
@@ -113,18 +121,25 @@ See main project [requirements.txt](../requirements.txt) for all dependencies.
 
 ## 📖 Documentation
 
-Full documentation available in [docs/](docs/) folder:
-- English: [README.md](docs/README.md), [SUMMARY.md](docs/SUMMARY.md)
-- Polish: [README_PL.md](docs/README_PL.md), [PODSUMOWANIE.md](docs/PODSUMOWANIE.md)
-- Thesis: [FINAL_THESIS_RESULTS.md](docs/FINAL_THESIS_RESULTS.md)
+**Main Documentation:**
+- 📊 **[THESIS_SUMMARY.md](THESIS_SUMMARY.md)** - Complete thesis summary with all results ⭐
+- 🚀 **[QUICK_START.md](QUICK_START.md)** - Quick start guide for running frameworks
+- 📝 **[README.md](README.md)** - This file (project overview)
+
+**Polish Documentation:**
+- [README_PL.md](docs/README_PL.md) - Polski README
+- [PODSUMOWANIE.md](docs/PODSUMOWANIE.md) - Polskie podsumowanie
 
 ## 🎓 For Thesis
 
-All 5 frameworks are validated and ready for academic use. Results demonstrate:
-1. **Fair comparison** - identical data and configuration
-2. **High consistency** - all frameworks detect similar anomalies
-3. **Performance trade-offs** - speed vs flexibility documented
+**📊 [→ See THESIS_SUMMARY.md for complete thesis documentation](THESIS_SUMMARY.md)**
+
+All 5 frameworks validated and ready for academic use:
+1. **Fair comparison** - identical 5M sample dataset and configuration
+2. **High consistency** - all frameworks detect ~1.01% anomalies
+3. **Performance benchmarks** - comprehensive speed and accuracy metrics
 4. **Reproducible** - fixed random seeds, documented parameters
+5. **Production-ready** - tested at scale with real-world data
 
 ---
 

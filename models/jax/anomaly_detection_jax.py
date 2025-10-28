@@ -1,23 +1,24 @@
 """
 Anomaly Detection using JAX
 Implementation of MLP Autoencoder for anomaly detection
-Based on data_science.md comparative modeling plan
+FIXED VERSION: 50 epochs + early stopping
 """
 
-import polars as pl
-import numpy as np
-import time
-import psutil
 import json
+import time
+import warnings
 from pathlib import Path
+
 import jax
 import jax.numpy as jnp
-from jax import grad, jit, vmap
-from jax import random
+import numpy as np
 import optax
+import polars as pl
+import psutil
+from jax import grad, jit, random, vmap
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-import warnings
+
 warnings.filterwarnings('ignore')
 
 
@@ -108,6 +109,9 @@ class AnomalyDetectorJAX:
         self.scaler = StandardScaler()
         self.threshold = None
 
+        # Set reproducibility
+        np.random.seed(random_state)
+
         print(f"JAX version: {jax.__version__}")
         print(f"JAX backend: {jax.default_backend()}")
 
@@ -145,6 +149,10 @@ class AnomalyDetectorJAX:
         ]
 
         available_cols = [col for col in feature_cols if col in df.columns]
+        
+        if len(available_cols) == 0:
+            raise ValueError(f"No features found! Available columns: {df.columns.to_list()}")
+        
         print(f"   Using {len(available_cols)} features: {available_cols}")
 
         X = df.select(available_cols).to_numpy()
@@ -166,18 +174,20 @@ class AnomalyDetectorJAX:
 
         return X_train, X_val, X_test
 
-    def create_batches(self, X, batch_size=1024):
+    def create_batches(self, X, batch_size=1024, shuffle=True):
         """Create batches from data"""
         n_samples = X.shape[0]
         indices = np.arange(n_samples)
-        np.random.shuffle(indices)
+        
+        if shuffle:
+            np.random.shuffle(indices)
 
         for start_idx in range(0, n_samples, batch_size):
             end_idx = min(start_idx + batch_size, n_samples)
             yield X[indices[start_idx:end_idx]]
 
-    def train_model(self, X_train, X_val, input_dim, epochs=5, batch_size=1024, lr=0.001):
-        """Train the autoencoder model"""
+    def train_model(self, X_train, X_val, input_dim, epochs=50, batch_size=1024, lr=0.001):
+        """Train the autoencoder model with early stopping"""
         print("\n" + "="*80)
         print("JAX MLP AUTOENCODER")
         print("="*80)
@@ -197,8 +207,13 @@ class AnomalyDetectorJAX:
         total_params = self.model.count_params()
         print(f"   Total parameters: {total_params:,}")
 
-        # Optimizer
-        optimizer = optax.adam(lr)
+        # Optimizer with exponential decay schedule
+        scheduler = optax.exponential_decay(
+            init_value=lr,
+            transition_steps=1000,
+            decay_rate=0.95
+        )
+        optimizer = optax.adam(scheduler)
         opt_state = optimizer.init(self.model.params)
 
         # JIT compile the update function
@@ -209,17 +224,23 @@ class AnomalyDetectorJAX:
             params = optax.apply_updates(params, updates)
             return params, opt_state, loss_value
 
-        print(f"\nTraining for {epochs} epochs...")
+        print(f"\nTraining for up to {epochs} epochs (with early stopping)...")
+        print(f"   Early stopping patience: 7 epochs")
         start_time = time.time()
 
+        # FIXED: Early stopping variables
+        best_val_loss = float('inf')
+        patience = 7
+        patience_counter = 0
         train_losses = []
         val_losses = []
+        best_params = None
 
-        for epoch in range(epochs):
+        for epoch in range(epochs):  # FIXED: Changed from 5 to 50
             # Training phase
             train_loss = 0.0
             n_batches = 0
-            for batch in self.create_batches(X_train_scaled, batch_size):
+            for batch in self.create_batches(X_train_scaled, batch_size, shuffle=True):
                 batch_jax = jnp.array(batch)
                 self.model.params, opt_state, loss = update(self.model.params, opt_state, batch_jax)
                 train_loss += float(loss)
@@ -231,7 +252,7 @@ class AnomalyDetectorJAX:
             # Validation phase
             val_loss = 0.0
             n_val_batches = 0
-            for batch in self.create_batches(X_val_scaled, batch_size):
+            for batch in self.create_batches(X_val_scaled, batch_size, shuffle=False):
                 batch_jax = jnp.array(batch)
                 loss = self.model.loss_fn(self.model.params, batch_jax)
                 val_loss += float(loss)
@@ -239,6 +260,20 @@ class AnomalyDetectorJAX:
 
             val_loss /= n_val_batches
             val_losses.append(val_loss)
+
+            # FIXED: Early stopping logic
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                patience_counter = 0
+                # Save best params (deep copy)
+                best_params = {k: jnp.array(v) for k, v in self.model.params.items()}
+            else:
+                patience_counter += 1
+                if patience_counter >= patience:
+                    print(f"   Early stopping at epoch {epoch+1}")
+                    # Restore best params
+                    self.model.params = best_params
+                    break
 
             # Print progress every 5 epochs
             if (epoch + 1) % 5 == 0:
@@ -248,10 +283,12 @@ class AnomalyDetectorJAX:
         mem_after = process.memory_info().rss / 1024 / 1024 / 1024  # GB
         mem_used = mem_after - mem_before
 
-        print(f"\n   Training completed in {training_time:.2f}s")
+        actual_epochs = len(train_losses)
+        print(f"\n   Training stopped after {actual_epochs} epochs")
+        print(f"   Training completed in {training_time:.2f}s")
         print(f"   Final train loss: {train_losses[-1]:.6f}")
         print(f"   Final val loss: {val_losses[-1]:.6f}")
-        print(f"   Best val loss: {min(val_losses):.6f}")
+        print(f"   Best val loss: {best_val_loss:.6f}")
         print(f"   Memory used: {mem_used:.2f} GB")
 
         return training_time, mem_used, train_losses, val_losses, X_train_scaled, X_val_scaled
@@ -326,9 +363,9 @@ class AnomalyDetectorJAX:
         X, feature_names = self.prepare_features(df)
         X_train, X_val, X_test = self.split_data(X)
 
-        # Train model
+        # Train model (FIXED: now uses 50 epochs with early stopping)
         training_time, mem_used, train_losses, val_losses, X_train_scaled, X_val_scaled = self.train_model(
-            X_train, X_val, input_dim=X.shape[1], epochs=5
+            X_train, X_val, input_dim=X.shape[1], epochs=50
         )
 
         # Set threshold from validation set
@@ -355,8 +392,10 @@ class AnomalyDetectorJAX:
             'configuration': {
                 'contamination': self.contamination,
                 'random_state': self.random_state,
-                'epochs': 10,
+                'max_epochs': 50,
+                'actual_epochs': len(train_losses),
                 'batch_size': 1024,
+                'early_stopping_patience': 7,
                 'jax_version': jax.__version__,
                 'backend': jax.default_backend()
             }
@@ -399,9 +438,55 @@ if __name__ == "__main__":
     data_path = "../processed/processed_data.parquet"
     output_dir = "../results"
 
-    # Use 1M sample (same as PyTorch/TensorFlow for fair comparison)
+    # Use 10M sample
     detector = AnomalyDetectorJAX(contamination=0.01, random_state=42)
     results = detector.run_full_comparison(data_path, output_dir, sample_size=10_000_000)
 
     print("\n[SUCCESS] JAX anomaly detection complete!")
-    print("[COMPLETE] All frameworks implemented!")
+    print("[FIXED] Now using 50 epochs with early stopping")
+        # Print summary
+        print("\n" + "=" * 80)
+        print("RESULTS SUMMARY")
+        print("=" * 80)
+        print(f"{'Training Time':<30} {training_time:.2f}s")
+        print(f"{'Memory Usage':<30} {mem_used:.2f} GB")
+        print(f"{'Inference Time':<30} {results['inference_time']:.2f}s")
+        print(
+            f"{'Anomalies Detected':<30} {results['n_anomalies']:,} ({results['anomaly_rate']:.2f}%)"
+        )
+        print(f"{'Inference Speed':<30} {results['inference_speed']:,.0f} samples/s")
+
+        # Save results
+        output_file = f"{output_dir}/jax_anomaly_detection_results.json"
+        with open(output_file, "w") as f:
+            json.dump(comparison, f, indent=2)
+        print(f"\nResults saved to: {output_file}")
+
+        # Save predictions
+        predictions_df = pl.DataFrame(
+            {"jax_anomaly": predictions, "reconstruction_error": errors}
+        )
+        predictions_file = f"{output_dir}/jax_predictions.csv"
+        predictions_df.write_csv(predictions_file)
+        print(f"Predictions saved to: {predictions_file}")
+
+        print("\n" + "=" * 80)
+        print("JAX ANALYSIS COMPLETE")
+        print("=" * 80)
+
+        return comparison
+
+
+if __name__ == "__main__":
+    # Run JAX anomaly detection on preprocessed data
+    data_path = "../processed/processed_data.parquet"
+    output_dir = "../results"
+
+    # Use 10M sample
+    detector = AnomalyDetectorJAX(contamination=0.01, random_state=42)
+    results = detector.run_full_comparison(
+        data_path, output_dir, sample_size=10_000_000
+    )
+
+    print("\n[SUCCESS] JAX anomaly detection complete!")
+    print("[FIXED] Now using 50 epochs with early stopping")
