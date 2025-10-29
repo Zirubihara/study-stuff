@@ -379,6 +379,152 @@ class MLFrameworkVisualizerMatplotlib:
         print(f"  Saved: {output_file}")
         plt.close()
 
+    def plot_ml_training_vs_inference(self, data):
+        """Scatter plot: Training time vs Inference speed"""
+        print("\nCreating training vs inference scatter plot...")
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        colors = plt.cm.Set2(np.linspace(0, 1, len(self.frameworks)))
+
+        for i, fw in enumerate(self.frameworks):
+            if fw not in data:
+                continue
+
+            if fw == 'sklearn':
+                model_data = data[fw].get('isolation_forest', {})
+            elif fw in ['pytorch', 'tensorflow', 'jax']:
+                model_data = data[fw].get(f'{fw}_autoencoder', {})
+            elif fw == 'xgboost':
+                model_data = data[fw].get('xgboost_detector', {})
+            else:
+                continue
+
+            train = model_data.get('training_time', 0)
+            infer = model_data.get('inference_speed', 0)
+
+            if train > 0 and infer > 0:
+                ax.scatter([train], [infer], s=150, c=[colors[i]],
+                          label=self.framework_names[fw], alpha=0.7)
+                ax.annotate(self.framework_names[fw], (train, infer),
+                           xytext=(5, 5), textcoords='offset points', fontsize=9)
+
+        ax.set_xlabel('Training Time (seconds)', fontsize=12)
+        ax.set_ylabel('Inference Speed (samples/sec)', fontsize=12)
+        ax.set_title('ML/DL Training vs Inference Trade-off',
+                     fontsize=14, fontweight='bold')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+
+        output_file = self.output_dir / 'ml_training_vs_inference.png'
+        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        print(f"  Saved: {output_file}")
+        plt.close()
+
+    def plot_ml_framework_radar(self, data):
+        """Radar chart for ML framework comparison"""
+        print("\nCreating ML framework radar chart...")
+
+        fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(projection='polar'))
+
+        metrics = ['Training', 'Inference', 'Memory']
+        N = len(metrics)
+        angles = [n / float(N) * 2 * np.pi for n in range(N)]
+        angles += angles[:1]
+
+        colors = plt.cm.Set2(np.linspace(0, 1, len(self.frameworks)))
+
+        for i, fw in enumerate(self.frameworks):
+            if fw not in data:
+                continue
+
+            if fw == 'sklearn':
+                model_data = data[fw].get('isolation_forest', {})
+            elif fw in ['pytorch', 'tensorflow', 'jax']:
+                model_data = data[fw].get(f'{fw}_autoencoder', {})
+            elif fw == 'xgboost':
+                model_data = data[fw].get('xgboost_detector', {})
+            else:
+                continue
+
+            train_time = model_data.get('training_time', 0)
+            infer_speed = model_data.get('inference_speed', 0)
+            memory = abs(model_data.get('memory_usage_gb', 0))
+
+            values = [train_time, infer_speed / 1000, memory]
+
+            if max(values) > 0:
+                max_val = max(values)
+                values_norm = [v / max_val for v in values]
+                values_norm += values_norm[:1]
+
+                ax.plot(angles, values_norm, 'o-', linewidth=2,
+                       label=self.framework_names[fw], color=colors[i])
+                ax.fill(angles, values_norm, alpha=0.25, color=colors[i])
+
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(metrics)
+        ax.set_title('ML Framework Radar Comparison',
+                     fontsize=14, fontweight='bold', pad=20)
+        ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.1))
+        ax.grid(True)
+
+        output_file = self.output_dir / 'ml_framework_radar.png'
+        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        print(f"  Saved: {output_file}")
+        plt.close()
+
+    def plot_ml_framework_ranking(self, data):
+        """ML framework ranking (horizontal bars)"""
+        print("\nCreating ML framework ranking...")
+
+        # Calculate composite scores (higher inference / lower training = better)
+        scores = {}
+        for fw in self.frameworks:
+            if fw not in data:
+                continue
+
+            if fw == 'sklearn':
+                model_data = data[fw].get('isolation_forest', {})
+            elif fw in ['pytorch', 'tensorflow', 'jax']:
+                model_data = data[fw].get(f'{fw}_autoencoder', {})
+            elif fw == 'xgboost':
+                model_data = data[fw].get('xgboost_detector', {})
+            else:
+                continue
+
+            train = model_data.get('training_time', 0)
+            infer = model_data.get('inference_speed', 0)
+
+            if train > 0 and infer > 0:
+                scores[self.framework_names[fw]] = infer / train
+
+        # Sort by score
+        sorted_fws = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        fw_names = [fw[0] for fw in sorted_fws]
+        score_values = [fw[1] for fw in sorted_fws]
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+        bars = ax.barh(fw_names, score_values, color='#e74c3c')
+
+        # Add value labels
+        for bar in bars:
+            width = bar.get_width()
+            ax.text(width, bar.get_y() + bar.get_height()/2.,
+                   f'{width:.2f}',
+                   ha='left', va='center', fontsize=10)
+
+        ax.set_xlabel('Performance Score (Inference/Training)', fontsize=12)
+        ax.set_ylabel('Framework', fontsize=12)
+        ax.set_title('ML Framework Performance Ranking',
+                     fontsize=14, fontweight='bold')
+        ax.grid(True, alpha=0.3, axis='x')
+
+        output_file = self.output_dir / 'ml_framework_ranking.png'
+        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        print(f"  Saved: {output_file}")
+        plt.close()
+
     def generate_all_visualizations(self):
         """Generate all Matplotlib ML/DL visualizations"""
         print("="*80)
@@ -397,9 +543,12 @@ class MLFrameworkVisualizerMatplotlib:
         self.plot_anomaly_detection_rate(data)
         self.plot_framework_comparison_matrix(data)
         self.plot_performance_summary_table(data)
+        self.plot_ml_training_vs_inference(data)
+        self.plot_ml_framework_radar(data)
+        self.plot_ml_framework_ranking(data)
 
         print("\n" + "="*80)
-        print("MATPLOTLIB ML/DL COMPLETE - 6 STANDARDIZED CHARTS")
+        print("MATPLOTLIB ML/DL COMPLETE - 9 STANDARDIZED CHARTS")
         print(f"Charts saved to: {self.output_dir}")
         print("  1. ml_training_time.png")
         print("  2. ml_inference_speed.png")

@@ -4,10 +4,12 @@ Interactive visualizations for framework comparison
 """
 
 import json
-import plotly.graph_objects as go
-import plotly.express as px
-from plotly.subplots import make_subplots
 from pathlib import Path
+
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
 
 class MLFrameworkVisualizerPlotly:
     """Plotly interactive visualizations for ML/DL frameworks"""
@@ -17,20 +19,20 @@ class MLFrameworkVisualizerPlotly:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        self.frameworks = ['sklearn', 'pytorch', 'tensorflow', 'xgboost', 'jax']
+        self.frameworks = ["sklearn", "pytorch", "tensorflow", "xgboost", "jax"]
         self.framework_names = {
-            'sklearn': 'Scikit-learn',
-            'pytorch': 'PyTorch',
-            'tensorflow': 'TensorFlow',
-            'xgboost': 'XGBoost',
-            'jax': 'JAX'
+            "sklearn": "Scikit-learn",
+            "pytorch": "PyTorch",
+            "tensorflow": "TensorFlow",
+            "xgboost": "XGBoost",
+            "jax": "JAX",
         }
         self.colors = {
-            'sklearn': '#1f77b4',
-            'pytorch': '#ff7f0e',
-            'tensorflow': '#2ca02c',
-            'xgboost': '#d62728',
-            'jax': '#9467bd'
+            "sklearn": "#1f77b4",
+            "pytorch": "#ff7f0e",
+            "tensorflow": "#2ca02c",
+            "xgboost": "#d62728",
+            "jax": "#9467bd",
         }
 
     def load_ml_results(self):
@@ -43,7 +45,7 @@ class MLFrameworkVisualizerPlotly:
             filepath = self.results_dir / filename
 
             if filepath.exists():
-                with open(filepath, 'r') as f:
+                with open(filepath, "r") as f:
                     data[framework] = json.load(f)
                 print(f"  Loaded: {filename}")
             else:
@@ -61,54 +63,56 @@ class MLFrameworkVisualizerPlotly:
             if fw not in data:
                 continue
 
-            if fw == 'sklearn':
-                model_data = data[fw].get('isolation_forest', {})
-            elif fw == 'pytorch':
-                model_data = data[fw].get('pytorch_autoencoder', {})
-            elif fw == 'tensorflow':
-                model_data = data[fw].get('tensorflow_autoencoder', {})
-            elif fw == 'jax':
-                model_data = data[fw].get('jax_autoencoder', {})
-            elif fw == 'xgboost':
-                model_data = data[fw].get('xgboost_detector', {})
+            if fw == "sklearn":
+                model_data = data[fw].get("isolation_forest", {})
+            elif fw == "pytorch":
+                model_data = data[fw].get("pytorch_autoencoder", {})
+            elif fw == "tensorflow":
+                model_data = data[fw].get("tensorflow_autoencoder", {})
+            elif fw == "jax":
+                model_data = data[fw].get("jax_autoencoder", {})
+            elif fw == "xgboost":
+                model_data = data[fw].get("xgboost_detector", {})
             else:
                 continue
 
-            train_time = model_data.get('training_time', 0)
-            infer_speed = model_data.get('inference_speed', 0)
-            memory = model_data.get('memory_usage_gb', 0)
+            train_time = model_data.get("training_time", 0)
+            infer_speed = model_data.get("inference_speed", 0)
+            memory = model_data.get("memory_usage_gb", 0)
 
             if train_time > 0 and infer_speed > 0:
-                fig.add_trace(go.Scatter(
-                    x=[train_time],
-                    y=[infer_speed],
-                    mode='markers+text',
-                    name=self.framework_names[fw],
-                    marker=dict(
-                        size=15 + abs(memory) * 5,  # Size based on memory
-                        color=self.colors[fw],
-                        line=dict(width=2, color='white')
-                    ),
-                    text=[self.framework_names[fw]],
-                    textposition="top center",
-                    hovertemplate=f'<b>{self.framework_names[fw]}</b><br>' +
-                                f'Training Time: {train_time:.2f}s<br>' +
-                                f'Inference Speed: {infer_speed:,.0f} samples/s<br>' +
-                                f'Memory: {memory:.2f} GB<extra></extra>'
-                ))
+                fig.add_trace(
+                    go.Scatter(
+                        x=[train_time],
+                        y=[infer_speed],
+                        mode="markers+text",
+                        name=self.framework_names[fw],
+                        marker=dict(
+                            size=15 + abs(memory) * 5,  # Size based on memory
+                            color=self.colors[fw],
+                            line=dict(width=2, color="white"),
+                        ),
+                        text=[self.framework_names[fw]],
+                        textposition="top center",
+                        hovertemplate=f"<b>{self.framework_names[fw]}</b><br>"
+                        + f"Training Time: {train_time:.2f}s<br>"
+                        + f"Inference Speed: {infer_speed:,.0f} samples/s<br>"
+                        + f"Memory: {memory:.2f} GB<extra></extra>",
+                    )
+                )
 
         fig.update_layout(
-            title='ML/DL Framework: Training Time vs Inference Speed Trade-off',
-            xaxis_title='Training Time (seconds) - Lower is Better',
-            yaxis_title='Inference Speed (samples/sec) - Higher is Better',
-            hovermode='closest',
-            template='plotly_white',
+            title="ML/DL Framework: Training Time vs Inference Speed Trade-off",
+            xaxis_title="Training Time (seconds) - Lower is Better",
+            yaxis_title="Inference Speed (samples/sec) - Higher is Better",
+            hovermode="closest",
+            template="plotly_white",
             height=600,
             font=dict(size=12),
-            showlegend=True
+            showlegend=True,
         )
 
-        output_file = self.output_dir / 'ml_training_vs_inference_interactive.html'
+        output_file = self.output_dir / "ml_training_vs_inference_interactive.html"
         fig.write_html(str(output_file))
         print(f"  Saved: {output_file}")
 
@@ -118,29 +122,34 @@ class MLFrameworkVisualizerPlotly:
 
         fig = go.Figure()
 
-        metrics = ['Training Speed', 'Inference Speed', 'Memory Efficiency', 'Anomaly Accuracy']
+        metrics = [
+            "Training Speed",
+            "Inference Speed",
+            "Memory Efficiency",
+            "Anomaly Accuracy",
+        ]
 
         for fw in self.frameworks:
             if fw not in data:
                 continue
 
-            if fw == 'sklearn':
-                model_data = data[fw].get('isolation_forest', {})
-            elif fw == 'pytorch':
-                model_data = data[fw].get('pytorch_autoencoder', {})
-            elif fw == 'tensorflow':
-                model_data = data[fw].get('tensorflow_autoencoder', {})
-            elif fw == 'jax':
-                model_data = data[fw].get('jax_autoencoder', {})
-            elif fw == 'xgboost':
-                model_data = data[fw].get('xgboost_detector', {})
+            if fw == "sklearn":
+                model_data = data[fw].get("isolation_forest", {})
+            elif fw == "pytorch":
+                model_data = data[fw].get("pytorch_autoencoder", {})
+            elif fw == "tensorflow":
+                model_data = data[fw].get("tensorflow_autoencoder", {})
+            elif fw == "jax":
+                model_data = data[fw].get("jax_autoencoder", {})
+            elif fw == "xgboost":
+                model_data = data[fw].get("xgboost_detector", {})
             else:
                 continue
 
-            train_time = model_data.get('training_time', 0)
-            infer_speed = model_data.get('inference_speed', 0)
-            memory = model_data.get('memory_usage_gb', 0)
-            anomaly_rate = model_data.get('anomaly_rate', 0)
+            train_time = model_data.get("training_time", 0)
+            infer_speed = model_data.get("inference_speed", 0)
+            memory = model_data.get("memory_usage_gb", 0)
+            anomaly_rate = model_data.get("anomaly_rate", 0)
 
             # Normalize to 0-10 scale
             # Training: faster = better (inverted)
@@ -154,30 +163,27 @@ class MLFrameworkVisualizerPlotly:
 
             scores = [train_score, infer_score, mem_score, anomaly_score]
 
-            fig.add_trace(go.Scatterpolar(
-                r=scores + [scores[0]],
-                theta=metrics + [metrics[0]],
-                fill='toself',
-                name=self.framework_names[fw],
-                line=dict(color=self.colors[fw], width=2),
-                hovertemplate=f'<b>{self.framework_names[fw]}</b><br>' +
-                            '%{theta}: %{r:.2f}<extra></extra>'
-            ))
+            fig.add_trace(
+                go.Scatterpolar(
+                    r=scores + [scores[0]],
+                    theta=metrics + [metrics[0]],
+                    fill="toself",
+                    name=self.framework_names[fw],
+                    line=dict(color=self.colors[fw], width=2),
+                    hovertemplate=f"<b>{self.framework_names[fw]}</b><br>"
+                    + "%{theta}: %{r:.2f}<extra></extra>",
+                )
+            )
 
         fig.update_layout(
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 10]
-                )
-            ),
-            title='ML/DL Framework Comprehensive Performance Comparison<br>(Higher = Better)',
+            polar=dict(radialaxis=dict(visible=True, range=[0, 10])),
+            title="ML/DL Framework Comprehensive Performance Comparison<br>(Higher = Better)",
             showlegend=True,
             height=700,
-            template='plotly_white'
+            template="plotly_white",
         )
 
-        output_file = self.output_dir / 'ml_framework_radar_interactive.html'
+        output_file = self.output_dir / "ml_framework_radar_interactive.html"
         fig.write_html(str(output_file))
         print(f"  Saved: {output_file}")
 
@@ -186,16 +192,13 @@ class MLFrameworkVisualizerPlotly:
         print("\nCreating multi-metric comparison chart...")
 
         metrics = [
-            ('training_time', 'Training Time (s)'),
-            ('inference_speed', 'Inference Speed (samples/s)'),
-            ('memory_usage_gb', 'Memory Usage (GB)'),
-            ('anomaly_rate', 'Anomaly Rate (%)')
+            ("training_time", "Training Time (s)"),
+            ("inference_speed", "Inference Speed (samples/s)"),
+            ("memory_usage_gb", "Memory Usage (GB)"),
+            ("anomaly_rate", "Anomaly Rate (%)"),
         ]
 
-        fig = make_subplots(
-            rows=2, cols=2,
-            subplot_titles=[m[1] for m in metrics]
-        )
+        fig = make_subplots(rows=2, cols=2, subplot_titles=[m[1] for m in metrics])
 
         for idx, (metric, title) in enumerate(metrics):
             row = (idx // 2) + 1
@@ -208,17 +211,17 @@ class MLFrameworkVisualizerPlotly:
                 if fw not in data:
                     continue
 
-                if fw == 'sklearn':
-                    model_data = data[fw].get('isolation_forest', {})
-                elif fw in ['pytorch', 'tensorflow', 'jax']:
-                    model_data = data[fw].get('autoencoder', {})
-                elif fw == 'xgboost':
-                    model_data = data[fw].get('xgboost_detector', {})
+                if fw == "sklearn":
+                    model_data = data[fw].get("isolation_forest", {})
+                elif fw in ["pytorch", "tensorflow", "jax"]:
+                    model_data = data[fw].get("autoencoder", {})
+                elif fw == "xgboost":
+                    model_data = data[fw].get("xgboost_detector", {})
                 else:
                     continue
 
                 val = model_data.get(metric, 0)
-                if val != 0 or metric == 'memory_usage_gb':
+                if val != 0 or metric == "memory_usage_gb":
                     frameworks.append(self.framework_names[fw])
                     values.append(val)
 
@@ -227,21 +230,26 @@ class MLFrameworkVisualizerPlotly:
                     go.Bar(
                         x=frameworks,
                         y=values,
-                        marker_color=[self.colors[fw.lower()] for fw in self.frameworks if self.framework_names[fw] in frameworks],
-                        hovertemplate='<b>%{x}</b><br>Value: %{y:.2f}<extra></extra>',
-                        showlegend=False
+                        marker_color=[
+                            self.colors[fw.lower()]
+                            for fw in self.frameworks
+                            if self.framework_names[fw] in frameworks
+                        ],
+                        hovertemplate="<b>%{x}</b><br>Value: %{y:.2f}<extra></extra>",
+                        showlegend=False,
                     ),
-                    row=row, col=col
+                    row=row,
+                    col=col,
                 )
 
         fig.update_layout(
-            title_text='ML/DL Framework Multi-Metric Comparison',
+            title_text="ML/DL Framework Multi-Metric Comparison",
             height=800,
-            template='plotly_white',
-            showlegend=False
+            template="plotly_white",
+            showlegend=False,
         )
 
-        output_file = self.output_dir / 'ml_multi_metric_comparison.html'
+        output_file = self.output_dir / "ml_multi_metric_comparison.html"
         fig.write_html(str(output_file))
         print(f"  Saved: {output_file}")
 
@@ -250,10 +258,10 @@ class MLFrameworkVisualizerPlotly:
         print("\nCreating framework ranking visualization...")
 
         metrics = {
-            'Training Speed': 'training_time',
-            'Inference Speed': 'inference_speed',
-            'Memory Efficiency': 'memory_usage_gb',
-            'Anomaly Accuracy': 'anomaly_rate'
+            "Training Speed": "training_time",
+            "Inference Speed": "inference_speed",
+            "Memory Efficiency": "memory_usage_gb",
+            "Anomaly Accuracy": "anomaly_rate",
         }
 
         fig = go.Figure()
@@ -265,23 +273,23 @@ class MLFrameworkVisualizerPlotly:
                 if fw not in data:
                     continue
 
-                if fw == 'sklearn':
-                    model_data = data[fw].get('isolation_forest', {})
-                elif fw in ['pytorch', 'tensorflow', 'jax']:
-                    model_data = data[fw].get('autoencoder', {})
-                elif fw == 'xgboost':
-                    model_data = data[fw].get('xgboost_detector', {})
+                if fw == "sklearn":
+                    model_data = data[fw].get("isolation_forest", {})
+                elif fw in ["pytorch", "tensorflow", "jax"]:
+                    model_data = data[fw].get("autoencoder", {})
+                elif fw == "xgboost":
+                    model_data = data[fw].get("xgboost_detector", {})
                 else:
                     continue
 
                 val = model_data.get(metric_key, 0)
-                if val != 0 or metric_key == 'memory_usage_gb':
+                if val != 0 or metric_key == "memory_usage_gb":
                     rankings.append((self.framework_names[fw], val))
 
             # Sort rankings (lower is better for time/memory, higher for speed)
-            if metric_key in ['training_time', 'memory_usage_gb']:
+            if metric_key in ["training_time", "memory_usage_gb"]:
                 rankings.sort(key=lambda x: abs(x[1]))
-            elif metric_key == 'inference_speed':
+            elif metric_key == "inference_speed":
                 rankings.sort(key=lambda x: x[1], reverse=True)
             else:  # anomaly_rate - closer to 1.0 is better
                 rankings.sort(key=lambda x: abs(x[1] - 1.0))
@@ -290,16 +298,21 @@ class MLFrameworkVisualizerPlotly:
             frameworks_ranked = [r[0] for r in rankings]
             values = [r[1] for r in rankings]
 
-            fig.add_trace(go.Bar(
-                name=metric_name,
-                x=frameworks_ranked,
-                y=list(range(len(frameworks_ranked), 0, -1)),  # Reverse rank (5=best, 1=worst)
-                orientation='v',
-                marker_color=self.colors.get(rankings[0][0].lower(), '#888'),
-                visible=False,
-                hovertemplate='<b>%{x}</b><br>Rank: %{y}<br>Value: ' +
-                            ', '.join([f'{v:.2f}' for v in values]) + '<extra></extra>'
-            ))
+            fig.add_trace(
+                go.Bar(
+                    name=metric_name,
+                    x=frameworks_ranked,
+                    y=list(
+                        range(len(frameworks_ranked), 0, -1)
+                    ),  # Reverse rank (5=best, 1=worst)
+                    orientation="v",
+                    marker_color=self.colors.get(rankings[0][0].lower(), "#888"),
+                    visible=False,
+                    hovertemplate="<b>%{x}</b><br>Rank: %{y}<br>Value: "
+                    + ", ".join([f"{v:.2f}" for v in values])
+                    + "<extra></extra>",
+                )
+            )
 
         # Make first trace visible
         fig.data[0].visible = True
@@ -308,39 +321,218 @@ class MLFrameworkVisualizerPlotly:
         buttons = []
         for i, metric_name in enumerate(metrics.keys()):
             visibility = [i == j for j in range(len(metrics))]
-            buttons.append(dict(
-                label=metric_name,
-                method='update',
-                args=[{'visible': visibility},
-                     {'title': f'Framework Ranking: {metric_name}'}]
-            ))
+            buttons.append(
+                dict(
+                    label=metric_name,
+                    method="update",
+                    args=[
+                        {"visible": visibility},
+                        {"title": f"Framework Ranking: {metric_name}"},
+                    ],
+                )
+            )
 
         fig.update_layout(
-            updatemenus=[dict(
-                type='buttons',
-                direction='left',
-                x=0.5,
-                xanchor='center',
-                y=1.15,
-                yanchor='top',
-                buttons=buttons
-            )],
-            title='Framework Ranking: Training Speed',
-            xaxis_title='Framework',
-            yaxis_title='Rank (Higher = Better)',
-            template='plotly_white',
-            height=600
+            updatemenus=[
+                dict(
+                    type="buttons",
+                    direction="left",
+                    x=0.5,
+                    xanchor="center",
+                    y=1.15,
+                    yanchor="top",
+                    buttons=buttons,
+                )
+            ],
+            title="Framework Ranking: Training Speed",
+            xaxis_title="Framework",
+            yaxis_title="Rank (Higher = Better)",
+            template="plotly_white",
+            height=600,
         )
 
-        output_file = self.output_dir / 'ml_framework_ranking_interactive.html'
+        output_file = self.output_dir / "ml_framework_ranking_interactive.html"
+        fig.write_html(str(output_file))
+        print(f"  Saved: {output_file}")
+
+    def plot_memory_usage(self, data):
+        """Memory usage comparison bar chart"""
+        print("\nCreating ML memory usage chart...")
+
+        fw_names = []
+        memory_values = []
+
+        for fw in self.frameworks:
+            if fw not in data:
+                continue
+
+            if fw == "sklearn":
+                mem = data[fw].get("isolation_forest", {}).get("memory_usage_gb", 0)
+            elif fw in ["pytorch", "tensorflow", "jax"]:
+                mem = data[fw].get(f"{fw}_autoencoder", {}).get("memory_usage_gb", 0)
+            elif fw == "xgboost":
+                mem = data[fw].get("xgboost_detector", {}).get("memory_usage_gb", 0)
+            else:
+                continue
+
+            fw_names.append(self.framework_names[fw])
+            memory_values.append(abs(mem))
+
+        fig = go.Figure(
+            data=[
+                go.Bar(
+                    x=fw_names,
+                    y=memory_values,
+                    marker_color=[
+                        self.colors[fw.lower()] for fw in self.frameworks if fw in data
+                    ],
+                    text=[f"{m:.2f} GB" for m in memory_values],
+                    textposition="outside",
+                    hovertemplate="<b>%{x}</b><br>Memory: %{y:.2f} GB<extra></extra>",
+                )
+            ]
+        )
+
+        fig.update_layout(
+            title="ML/DL Framework Memory Usage Comparison",
+            xaxis_title="Framework",
+            yaxis_title="Memory Usage (GB)",
+            template="plotly_white",
+            height=500,
+            font=dict(size=12),
+        )
+
+        output_file = self.output_dir / "ml_memory_usage.html"
+        fig.write_html(str(output_file))
+        print(f"  Saved: {output_file}")
+
+    def plot_anomaly_rate(self, data):
+        """Anomaly detection rate comparison bar chart"""
+        print("\nCreating ML anomaly rate chart...")
+
+        fw_names = []
+        rates = []
+
+        for fw in self.frameworks:
+            if fw not in data:
+                continue
+
+            if fw == "sklearn":
+                rate = data[fw].get("isolation_forest", {}).get("anomaly_rate", 0)
+            elif fw in ["pytorch", "tensorflow", "jax"]:
+                rate = data[fw].get(f"{fw}_autoencoder", {}).get("anomaly_rate", 0)
+            elif fw == "xgboost":
+                rate = data[fw].get("xgboost_detector", {}).get("anomaly_rate", 0)
+            else:
+                continue
+
+            if rate > 0:
+                fw_names.append(self.framework_names[fw])
+                rates.append(rate)
+
+        fig = go.Figure(
+            data=[
+                go.Bar(
+                    x=fw_names,
+                    y=rates,
+                    marker_color="#e74c3c",
+                    text=[f"{r:.2f}%" for r in rates],
+                    textposition="outside",
+                    hovertemplate="<b>%{x}</b><br>Anomaly Rate: %{y:.2f}%<extra></extra>",
+                )
+            ]
+        )
+
+        fig.update_layout(
+            title="Anomaly Detection Rate Comparison",
+            xaxis_title="Framework",
+            yaxis_title="Anomaly Detection Rate (%)",
+            template="plotly_white",
+            height=500,
+            font=dict(size=12),
+        )
+
+        output_file = self.output_dir / "ml_anomaly_rate.html"
+        fig.write_html(str(output_file))
+        print(f"  Saved: {output_file}")
+
+    def plot_summary_table(self, data):
+        """Summary table with all ML metrics"""
+        print("\nCreating ML summary table...")
+
+        # Prepare table data
+        headers = [
+            "Framework",
+            "Training (s)",
+            "Inference (samp/s)",
+            "Memory (GB)",
+            "Anomaly Rate (%)",
+        ]
+        rows = []
+
+        for fw in self.frameworks:
+            if fw not in data:
+                continue
+
+            if fw == "sklearn":
+                model_data = data[fw].get("isolation_forest", {})
+            elif fw in ["pytorch", "tensorflow", "jax"]:
+                model_data = data[fw].get(f"{fw}_autoencoder", {})
+            elif fw == "xgboost":
+                model_data = data[fw].get("xgboost_detector", {})
+            else:
+                continue
+
+            train = model_data.get("training_time", 0)
+            infer = model_data.get("inference_speed", 0)
+            mem = abs(model_data.get("memory_usage_gb", 0))
+            anomaly = model_data.get("anomaly_rate", 0)
+
+            rows.append(
+                [
+                    self.framework_names[fw],
+                    f"{train:.2f}",
+                    f"{infer:.0f}",
+                    f"{mem:.2f}",
+                    f"{anomaly:.2f}",
+                ]
+            )
+
+        fig = go.Figure(
+            data=[
+                go.Table(
+                    header=dict(
+                        values=headers,
+                        fill_color="#e74c3c",
+                        align="left",
+                        font=dict(color="white", size=14),
+                    ),
+                    cells=dict(
+                        values=list(zip(*rows)),  # Transpose for Plotly
+                        fill_color="lavender",
+                        align="left",
+                        font=dict(size=12),
+                        height=30,
+                    ),
+                )
+            ]
+        )
+
+        fig.update_layout(
+            title="ML/DL Framework Summary Table",
+            height=400,
+            margin=dict(l=0, r=0, t=50, b=0),
+        )
+
+        output_file = self.output_dir / "ml_summary_table.html"
         fig.write_html(str(output_file))
         print(f"  Saved: {output_file}")
 
     def generate_all_visualizations(self):
         """Generate all Plotly ML/DL visualizations"""
-        print("="*80)
+        print("=" * 80)
         print("PLOTLY ML/DL FRAMEWORK VISUALIZATIONS")
-        print("="*80)
+        print("=" * 80)
 
         data = self.load_ml_results()
 
@@ -352,11 +544,15 @@ class MLFrameworkVisualizerPlotly:
         self.plot_framework_radar_interactive(data)
         self.plot_multi_metric_comparison(data)
         self.plot_framework_ranking(data)
+        self.plot_memory_usage(data)
+        self.plot_anomaly_rate(data)
+        self.plot_summary_table(data)
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("PLOTLY ML/DL VISUALIZATIONS COMPLETE")
         print(f"Interactive charts saved to: {self.output_dir}")
-        print("="*80)
+        print(f"Total charts generated: 7")
+        print("=" * 80)
 
 
 if __name__ == "__main__":

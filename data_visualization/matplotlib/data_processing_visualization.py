@@ -4,9 +4,11 @@ Creates publication-quality static charts for thesis
 """
 
 import json
+from pathlib import Path
+
 import matplotlib.pyplot as plt
 import numpy as np
-from pathlib import Path
+
 
 class DataProcessingVisualizerMatplotlib:
     """Matplotlib visualizations for data processing benchmark comparison"""
@@ -16,10 +18,17 @@ class DataProcessingVisualizerMatplotlib:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-        self.libraries = ['pandas', 'polars', 'pyarrow', 'dask', 'spark']
-        self.dataset_sizes = ['5M', '10M', '50M']
-        self.operations = ['loading', 'cleaning', 'aggregation', 'sorting', 'filtering', 'correlation']
-        self.default_size = '10M'  # Standardized dataset size for comparisons
+        self.libraries = ["pandas", "polars", "pyarrow", "dask", "spark"]
+        self.dataset_sizes = ["5M", "10M", "50M"]
+        self.operations = [
+            "loading",
+            "cleaning",
+            "aggregation",
+            "sorting",
+            "filtering",
+            "correlation",
+        ]
+        self.default_size = "10M"  # Standardized dataset size for comparisons
 
     def load_benchmark_data(self):
         """Load all benchmark result files"""
@@ -33,7 +42,7 @@ class DataProcessingVisualizerMatplotlib:
                 filepath = self.results_dir / filename
 
                 if filepath.exists():
-                    with open(filepath, 'r') as f:
+                    with open(filepath, "r") as f:
                         data[lib][size] = json.load(f)
                     print(f"  Loaded: {filename}")
                 else:
@@ -54,37 +63,45 @@ class DataProcessingVisualizerMatplotlib:
             times = []
             for size in self.dataset_sizes:
                 if size in data[lib]:
-                    times.append(data[lib][size].get('total_operation_time_mean', 0))
+                    times.append(data[lib][size].get("total_operation_time_mean", 0))
                 else:
                     times.append(0)
 
-            offset = (i - len(self.libraries)/2) * width
+            offset = (i - len(self.libraries) / 2) * width
             bars = ax.bar(x + offset, times, width, label=lib.capitalize())
 
             # Add value labels on bars
             for bar in bars:
                 height = bar.get_height()
                 if height > 0:
-                    ax.text(bar.get_x() + bar.get_width()/2., height,
-                           f'{height:.1f}s',
-                           ha='center', va='bottom', fontsize=8)
+                    ax.text(
+                        bar.get_x() + bar.get_width() / 2.0,
+                        height,
+                        f"{height:.1f}s",
+                        ha="center",
+                        va="bottom",
+                        fontsize=8,
+                    )
 
-        ax.set_xlabel('Dataset Size', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Total Execution Time (seconds)', fontsize=12, fontweight='bold')
-        ax.set_title('Data Processing Performance: Total Execution Time Comparison',
-                    fontsize=14, fontweight='bold')
+        ax.set_xlabel("Dataset Size", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Total Execution Time (seconds)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            "Data Processing Performance: Total Execution Time Comparison",
+            fontsize=14,
+            fontweight="bold",
+        )
         ax.set_xticks(x)
         ax.set_xticklabels(self.dataset_sizes)
-        ax.legend(title='Library', loc='upper left')
-        ax.grid(axis='y', alpha=0.3, linestyle='--')
+        ax.legend(title="Library", loc="upper left")
+        ax.grid(axis="y", alpha=0.3, linestyle="--")
 
         plt.tight_layout()
-        output_file = self.output_dir / 'dp_execution_time.png'
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        output_file = self.output_dir / "dp_execution_time.png"
+        plt.savefig(output_file, dpi=300, bbox_inches="tight")
         print(f"  Saved: {output_file}")
         plt.close()
 
-    def plot_operation_breakdown(self, data, dataset_size='10M'):
+    def plot_operation_breakdown(self, data, dataset_size="10M"):
         """Show breakdown of time spent in each operation"""
         print(f"\nCreating operation breakdown chart for {dataset_size}...")
 
@@ -102,21 +119,26 @@ class DataProcessingVisualizerMatplotlib:
                 key = f"{op}_time_mean"
                 times.append(data[lib][dataset_size].get(key, 0))
 
-            offset = (i - len(self.libraries)/2) * width
+            offset = (i - len(self.libraries) / 2) * width
             ax.bar(x + offset, times, width, label=lib.capitalize())
 
-        ax.set_xlabel('Operation', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Execution Time (seconds)', fontsize=12, fontweight='bold')
-        ax.set_title(f'Operation Breakdown: {dataset_size} Dataset',
-                    fontsize=14, fontweight='bold')
+        ax.set_xlabel("Operation", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Execution Time (seconds)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            f"Operation Breakdown: {dataset_size} Dataset",
+            fontsize=14,
+            fontweight="bold",
+        )
         ax.set_xticks(x)
-        ax.set_xticklabels([op.capitalize() for op in self.operations], rotation=45, ha='right')
-        ax.legend(title='Library', loc='upper left')
-        ax.grid(axis='y', alpha=0.3, linestyle='--')
+        ax.set_xticklabels(
+            [op.capitalize() for op in self.operations], rotation=45, ha="right"
+        )
+        ax.legend(title="Library", loc="upper left")
+        ax.grid(axis="y", alpha=0.3, linestyle="--")
 
         plt.tight_layout()
-        output_file = self.output_dir / 'dp_operation_breakdown.png'
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        output_file = self.output_dir / "dp_operation_breakdown.png"
+        plt.savefig(output_file, dpi=300, bbox_inches="tight")
         print(f"  Saved: {output_file}")
         plt.close()
 
@@ -134,35 +156,40 @@ class DataProcessingVisualizerMatplotlib:
             for size in self.dataset_sizes:
                 if size in data[lib]:
                     # Sum memory from loading and cleaning operations
-                    load_mem = data[lib][size].get('loading_memory_mean', 0)
-                    clean_mem = data[lib][size].get('cleaning_memory_mean', 0)
+                    load_mem = data[lib][size].get("loading_memory_mean", 0)
+                    clean_mem = data[lib][size].get("cleaning_memory_mean", 0)
                     total_mem = (load_mem + clean_mem) / 1024  # Convert MB to GB
                     memory.append(total_mem)
                 else:
                     memory.append(0)
 
-            offset = (i - len(self.libraries)/2) * width
+            offset = (i - len(self.libraries) / 2) * width
             bars = ax.bar(x + offset, memory, width, label=lib.capitalize())
 
             # Add value labels
             for bar in bars:
                 height = bar.get_height()
                 if height > 0:
-                    ax.text(bar.get_x() + bar.get_width()/2., height,
-                           f'{height:.2f}GB',
-                           ha='center', va='bottom', fontsize=8)
+                    ax.text(
+                        bar.get_x() + bar.get_width() / 2.0,
+                        height,
+                        f"{height:.2f}GB",
+                        ha="center",
+                        va="bottom",
+                        fontsize=8,
+                    )
 
-        ax.set_xlabel('Dataset Size', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Memory Usage (GB)', fontsize=12, fontweight='bold')
-        ax.set_title('Memory Usage Comparison', fontsize=14, fontweight='bold')
+        ax.set_xlabel("Dataset Size", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Memory Usage (GB)", fontsize=12, fontweight="bold")
+        ax.set_title("Memory Usage Comparison", fontsize=14, fontweight="bold")
         ax.set_xticks(x)
         ax.set_xticklabels(self.dataset_sizes)
-        ax.legend(title='Library', loc='upper left')
-        ax.grid(axis='y', alpha=0.3, linestyle='--')
+        ax.legend(title="Library", loc="upper left")
+        ax.grid(axis="y", alpha=0.3, linestyle="--")
 
         plt.tight_layout()
-        output_file = self.output_dir / 'dp_memory_usage.png'
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        output_file = self.output_dir / "dp_memory_usage.png"
+        plt.savefig(output_file, dpi=300, bbox_inches="tight")
         print(f"  Saved: {output_file}")
         plt.close()
 
@@ -179,7 +206,7 @@ class DataProcessingVisualizerMatplotlib:
             times = []
             for size in self.dataset_sizes:
                 if size in data[lib]:
-                    times.append(data[lib][size].get('total_operation_time_mean', 0))
+                    times.append(data[lib][size].get("total_operation_time_mean", 0))
                 else:
                     times.append(None)
 
@@ -188,25 +215,34 @@ class DataProcessingVisualizerMatplotlib:
             valid_times = [t for t in times if t is not None]
 
             if valid_times:
-                ax.plot(valid_sizes, valid_times, marker='o', linewidth=2,
-                       markersize=8, label=lib.capitalize())
+                ax.plot(
+                    valid_sizes,
+                    valid_times,
+                    marker="o",
+                    linewidth=2,
+                    markersize=8,
+                    label=lib.capitalize(),
+                )
 
-        ax.set_xlabel('Dataset Size (Million Rows)', fontsize=12, fontweight='bold')
-        ax.set_ylabel('Total Execution Time (seconds)', fontsize=12, fontweight='bold')
-        ax.set_title('Scalability Analysis: Performance vs Dataset Size',
-                    fontsize=14, fontweight='bold')
-        ax.legend(title='Library')
-        ax.grid(True, alpha=0.3, linestyle='--')
-        ax.set_xscale('log')
-        ax.set_yscale('log')
+        ax.set_xlabel("Dataset Size (Million Rows)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Total Execution Time (seconds)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            "Scalability Analysis: Performance vs Dataset Size",
+            fontsize=14,
+            fontweight="bold",
+        )
+        ax.legend(title="Library")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.set_xscale("log")
+        ax.set_yscale("log")
 
         plt.tight_layout()
-        output_file = self.output_dir / 'dp_scalability.png'
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        output_file = self.output_dir / "dp_scalability.png"
+        plt.savefig(output_file, dpi=300, bbox_inches="tight")
         print(f"  Saved: {output_file}")
         plt.close()
 
-    def plot_performance_rankings(self, data, dataset_size='10M'):
+    def plot_performance_rankings(self, data, dataset_size="10M"):
         """Create a ranking visualization for different operations"""
         print(f"\nCreating performance rankings for {dataset_size}...")
 
@@ -238,34 +274,53 @@ class DataProcessingVisualizerMatplotlib:
                 # Add value labels
                 for bar in bars:
                     width = bar.get_width()
-                    ax.text(width, bar.get_y() + bar.get_height()/2.,
-                           f'{width:.2f}s',
-                           ha='left', va='center', fontsize=9)
+                    ax.text(
+                        width,
+                        bar.get_y() + bar.get_height() / 2.0,
+                        f"{width:.2f}s",
+                        ha="left",
+                        va="center",
+                        fontsize=9,
+                    )
 
-                ax.set_xlabel('Time (seconds)', fontsize=10)
-                ax.set_title(f'{op.capitalize()} Performance', fontsize=11, fontweight='bold')
-                ax.grid(axis='x', alpha=0.3, linestyle='--')
+                ax.set_xlabel("Time (seconds)", fontsize=10)
+                ax.set_title(
+                    f"{op.capitalize()} Performance", fontsize=11, fontweight="bold"
+                )
+                ax.grid(axis="x", alpha=0.3, linestyle="--")
 
-        plt.suptitle(f'Performance Rankings by Operation - {dataset_size} Dataset',
-                    fontsize=16, fontweight='bold', y=0.995)
+        plt.suptitle(
+            f"Performance Rankings by Operation - {dataset_size} Dataset",
+            fontsize=16,
+            fontweight="bold",
+            y=0.995,
+        )
         plt.tight_layout()
 
-        output_file = self.output_dir / 'dp_performance_rankings.png'
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        output_file = self.output_dir / "dp_performance_rankings.png"
+        plt.savefig(output_file, dpi=300, bbox_inches="tight")
         print(f"  Saved: {output_file}")
         plt.close()
 
-    def create_summary_table(self, data, dataset_size='10M'):
+    def create_summary_table(self, data, dataset_size="10M"):
         """Create a summary table visualization"""
         print(f"\nCreating summary table for {dataset_size}...")
 
         fig, ax = plt.subplots(figsize=(14, 8))
-        ax.axis('tight')
-        ax.axis('off')
+        ax.axis("tight")
+        ax.axis("off")
 
         # Prepare table data
-        headers = ['Library', 'Total Time', 'Loading', 'Cleaning', 'Aggregation',
-                  'Sorting', 'Filtering', 'Correlation']
+        headers = [
+            "Library",
+            "Total Time",
+            "Loading",
+            "Cleaning",
+            "Aggregation",
+            "Sorting",
+            "Filtering",
+            "Correlation",
+        ]
         table_data = []
 
         for lib in self.libraries:
@@ -282,9 +337,13 @@ class DataProcessingVisualizerMatplotlib:
 
             table_data.append(row)
 
-        table = ax.table(cellText=table_data, colLabels=headers,
-                        cellLoc='center', loc='center',
-                        colWidths=[0.12] * len(headers))
+        table = ax.table(
+            cellText=table_data,
+            colLabels=headers,
+            cellLoc="center",
+            loc="center",
+            colWidths=[0.12] * len(headers),
+        )
 
         table.auto_set_font_size(False)
         table.set_fontsize(10)
@@ -292,54 +351,198 @@ class DataProcessingVisualizerMatplotlib:
 
         # Style header
         for i in range(len(headers)):
-            table[(0, i)].set_facecolor('#4CAF50')
-            table[(0, i)].set_text_props(weight='bold', color='white')
+            table[(0, i)].set_facecolor("#4CAF50")
+            table[(0, i)].set_text_props(weight="bold", color="white")
 
         # Alternate row colors
         for i in range(1, len(table_data) + 1):
             for j in range(len(headers)):
                 if i % 2 == 0:
-                    table[(i, j)].set_facecolor('#f0f0f0')
+                    table[(i, j)].set_facecolor("#f0f0f0")
 
-        plt.title(f'Performance Summary Table - {dataset_size} Dataset',
-                 fontsize=14, fontweight='bold', pad=20)
+        plt.title(
+            f"Performance Summary Table - {dataset_size} Dataset",
+            fontsize=14,
+            fontweight="bold",
+            pad=20,
+        )
 
-        output_file = self.output_dir / 'dp_summary_table.png'
-        plt.savefig(output_file, dpi=300, bbox_inches='tight')
+        output_file = self.output_dir / "dp_summary_table.png"
+        plt.savefig(output_file, dpi=300, bbox_inches="tight")
+        print(f"  Saved: {output_file}")
+        plt.close()
+
+    def plot_performance_radar(self, data, dataset_size="10M"):
+        """Radar chart for performance metrics"""
+        print(f"\nCreating performance radar chart ({dataset_size})...")
+
+        fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(projection="polar"))
+
+        categories = [op.capitalize() for op in self.operations]
+        N = len(categories)
+        angles = [n / float(N) * 2 * np.pi for n in range(N)]
+        angles += angles[:1]
+
+        for lib in self.libraries:
+            if dataset_size not in data[lib]:
+                continue
+
+            values = []
+            for op in self.operations:
+                key = f"{op}_time_mean"
+                values.append(data[lib][dataset_size].get(key, 0))
+
+            values += values[:1]
+            ax.plot(angles, values, "o-", linewidth=2, label=lib.capitalize())
+            ax.fill(angles, values, alpha=0.25)
+
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(categories)
+        ax.set_title(
+            f"Performance Radar - {dataset_size} Dataset",
+            fontsize=14,
+            fontweight="bold",
+            pad=20,
+        )
+        ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1))
+        ax.grid(True)
+
+        output_file = self.output_dir / f"dp_performance_radar_{dataset_size}.png"
+        plt.savefig(output_file, dpi=300, bbox_inches="tight")
+        print(f"  Saved: {output_file}")
+        plt.close()
+
+    def plot_operation_breakdown_stacked(self, data, dataset_size="10M"):
+        """Stacked bar chart for operation breakdown"""
+        print(f"\nCreating stacked operation breakdown ({dataset_size})...")
+
+        fig, ax = plt.subplots(figsize=(12, 6))
+
+        lib_names = [
+            lib.capitalize() for lib in self.libraries if dataset_size in data[lib]
+        ]
+
+        operation_data = {op: [] for op in self.operations}
+        for lib in self.libraries:
+            if dataset_size not in data[lib]:
+                continue
+            for op in self.operations:
+                key = f"{op}_time_mean"
+                operation_data[op].append(data[lib][dataset_size].get(key, 0))
+
+        bottom = np.zeros(len(lib_names))
+        colors = plt.cm.Set3(np.linspace(0, 1, len(self.operations)))
+
+        for i, op in enumerate(self.operations):
+            ax.bar(
+                lib_names,
+                operation_data[op],
+                bottom=bottom,
+                label=op.capitalize(),
+                color=colors[i],
+            )
+            bottom += operation_data[op]
+
+        ax.set_xlabel("Library", fontsize=12)
+        ax.set_ylabel("Time (seconds)", fontsize=12)
+        ax.set_title(
+            f"Stacked Operation Breakdown - {dataset_size} Dataset",
+            fontsize=14,
+            fontweight="bold",
+        )
+        ax.legend(loc="upper right")
+        ax.grid(True, alpha=0.3, axis="y")
+        plt.xticks(rotation=45)
+
+        output_file = (
+            self.output_dir / f"operation_breakdown_stacked_{dataset_size}.png"
+        )
+        plt.savefig(output_file, dpi=300, bbox_inches="tight")
+        print(f"  Saved: {output_file}")
+        plt.close()
+
+    def plot_memory_vs_time_scatter(self, data):
+        """Scatter plot: Memory vs Time trade-off"""
+        print("\nCreating memory vs time scatter plot...")
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        colors = plt.cm.Set1(np.linspace(0, 1, len(self.libraries)))
+
+        for i, lib in enumerate(self.libraries):
+            for size in self.dataset_sizes:
+                if size not in data[lib]:
+                    continue
+
+                d = data[lib][size]
+                total_time = d.get("total_operation_time_mean", 0)
+                load_mem = d.get("loading_memory_mean", 0)
+                clean_mem = d.get("cleaning_memory_mean", 0)
+                total_mem = (load_mem + clean_mem) / 1024  # GB
+
+                if total_time > 0 and total_mem > 0:
+                    ax.scatter(
+                        total_mem,
+                        total_time,
+                        s=100,
+                        c=[colors[i]],
+                        label=f"{lib.capitalize()} ({size})",
+                        alpha=0.6,
+                    )
+
+        ax.set_xlabel("Memory Usage (GB)", fontsize=12)
+        ax.set_ylabel("Execution Time (seconds)", fontsize=12)
+        ax.set_title(
+            "Memory vs Time Trade-off Analysis", fontsize=14, fontweight="bold"
+        )
+        ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+        ax.grid(True, alpha=0.3)
+
+        output_file = self.output_dir / "memory_vs_time_scatter.png"
+        plt.savefig(output_file, dpi=300, bbox_inches="tight")
         print(f"  Saved: {output_file}")
         plt.close()
 
     def generate_all_visualizations(self):
         """Generate all Matplotlib visualizations"""
-        print("="*80)
+        print("=" * 80)
         print("MATPLOTLIB DATA PROCESSING VISUALIZATIONS")
-        print("="*80)
+        print("=" * 80)
 
         data = self.load_benchmark_data()
 
         self.plot_execution_time_comparison(data)
         self.plot_memory_usage(data)
         self.plot_scalability_analysis(data)
+        self.plot_memory_vs_time_scatter(data)
 
-        for size in ['10M']:  # Focus on 10M for detailed analysis
+        for size in ["10M"]:  # Focus on 10M for detailed analysis
             self.plot_operation_breakdown(data, size)
             self.plot_performance_rankings(data, size)
+            self.plot_performance_radar(data, size)
+            self.plot_operation_breakdown_stacked(data, size)
             try:
                 self.create_summary_table(data, size)
             except Exception as e:
                 print(f"  Warning: Could not create summary table: {e}")
                 # Create placeholder
                 fig, ax = plt.subplots(figsize=(14, 8))
-                ax.axis('off')
-                ax.text(0.5, 0.5, 'Summary table data not available',
-                        ha='center', va='center', fontsize=16)
-                output_file = self.output_dir / 'dp_summary_table.png'
-                plt.savefig(output_file, dpi=300, bbox_inches='tight')
+                ax.axis("off")
+                ax.text(
+                    0.5,
+                    0.5,
+                    "Summary table data not available",
+                    ha="center",
+                    va="center",
+                    fontsize=16,
+                )
+                output_file = self.output_dir / "dp_summary_table.png"
+                plt.savefig(output_file, dpi=300, bbox_inches="tight")
                 print(f"  Saved placeholder: {output_file}")
                 plt.close()
 
-        print("\n" + "="*80)
-        print("MATPLOTLIB DATA PROCESSING COMPLETE - 6 STANDARDIZED CHARTS")
+        print("\n" + "=" * 80)
+        print("MATPLOTLIB DATA PROCESSING COMPLETE - 9 STANDARDIZED CHARTS")
         print(f"Charts saved to: {self.output_dir}")
         print("  1. dp_execution_time.png")
         print("  2. dp_operation_breakdown.png")
@@ -347,7 +550,7 @@ class DataProcessingVisualizerMatplotlib:
         print("  4. dp_scalability.png")
         print("  5. dp_performance_rankings.png")
         print("  6. dp_summary_table.png")
-        print("="*80)
+        print("=" * 80)
 
 
 if __name__ == "__main__":
