@@ -1,6 +1,14 @@
 """
-Master Script to Generate All Visualizations
-Run this to create all charts across all 5 visualization libraries
+Master Script to Generate All Visualizations - ALL 5 FRAMEWORKS
+
+Run this to create 95+ charts across all 5 visualization frameworks:
+- Matplotlib (24 PNG files @ 300 DPI) - For thesis document
+- Plotly (22 HTML files) - Interactive web charts  
+- Bokeh (24 HTML files) - Interactive dashboards
+- Holoviews (25 HTML files) - Declarative visualizations
+- Streamlit (Live dashboard) - Run separately for live demos
+
+Total: 95+ visualizations ready for thesis use!
 """
 
 import subprocess
@@ -58,14 +66,16 @@ def run_visualization(lib_name, script_path, description):
 def main():
     """Generate all visualizations"""
     print("="*80)
-    print("GENERATING ALL VISUALIZATIONS FOR THESIS")
+    print("GENERATING ALL VISUALIZATIONS FOR THESIS - ALL 5 FRAMEWORKS")
     print("="*80)
     print("\nThis will generate:")
-    print("  - 12 Matplotlib PNG charts (publication quality)")
-    print("  - 10 Plotly HTML charts (interactive)")
-    print("  - 6 Bokeh HTML charts (interactive)")
-    print("  - 6 Holoviews HTML charts (interactive)")
-    print("\nTotal: 34 visualizations")
+    print("  - 24 Matplotlib PNG charts (publication quality)")
+    print("  - 22 Plotly HTML charts (interactive)")
+    print("  - 6 Plotly Operation-Specific charts (interactive)")
+    print("  - 24 Bokeh HTML charts (interactive)")
+    print("  - 25 Holoviews HTML charts (interactive)")
+    print("  - Streamlit dashboard (live web application)")
+    print("\nTotal: 95+ visualizations across all 5 frameworks")
     print("="*80)
 
     scripts = [
@@ -77,6 +87,8 @@ def main():
          "Plotly - Data Processing Comparison"),
         ("Plotly", "plotly/ml_frameworks_visualization.py",
          "Plotly - ML/DL Frameworks Comparison"),
+        ("Plotly", "plotly/operation_specific_charts.py",
+         "Plotly - Operation-Specific Charts"),
         ("Bokeh", "bokeh/combined_visualization.py",
          "Bokeh - Combined Visualizations"),
         ("Holoviews", "holoviews/combined_visualization.py",
@@ -123,20 +135,30 @@ def main():
     # Output locations
     if successes > 0:
         print("\n📊 Generated visualizations are in:")
-        print("  - matplotlib/output/  (PNG files for thesis document)")
-        print("  - plotly/output/      (HTML files for interactive viewing)")
-        print("  - bokeh/output/       (HTML files for interactive viewing)")
-        print("  - holoviews/output/   (HTML files for interactive viewing)")
+        print("  - matplotlib/output/  (24 PNG files @ 300 DPI for thesis document)")
+        print("  - plotly/output/      (22 HTML files for interactive viewing)")
+        print("  - bokeh/output/       (24 HTML files for interactive viewing)")
+        print("  - holoviews/output/   (25 HTML files for interactive viewing)")
+        print("\n  Total: 95+ static/interactive visualizations generated!")
 
     # Streamlit info
     print("\n" + "="*80)
-    print("STREAMLIT DASHBOARD")
+    print("FRAMEWORK 5/5: STREAMLIT DASHBOARD (Live Web Application)")
     print("="*80)
-    print("For interactive dashboard presentation, run:")
-    print("  cd streamlit")
-    print("  streamlit run dashboard.py")
-    print("\nOr from data_visualization root:")
-    print("  streamlit run streamlit/dashboard.py")
+    print("Streamlit is a live web application framework (not a file generator).")
+    print("\n🚀 To run the interactive dashboard:")
+    print("\n  Option 1 - Full Dashboard:")
+    print("    cd streamlit")
+    print("    streamlit run dashboard.py")
+    print("\n  Option 2 - From root:")
+    print("    streamlit run streamlit/dashboard.py")
+    print("\n📝 For thesis comparison (side-by-side with other frameworks):")
+    print("    python comparative_visualization_thesis.py")
+    print("    # Generates Streamlit code in THESIS_COMPARISON_CHARTS/streamlit/")
+    print("\n💡 Use Streamlit for:")
+    print("  - Live thesis defense demonstrations")
+    print("  - Interactive committee Q&A sessions")
+    print("  - Real-time data filtering and exploration")
     print("="*80)
 
     return 0 if failures == 0 else 1
