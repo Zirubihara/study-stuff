@@ -398,36 +398,27 @@ class Chart1_ExecutionTime:
         Approach: Plotly wrapper with reactive components
         Lines of code: ~15
         Complexity: Low (requires server)
-        Note: This returns code string for thesis documentation
+        Note: Extracts real code from streamlit_implementations.py module
         """
-        code = '''
-def chart1_execution_time_streamlit(dp_data):
-    """Streamlit implementation - requires 'streamlit run'"""
-    import streamlit as st
-    import plotly.express as px
-    
-    st.subheader("Chart 1: Execution Time Comparison")
-    
-    # Prepare data
-    df = Chart1_ExecutionTime.prepare_data(dp_data)
-    
-    # Metrics
-    col1, col2, col3 = st.columns(3)
-    col1.metric("Fastest", df.loc[df['Time'].idxmin(), 'Library'], 
-                f"{df['Time'].min():.2f}s")
-    col2.metric("Average", "All Libraries", f"{df['Time'].mean():.2f}s")
-    col3.metric("Slowest", df.loc[df['Time'].idxmax(), 'Library'],
-                f"{df['Time'].max():.2f}s")
-    
-    # Chart
-    fig = px.bar(df, x='Library', y='Time', color='Library',
-                title='Data Processing Performance - 10M Dataset')
-    st.plotly_chart(fig, use_container_width=True)
-'''
-        # Save code to file for documentation
-        (Config.OUTPUT_BASE / "streamlit" / "chart1_execution_time.py").write_text(code)
-        print("  ✓ Streamlit: chart1_execution_time.py (code only)")
-        return code
+        import inspect
+
+        try:
+            from streamlit_implementations import Chart1_ExecutionTime_Streamlit
+
+            # Extract actual source code from real implementation
+            code = inspect.getsource(Chart1_ExecutionTime_Streamlit.streamlit)
+
+            # Save code to file for thesis documentation
+            (Config.OUTPUT_BASE / "streamlit" / "chart1_execution_time.py").write_text(
+                code
+            )
+            print("  ✓ Streamlit: chart1_execution_time.py (extracted from module)")
+            return code
+        except ImportError:
+            print(
+                "  ⚠ Streamlit: streamlit_implementations.py not found (code not extracted)"
+            )
+            return ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -649,24 +640,25 @@ class Chart2_OperationBreakdown:
 
     @staticmethod
     def streamlit_code(dp_data: Dict) -> str:
-        """STREAMLIT CODE"""
-        code = """
-def chart2_operation_breakdown_streamlit(dp_data):
-    import streamlit as st
-    import plotly.express as px
-    
-    st.subheader("Chart 2: Operation Breakdown")
-    df = Chart2_OperationBreakdown.prepare_data(dp_data)
-    
-    fig = px.bar(df, x='Operation', y='Time', color='Library',
-                barmode='group', title='Operation Breakdown')
-    st.plotly_chart(fig, use_container_width=True)
-"""
-        (Config.OUTPUT_BASE / "streamlit" / "chart2_operation_breakdown.py").write_text(
-            code
-        )
-        print("  ✓ Streamlit: chart2_operation_breakdown.py (code only)")
-        return code
+        """STREAMLIT CODE - extracted from streamlit_implementations.py"""
+        import inspect
+
+        try:
+            from streamlit_implementations import Chart2_OperationBreakdown_Streamlit
+
+            code = inspect.getsource(Chart2_OperationBreakdown_Streamlit.streamlit)
+            (
+                Config.OUTPUT_BASE / "streamlit" / "chart2_operation_breakdown.py"
+            ).write_text(code)
+            print(
+                "  ✓ Streamlit: chart2_operation_breakdown.py (extracted from module)"
+            )
+            return code
+        except ImportError:
+            print(
+                "  ⚠ Streamlit: streamlit_implementations.py not found (code not extracted)"
+            )
+            return ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -833,24 +825,23 @@ class Chart3_MemoryUsage_DP:
 
     @staticmethod
     def streamlit_code(dp_data: Dict) -> str:
-        """STREAMLIT CODE"""
-        code = """
-def chart3_memory_usage_dp_streamlit(dp_data):
-    import streamlit as st
-    import plotly.express as px
-    
-    st.subheader("Chart 3: Memory Usage (Data Processing)")
-    df = Chart3_MemoryUsage_DP.prepare_data(dp_data)
-    
-    fig = px.bar(df, x='Library', y='Memory (GB)', color='Library',
-                title='Memory Usage Comparison')
-    st.plotly_chart(fig, use_container_width=True)
-"""
-        (Config.OUTPUT_BASE / "streamlit" / "chart3_memory_usage_dp.py").write_text(
-            code
-        )
-        print("  ✓ Streamlit: chart3_memory_usage_dp.py (code only)")
-        return code
+        """STREAMLIT CODE - extracted from streamlit_implementations.py"""
+        import inspect
+
+        try:
+            from streamlit_implementations import Chart3_MemoryUsage_DP_Streamlit
+
+            code = inspect.getsource(Chart3_MemoryUsage_DP_Streamlit.streamlit)
+            (Config.OUTPUT_BASE / "streamlit" / "chart3_memory_usage_dp.py").write_text(
+                code
+            )
+            print("  ✓ Streamlit: chart3_memory_usage_dp.py (extracted from module)")
+            return code
+        except ImportError:
+            print(
+                "  ⚠ Streamlit: streamlit_implementations.py not found (code not extracted)"
+            )
+            return ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1058,31 +1049,23 @@ class Chart4_Scalability:
 
     @staticmethod
     def streamlit_code(dp_data: Dict) -> str:
-        """STREAMLIT CODE"""
-        code = """
-def chart4_scalability_streamlit(dp_data):
-    import streamlit as st
-    import plotly.express as px
-    
-    st.subheader("Chart 4: Scalability Analysis")
-    df = Chart4_Scalability.prepare_data(dp_data)
-    
-    selected_libs = st.multiselect(
-        "Select libraries to display:",
-        options=df['Library'].unique().tolist(),
-        default=df['Library'].unique().tolist()
-    )
-    
-    filtered_df = df[df['Library'].isin(selected_libs)]
-    
-    fig = px.line(filtered_df, x='Dataset Size (M)', y='Time',
-                 color='Library', markers=True,
-                 title='Scalability Analysis')
-    st.plotly_chart(fig, use_container_width=True)
-"""
-        (Config.OUTPUT_BASE / "streamlit" / "chart4_scalability.py").write_text(code)
-        print("  ✓ Streamlit: chart4_scalability.py (code only)")
-        return code
+        """STREAMLIT CODE - extracted from streamlit_implementations.py"""
+        import inspect
+
+        try:
+            from streamlit_implementations import Chart4_Scalability_Streamlit
+
+            code = inspect.getsource(Chart4_Scalability_Streamlit.streamlit)
+            (Config.OUTPUT_BASE / "streamlit" / "chart4_scalability.py").write_text(
+                code
+            )
+            print("  ✓ Streamlit: chart4_scalability.py (extracted from module)")
+            return code
+        except ImportError:
+            print(
+                "  ⚠ Streamlit: streamlit_implementations.py not found (code not extracted)"
+            )
+            return ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1255,28 +1238,23 @@ class Chart5_TrainingTime:
 
     @staticmethod
     def streamlit_code(ml_data: Dict) -> str:
-        """STREAMLIT CODE"""
-        code = """
-def chart5_training_time_streamlit(ml_data):
-    import streamlit as st
-    import plotly.express as px
-    
-    st.subheader("Chart 5: ML/DL Training Time")
-    df = Chart5_TrainingTime.prepare_data(ml_data)
-    
-    col1, col2 = st.columns(2)
-    col1.metric("Fastest", df.loc[df['Training Time'].idxmin(), 'Framework'],
-                f"{df['Training Time'].min():.1f}s")
-    col2.metric("Slowest", df.loc[df['Training Time'].idxmax(), 'Framework'],
-                f"{df['Training Time'].max():.1f}s")
-    
-    fig = px.bar(df, x='Framework', y='Training Time', color='Framework',
-                title='Training Time Comparison')
-    st.plotly_chart(fig, use_container_width=True)
-"""
-        (Config.OUTPUT_BASE / "streamlit" / "chart5_training_time.py").write_text(code)
-        print("  ✓ Streamlit: chart5_training_time.py (code only)")
-        return code
+        """STREAMLIT CODE - extracted from streamlit_implementations.py"""
+        import inspect
+
+        try:
+            from streamlit_implementations import Chart5_TrainingTime_Streamlit
+
+            code = inspect.getsource(Chart5_TrainingTime_Streamlit.streamlit)
+            (Config.OUTPUT_BASE / "streamlit" / "chart5_training_time.py").write_text(
+                code
+            )
+            print("  ✓ Streamlit: chart5_training_time.py (extracted from module)")
+            return code
+        except ImportError:
+            print(
+                "  ⚠ Streamlit: streamlit_implementations.py not found (code not extracted)"
+            )
+            return ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1451,30 +1429,23 @@ class Chart6_InferenceSpeed:
 
     @staticmethod
     def streamlit_code(ml_data: Dict) -> str:
-        """STREAMLIT CODE"""
-        code = """
-def chart6_inference_speed_streamlit(ml_data):
-    import streamlit as st
-    import plotly.express as px
-    
-    st.subheader("Chart 6: ML/DL Inference Speed")
-    df = Chart6_InferenceSpeed.prepare_data(ml_data)
-    
-    col1, col2 = st.columns(2)
-    col1.metric("Fastest", df.loc[df['Inference Speed'].idxmax(), 'Framework'],
-                f"{df['Inference Speed'].max():,.0f} samp/s")
-    col2.metric("Average", "All Frameworks",
-                f"{df['Inference Speed'].mean():,.0f} samp/s")
-    
-    fig = px.bar(df, x='Framework', y='Inference Speed', color='Framework',
-                title='Inference Speed Comparison')
-    st.plotly_chart(fig, use_container_width=True)
-"""
-        (Config.OUTPUT_BASE / "streamlit" / "chart6_inference_speed.py").write_text(
-            code
-        )
-        print("  ✓ Streamlit: chart6_inference_speed.py (code only)")
-        return code
+        """STREAMLIT CODE - extracted from streamlit_implementations.py"""
+        import inspect
+
+        try:
+            from streamlit_implementations import Chart6_InferenceSpeed_Streamlit
+
+            code = inspect.getsource(Chart6_InferenceSpeed_Streamlit.streamlit)
+            (Config.OUTPUT_BASE / "streamlit" / "chart6_inference_speed.py").write_text(
+                code
+            )
+            print("  ✓ Streamlit: chart6_inference_speed.py (extracted from module)")
+            return code
+        except ImportError:
+            print(
+                "  ⚠ Streamlit: streamlit_implementations.py not found (code not extracted)"
+            )
+            return ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -1643,30 +1614,23 @@ class Chart7_MemoryUsage_ML:
 
     @staticmethod
     def streamlit_code(ml_data: Dict) -> str:
-        """STREAMLIT CODE"""
-        code = """
-def chart7_memory_usage_ml_streamlit(ml_data):
-    import streamlit as st
-    import plotly.express as px
-    
-    st.subheader("Chart 7: ML/DL Memory Usage")
-    df = Chart7_MemoryUsage_ML.prepare_data(ml_data)
-    
-    col1, col2 = st.columns(2)
-    col1.metric("Lowest", df.loc[df['Memory (GB)'].idxmin(), 'Framework'],
-                f"{df['Memory (GB)'].min():.2f} GB")
-    col2.metric("Highest", df.loc[df['Memory (GB)'].idxmax(), 'Framework'],
-                f"{df['Memory (GB)'].max():.2f} GB")
-    
-    fig = px.bar(df, x='Framework', y='Memory (GB)', color='Framework',
-                title='Memory Usage Comparison')
-    st.plotly_chart(fig, use_container_width=True)
-"""
-        (Config.OUTPUT_BASE / "streamlit" / "chart7_memory_usage_ml.py").write_text(
-            code
-        )
-        print("  ✓ Streamlit: chart7_memory_usage_ml.py (code only)")
-        return code
+        """STREAMLIT CODE - extracted from streamlit_implementations.py"""
+        import inspect
+
+        try:
+            from streamlit_implementations import Chart7_MemoryUsage_ML_Streamlit
+
+            code = inspect.getsource(Chart7_MemoryUsage_ML_Streamlit.streamlit)
+            (Config.OUTPUT_BASE / "streamlit" / "chart7_memory_usage_ml.py").write_text(
+                code
+            )
+            print("  ✓ Streamlit: chart7_memory_usage_ml.py (extracted from module)")
+            return code
+        except ImportError:
+            print(
+                "  ⚠ Streamlit: streamlit_implementations.py not found (code not extracted)"
+            )
+            return ""
 
 
 # ═══════════════════════════════════════════════════════════════════════════
