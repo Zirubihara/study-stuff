@@ -44,7 +44,9 @@ try:
     )
 except ImportError:
     # Fallback for when run standalone
-    st.error("Please run from the same directory as comparative_visualization_thesis.py")
+    st.error(
+        "Please run from the same directory as comparative_visualization_thesis.py"
+    )
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -516,4 +518,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
