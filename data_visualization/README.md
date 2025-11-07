@@ -4,7 +4,7 @@
 
 ## 🎯 Overview
 
-This project provides **95 professional visualizations** comparing:
+This project provides **35 professional visualizations** (7 charts × 5 libraries) comparing:
 1. **Data Processing Libraries**: Pandas, Polars, PyArrow, Dask, PySpark (10M dataset)
 2. **ML/DL Frameworks**: Scikit-learn, PyTorch, TensorFlow, XGBoost, JAX (5M dataset)
 
@@ -14,13 +14,13 @@ This project provides **95 professional visualizations** comparing:
 
 | Framework | Charts | Type | Best For |
 |-----------|:------:|------|----------|
-| **Matplotlib** | 24 | Static PNG (300 DPI) | Academic papers, thesis documents |
-| **Plotly** | 22 | Interactive HTML | Web embedding, presentations |
-| **Bokeh** | 24 | Interactive HTML | Custom dashboards, max control |
-| **Holoviews** | 25 | Interactive HTML | Clean code, rapid prototyping |
-| **Streamlit** | ∞ | Web Application | Live demos, thesis defense |
+| **Matplotlib** | 7 | Static PNG (300 DPI) | Academic papers, thesis documents |
+| **Plotly** | 7 | Interactive HTML | Web embedding, presentations |
+| **Bokeh** | 7 | Interactive HTML | Custom dashboards, max control |
+| **Holoviews** | 7 | Interactive HTML | Clean code, rapid prototyping |
+| **Streamlit** | 7 | Python Scripts | Live demos, thesis defense |
 
-**Total:** **95 visualizations** ready for your thesis!
+**Total:** **35 visualizations** (7 charts × 5 libraries) ready for your thesis!
 
 ## Clean Project Structure
 
@@ -30,23 +30,28 @@ data_visualization/
 ├── matplotlib/                          # Static charts for thesis document
 │   ├── data_processing_visualization.py
 │   ├── ml_frameworks_visualization.py
-│   └── output/  (12 PNG files, 300 DPI)
+│   ├── operation_specific_charts.py
+│   └── output/  (18 PNG files, 300 DPI)
 │
 ├── plotly/                              # Interactive HTML visualizations
 │   ├── data_processing_visualization.py
 │   ├── ml_frameworks_visualization.py
-│   └── output/  (10 HTML files)
+│   ├── operation_specific_charts.py
+│   └── output/  (16 HTML files)
 │
 ├── bokeh/                               # Interactive charts
 │   ├── combined_visualization.py
-│   └── output/  (6 HTML files)
+│   ├── operation_specific_charts.py
+│   └── output/  (12 HTML files)
 │
 ├── holoviews/                           # Declarative visualizations
 │   ├── combined_visualization.py
-│   └── output/  (6 HTML files)
+│   └── output/  (15 HTML files)
 │
 ├── streamlit/                           # Dashboard application
 │   └── dashboard.py
+│
+├── output/                              # Root output directory (mixed files)
 │
 ├── THESIS_COMPARISON_CHARTS/            # Side-by-side comparison (35 files) ⭐
 │   ├── matplotlib/  (7 PNG) ⭐ USE IN THESIS
@@ -54,35 +59,25 @@ data_visualization/
 │   ├── bokeh/  (7 HTML)
 │   ├── holoviews/  (7 HTML)
 │   ├── streamlit/  (7 scripts)
-│   └── COMPARISON_REPORT.md
+│   └── library_comparison_summary.csv
 │
-├── comparative_visualization_thesis.py  # Main comparative script (2467 lines)
-├── generate_all_visualizations.py       # Generate all 95 charts
-│
-├── VISUALIZATION_THESIS_SUMMARY.md      ⭐ COMPLETE THESIS DOCUMENTATION
-├── QUICK_START.md                       # Usage guide
+├── comparative_visualization_thesis.py  # Main comparative script (2431 lines)
+├── streamlit_implementations.py         # Streamlit code listings (521 lines)
 └── README.md                            # This file
 ```
-
-## 📖 Documentation
-
-**For Your Thesis:**
-- 📊 **[VISUALIZATION_THESIS_SUMMARY.md](VISUALIZATION_THESIS_SUMMARY.md)** ⭐ - Complete thesis documentation with all 19 sections
-- 🚀 **[QUICK_START.md](QUICK_START.md)** - Quick usage guide
-- 📝 **[README.md](README.md)** - This file (project overview)
 
 ---
 
 ## 🚀 Quick Start
 
-### **Easy Way - Generate Everything** ⭐
+### **Generate All Charts** ⭐
 
 ```bash
 cd data_visualization
-python generate_all_visualizations.py
+python comparative_visualization_thesis.py
 ```
 
-Creates **95 visualizations** across all 5 frameworks in ~3 minutes!
+Creates **35 visualizations** (7 charts × 5 libraries) in THESIS_COMPARISON_CHARTS/ directory!
 
 ### Generate Individual Libraries
 
@@ -125,24 +120,27 @@ holoviews==1.21.0
 
 | Library | Files | Type | Best For |
 |---------|-------|------|----------|
-| Matplotlib | 12 PNG | Static, 300 DPI | Thesis document |
-| Plotly | 10 HTML | Interactive | Online viewing |
-| Bokeh | 6 HTML | Interactive | Large datasets |
-| Holoviews | 6 HTML | Interactive | Quick exploration |
-| Streamlit | 1 App | Interactive | Presentations |
+| Matplotlib | 7 PNG | Static, 300 DPI | Thesis document |
+| Plotly | 7 HTML | Interactive | Online viewing |
+| Bokeh | 7 HTML | Interactive | Large datasets |
+| Holoviews | 7 HTML | Interactive | Quick exploration |
+| Streamlit | 7 Scripts + 1 Dashboard | Python/Web App | Presentations |
 
-**Total**: 34 visualizations + 1 dashboard
+**Total**: **35 visualizations** in THESIS_COMPARISON_CHARTS/ directory
 
 ## Usage Recommendations
 
 ### For Written Thesis
-**Use**: `matplotlib/output/` ← PNG files for LaTeX/Word
+**Use**: `THESIS_COMPARISON_CHARTS/matplotlib/` ← 7 PNG files (300 DPI) for LaTeX/Word
 
 ### For Thesis Defense
-**Use**: `streamlit/dashboard.py` ← Interactive Q&A
+**Use**: `streamlit/dashboard.py` ← Interactive dashboard for live Q&A
 
-### For Digital Thesis
-**Use**: `plotly/output/` ← Self-contained HTML
+### For Digital Appendix
+**Use**: `THESIS_COMPARISON_CHARTS/plotly/` or `THESIS_COMPARISON_CHARTS/holoviews/` ← Interactive HTML files
+
+### For Code Listings
+**Use**: `streamlit_implementations.py` ← Clean Streamlit code for thesis
 
 ## Key Insights from Data
 
@@ -171,19 +169,20 @@ holoviews==1.21.0
 ## Documentation
 
 - **README.md** - Main documentation (this file)
-- **QUICK_START.md** - Quick commands and examples
-- **VISUALIZATION_LIBRARY_COMPARISON.md** - Detailed analysis
-- **docs/** - Development notes and fixes
+- **comparative_visualization_thesis.py** - Main script with all implementations
+- **streamlit_implementations.py** - Streamlit code for thesis listings
+- **library_comparison_summary.csv** - Library comparison summary
 
 ## Scripts Overview
 
 ```
-generate_all_visualizations.py  → Run all scripts (master)
-matplotlib/*.py                 → 12 static charts
-plotly/*.py                     → 10 interactive charts
-bokeh/*.py                      → 6 interactive charts
-holoviews/*.py                  → 6 interactive charts
-streamlit/dashboard.py          → Interactive dashboard
+comparative_visualization_thesis.py  → Generate all 35 charts (7 × 5 libraries)
+streamlit_implementations.py         → Streamlit code listings
+matplotlib/*.py                      → Individual library implementations
+plotly/*.py                          → Individual library implementations
+bokeh/*.py                           → Individual library implementations
+holoviews/*.py                       → Individual library implementations
+streamlit/dashboard.py               → Interactive dashboard
 ```
 
 ## Troubleshooting
@@ -203,15 +202,16 @@ streamlit run streamlit/dashboard.py --server.port 8502
 
 ## Summary
 
-✅ 34 professional visualizations
-✅ 5 visualization libraries
-✅ Clean, organized structure
-✅ Publication-ready charts
-✅ Interactive dashboards
-✅ Comprehensive documentation
+✅ **35 professional visualizations** (7 charts × 5 libraries)
+✅ 5 visualization frameworks (Matplotlib, Plotly, Bokeh, Holoviews, Streamlit)
+✅ Clean, organized structure in THESIS_COMPARISON_CHARTS/
+✅ Publication-ready PNG charts (300 DPI)
+✅ Interactive HTML visualizations
+✅ Live Streamlit dashboard
+✅ Complete code documentation
 
 Perfect for your thesis! 🎓
 
 ---
 
-**Status**: ✅ Production Ready | **Created**: 2025-10-14
+**Status**: ✅ Production Ready | **Last Updated**: 2025-11-07
