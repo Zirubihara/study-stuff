@@ -2,13 +2,11 @@
 
 Comparative analysis of 5 machine learning frameworks for anomaly detection on Japanese trade data (1988-2020).
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 models/
-├── run_all_models.py                 # Unified runner (runs all frameworks) ⭐
-├── THESIS_SUMMARY.md                 # Complete thesis documentation ⭐
-├── QUICK_START.md                    # Usage guide
+├── run_all_models.py                 # Unified runner (runs all frameworks)
 ├── README.md                         # This file
 │
 ├── sklearn/                          # Classical Machine Learning
@@ -17,7 +15,7 @@ models/
 │   └── anomaly_detection_xgboost.py  # XGBoost Detector
 ├── pytorch/                          # Deep Learning Framework
 │   └── anomaly_detection_pytorch.py  # MLP Autoencoder
-├── tensorflow/                       # Deep Learning Framework (Google)
+├── tensorflow/                       # Deep Learning Framework
 │   └── anomaly_detection_tensorflow.py # MLP Autoencoder
 ├── jax/                              # Modern Deep Learning
 │   └── anomaly_detection_jax.py      # MLP Autoencoder with JIT
@@ -30,36 +28,62 @@ models/
 │
 ├── results/                          # JSON results & CSV predictions
 ├── charts/                           # Generated visualizations
-├── processed/                        # Preprocessed data
-└── docs/                             # Polish documentation
-    ├── README_PL.md                  # Polski README
-    └── PODSUMOWANIE.md               # Polskie podsumowanie
+└── processed/                        # Preprocessed data
 ```
 
-## 🚀 Quick Start
+## Usage
 
-### **Easy Way - Run All Frameworks at Once** ⭐
+### Running All Frameworks
+
+The recommended approach is to run all frameworks sequentially using the unified runner:
 
 ```bash
 cd models
 python run_all_models.py
 ```
 
-This runs all 5 frameworks, generates comparison charts, and prints a comprehensive summary!
+This command will:
+1. Run all 5 frameworks sequentially (sklearn, xgboost, pytorch, tensorflow, jax)
+2. Show real-time progress with colored output
+3. Handle errors gracefully (continues even if one framework fails)
+4. Automatically generate comparison visualizations
+5. Print a comprehensive summary with all metrics
 
-**Duration:** 5-15 minutes | **See:** [QUICK_START.md](QUICK_START.md) for advanced options
+**Expected Duration:** 5-15 minutes (depending on hardware)
 
----
+### Advanced Options
 
-### Manual Way - Run Individual Frameworks
+#### Skip Specific Frameworks
 
 ```bash
-# 1. Preprocess Data (if needed)
+# Skip PyTorch and TensorFlow
+python run_all_models.py --skip pytorch,tensorflow
+
+# Skip only JAX
+python run_all_models.py --skip jax
+```
+
+#### Run Only Specific Frameworks
+
+```bash
+# Run only classical ML frameworks
+python run_all_models.py --only sklearn,xgboost
+
+# Run only deep learning frameworks
+python run_all_models.py --only pytorch,tensorflow,jax
+```
+
+### Manual Execution
+
+For individual framework execution:
+
+```bash
+# Step 1: Preprocess data (if not done yet)
 cd preprocessing
 python preprocess_polars.py
 
-# 2. Run Individual Frameworks
-cd sklearn
+# Step 2: Run individual frameworks
+cd ../sklearn
 python anomaly_detection_sklearn.py
 
 cd ../xgboost
@@ -74,23 +98,25 @@ python anomaly_detection_tensorflow.py
 cd ../jax
 python anomaly_detection_jax.py
 
-# 3. Generate Comparison Charts
+# Step 3: Generate comparison visualizations
 cd ../visualization
 python compare_all_results.py
 ```
 
-## 📊 Framework Classification
+## Framework Classification
 
 ### Machine Learning (Classical)
-1. **Scikit-learn** - Isolation Forest, LOF
-2. **XGBoost** - Gradient Boosting
+1. **Scikit-learn** - Isolation Forest, Local Outlier Factor (LOF)
+2. **XGBoost** - Gradient Boosting-based anomaly detection
 
 ### Deep Learning
 3. **PyTorch** - MLP Autoencoder
 4. **TensorFlow** - MLP Autoencoder
 5. **JAX** - MLP Autoencoder (JIT-compiled)
 
-## 🎯 Results Summary (5M Samples)
+## Results Summary
+
+Performance metrics on 5,000,000 samples:
 
 | Framework | Training Time | Inference Speed | Anomalies Detected |
 |-----------|---------------|-----------------|-------------------|
@@ -101,48 +127,98 @@ python compare_all_results.py
 | PyTorch | 345.75s | 114K samples/s | 7,550 |
 
 **Key Findings:**
-- ✅ High agreement across all frameworks (~7,550 anomalies, 1.01-1.02%)
-- ⚡ XGBoost fastest overall (training + inference)
-- 🔥 JAX fastest among deep learning frameworks
-- 📊 All frameworks validated on identical 5M dataset (fair comparison)
+- High agreement across all frameworks (~7,550 anomalies, 1.01-1.02%)
+- XGBoost demonstrates fastest overall performance (training + inference)
+- JAX achieves best performance among deep learning frameworks
+- All frameworks validated on identical 5M dataset ensuring fair comparison
 
-## 📝 Configuration
+## Configuration
 
-All frameworks use identical settings:
+All frameworks use identical experimental settings:
 - **Dataset**: 5,000,000 samples from Japanese trade data
 - **Split**: 70% train / 15% validation / 15% test
 - **Contamination**: 1% expected anomalies
-- **Random State**: 42 (reproducibility)
+- **Random State**: 42 (for reproducibility)
 - **Features**: 11 features (normalized values, encoded categories, temporal features)
 
-## 🔧 Requirements
+## Output Files
 
-See main project [requirements.txt](../requirements.txt) for all dependencies.
+### Results (JSON)
+- `results/sklearn_anomaly_detection_results.json`
+- `results/pytorch_anomaly_detection_results.json`
+- `results/tensorflow_anomaly_detection_results.json`
+- `results/jax_anomaly_detection_results.json`
+- `results/xgboost_anomaly_detection_results.json`
 
-## 📖 Documentation
+### Predictions (CSV)
+- `results/sklearn_predictions.csv`
+- `results/pytorch_predictions.csv`
+- `results/tensorflow_predictions.csv`
+- `results/jax_predictions.csv`
+- `results/xgboost_predictions.csv`
 
-**Main Documentation:**
-- 📊 **[THESIS_SUMMARY.md](THESIS_SUMMARY.md)** - Complete thesis summary with all results ⭐
-- 🚀 **[QUICK_START.md](QUICK_START.md)** - Quick start guide for running frameworks
-- 📝 **[README.md](README.md)** - This file (project overview)
+### Visualizations (PNG)
+- `charts/framework_comparison.png` - 6-panel comparison chart
+- `charts/framework_comparison_table.png` - Summary table with rankings
 
-**Polish Documentation:**
-- [README_PL.md](docs/README_PL.md) - Polski README
-- [PODSUMOWANIE.md](docs/PODSUMOWANIE.md) - Polskie podsumowanie
+### Logs
+- `sklearn/sklearn_run.log`
+- `pytorch/pytorch_run.log`
+- `tensorflow/tensorflow_run.log`
+- `jax/jax_run.log`
+- `xgboost/xgboost_run.log`
 
-## 🎓 For Thesis
+## Prerequisites
 
-**📊 [→ See THESIS_SUMMARY.md for complete thesis documentation](THESIS_SUMMARY.md)**
+Required components:
+1. Preprocessed data: `models/processed/processed_data.parquet`
+2. All dependencies installed: `pip install -r ../requirements.txt`
+3. Python 3.8+ with appropriate ML libraries
 
-All 5 frameworks validated and ready for academic use:
+If preprocessed data doesn't exist, run:
+```bash
+cd preprocessing
+python preprocess_polars.py
+```
+
+## Troubleshooting
+
+### "Script not found" error
+Ensure you're in the `models/` directory:
+```bash
+cd models
+python run_all_models.py
+```
+
+### "No preprocessed data" error
+Run preprocessing first:
+```bash
+cd preprocessing
+python preprocess_polars.py
+cd ..
+python run_all_models.py
+```
+
+### Out of memory error
+- Skip memory-intensive frameworks: `--skip pytorch`
+- Or run frameworks individually with more time between executions
+
+### Framework fails but others continue
+- This is expected behavior - the script continues even if one framework fails
+- Check the framework's log file for details
+- The summary will show which frameworks succeeded/failed
+
+## Validation
+
+All 5 frameworks have been validated and ensure:
 1. **Fair comparison** - identical 5M sample dataset and configuration
-2. **High consistency** - all frameworks detect ~1.01% anomalies
+2. **High consistency** - all frameworks detect approximately 1.01% anomalies
 3. **Performance benchmarks** - comprehensive speed and accuracy metrics
-4. **Reproducible** - fixed random seeds, documented parameters
-5. **Production-ready** - tested at scale with real-world data
+4. **Reproducibility** - fixed random seeds, documented parameters
+5. **Scalability** - tested at scale with real-world data
 
 ---
 
-**Project**: Comparative ML/DL Framework Analysis for Anomaly Detection
-**Data**: Japanese Trade Dataset (1988-2020, 113.6M rows original)
-**Sample Size**: 5M rows for all benchmarks
+**Project**: Comparative ML/DL Framework Analysis for Anomaly Detection  
+**Dataset**: Japanese Trade Dataset (1988-2020, 113.6M rows original)  
+**Sample Size**: 5,000,000 rows for all benchmarks
