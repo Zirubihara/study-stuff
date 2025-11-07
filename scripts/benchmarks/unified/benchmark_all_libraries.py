@@ -776,7 +776,7 @@ def run_comprehensive_benchmark():
     """Run comprehensive benchmark with multiple dataset sizes and runs."""
     # Dataset sizes for comprehensive benchmarking (massive sizes for true Spark advantages)
     dataset_configs = [
-        {"rows": 50000000, "name": "50M", "file": "../../../data/benchmark_50m.csv"},
+        {"rows": 10000000, "name": "10M", "file": "../../../data/benchmark_10m.csv"},
     ]
 
     # Configuration
@@ -809,8 +809,8 @@ def run_comprehensive_benchmark():
         # Run benchmarks for this dataset size
         dataset_results = {}
 
-        # Test each library (excluding spark due to Java version issue)
-        libraries = ["pandas", "polars", "pyarrow", "dask"]
+        # Test each library
+        libraries = ["pandas", "polars", "pyarrow", "dask", "spark"]
 
         for lib_name in libraries:
             try:
