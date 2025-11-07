@@ -176,12 +176,12 @@ cython_debug/
 custom_1988_2020.csv
 data/benchmark_100m.csv
 data/benchmark_50m.csv
-data/benchmark_10m.csv
-data/benchmark_5m.csv
 data/large_data.csv
 data/specialized/polars_showcase.csv
 data/specialized/pyarrow_showcase.csv
 data/specialized/spark_showcase.csv
+
+# Note: benchmark_5m.csv and benchmark_10m.csv are tracked via Git LFS
 
 # Keep small data files and results for study tracking
 

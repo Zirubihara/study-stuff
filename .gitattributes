@@ -1,2 +1,4 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
 *.parquet filter=lfs diff=lfs merge=lfs -text
+data/benchmark_5m.csv filter=lfs diff=lfs merge=lfs -text
+data/benchmark_10m.csv filter=lfs diff=lfs merge=lfs -text
