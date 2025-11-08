@@ -3,7 +3,7 @@
 ## 📂 Struktura Katalogów
 
 ```
-📁 scripts/benchmarks/
+📁 data_manipulation/benchmarks/
 │
 ├── 📁 dataset_specific/           # Skrypty orkiestrujące dla konkretnych rozmiarów
 │   ├── benchmark_5million_dataset.py    ← ORKIESTRATOR 5M
@@ -28,7 +28,7 @@
 
 ### Poziom 1: WYWOŁANIE GŁÓWNE
 ```bash
-cd scripts/benchmarks/dataset_specific
+cd data_manipulation/benchmarks/dataset_specific
 python benchmark_10million_dataset.py
 ```
 
@@ -136,7 +136,7 @@ USUWA wszystkie pliki temp_*_10m.py
 
 ### 1. SYSTEM ŚCIEŻEK
 ```
-WZGLĘDEM: scripts/benchmarks/dataset_specific/
+WZGLĘDEM: data_manipulation/benchmarks/dataset_specific/
 ├── ../implementations/           (implementacje)
 ├── ../../../data/               (dane wejściowe)
 └── ../../../results/            (wyniki)
@@ -171,7 +171,7 @@ ZAMIENIANE ELEMENTY:
 
 ```bash
 # Uruchom benchmark 10M dla wszystkich technologii
-cd scripts/benchmarks/dataset_specific
+cd data_manipulation/benchmarks/dataset_specific
 python benchmark_10million_dataset.py
 
 # Rezultat:

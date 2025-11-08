@@ -1,6 +1,6 @@
-# Script Usage Guide
+# Data Manipulation Usage Guide
 
-This guide explains when to use each script in the `scripts/` folder for the data processing performance comparison project.
+This guide explains when to use each script in the `data_manipulation/` folder for the data processing performance comparison project.
 
 ## Analysis Summary
 **All Scripts Renamed**: All 24 scripts now have meaningful, descriptive names
@@ -111,7 +111,7 @@ python benchmark_strength_comparison.py  # Run strength-focused tests
 
 ## 📝 Notes
 
-- **Run from scripts/ directory**: All scripts should be executed from within the `scripts/` folder
+- **Run from data_manipulation/ directory**: All scripts should be executed from within the `data_manipulation/` folder
 - **Dataset recommendations**: Use 100M+ rows to see Spark's true advantages
 - **Memory requirements**: Massive datasets (100M rows) require 8GB+ RAM
 - **Results location**: Performance metrics saved to `../results/`, charts to `../charts/`

@@ -117,7 +117,7 @@ pip install -r requirements.txt
 
 ```bash
 # First time only: Extract real-world data subsets from the original dataset
-cd scripts/data_generation
+cd data_manipulation/data_generation
 python extract_real_world_datasets.py
 
 # This creates benchmark datasets (1M, 5M, 10M, 50M, 100M rows) from custom_1988_2020.csv
@@ -156,11 +156,11 @@ ls results/
 
 ```
 study-stuff/
-├── scripts/benchmarks/dataset_specific/    ← The benchmark tests are here
-├── results/                               ← Results appear here as JSON files
-├── data/                                  ← CSV datasets are stored here
-├── charts/                                ← Generated charts go here
-└── README.md                              ← You are here!
+├── data_manipulation/benchmarks/dataset_specific/    ← The benchmark tests are here
+├── results/                                          ← Results appear here as JSON files
+├── data/                                             ← CSV datasets are stored here
+├── charts/                                           ← Generated charts go here
+└── README.md                                         ← You are here!
 ```
 
 ## 📊 Understanding the Results
@@ -186,7 +186,7 @@ Each test creates a JSON file with timing results. Here's what the numbers mean:
 ## 🎨 Generate Pretty Charts
 
 ```bash
-cd scripts/visualization
+cd data_manipulation/visualization
 python create_presentation_charts.py
 
 # Charts will appear in ../../charts/ folder
@@ -220,7 +220,7 @@ If you see Java version errors:
 Make sure you have the original custom_1988_2020.csv file and run the extraction script:
 
 ```bash
-cd scripts/data_generation
+cd data_manipulation/data_generation
 python extract_real_world_datasets.py
 ```
 

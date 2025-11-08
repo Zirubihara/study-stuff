@@ -442,7 +442,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 
 **Navigate to benchmark directory:**
 ```bash
-cd scripts/benchmarks/dataset_specific
+cd data_manipulation/benchmarks/dataset_specific
 ```
 
 **Run specific dataset size:**
@@ -877,7 +877,7 @@ final.plot(...)
 ### Project Repository Structure
 ```
 study-stuff/
-├── scripts/benchmarks/
+├── data_manipulation/benchmarks/
 │   ├── dataset_specific/    # Benchmark entry points
 │   ├── unified/              # Library implementations
 │   └── results/              # Benchmark outputs
@@ -894,7 +894,7 @@ study-stuff/
 ### Command Cheat Sheet
 ```bash
 # Run benchmarks
-cd scripts/benchmarks/dataset_specific
+cd data_manipulation/benchmarks/dataset_specific
 python benchmark_1m_simple.py     # 1M rows
 python benchmark_5m_simple.py     # 5M rows
 python benchmark_10m_simple.py    # 10M rows
@@ -948,6 +948,7 @@ Memory           0.16GB  0.27GB  0.14GB   0.19GB 0.23GB
 **License**: MIT
 
 For questions or issues, refer to project documentation or contact the research team.
+
 
 
 
