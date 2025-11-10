@@ -3,6 +3,7 @@ import json
 import os
 import statistics
 import time
+import tracemalloc
 from dataclasses import dataclass
 from functools import wraps
 from pathlib import Path
@@ -11,7 +12,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import dask.dataframe as dd
 import pandas as pd
 import polars as pl
-import psutil
 import pyarrow as pa
 import pyarrow.compute as pc  # for compute functions
 from pyspark.sql import SparkSession
@@ -52,17 +52,20 @@ def time_operation(operation_name: str):
     def decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
-            # Memory before operation
-            process = psutil.Process()
-            memory_before = process.memory_info().rss / 1024 / 1024  # MB
+            # Start memory tracking
+            gc.collect()  # Clean up before measurement
+            tracemalloc.start()
 
             start_time = time.time()
             result = func(self, *args, **kwargs)
             execution_time = time.time() - start_time
 
-            # Memory after operation
-            memory_after = process.memory_info().rss / 1024 / 1024  # MB
-            memory_used = memory_after - memory_before
+            # Get memory usage (peak memory used during operation)
+            _, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+
+            # Convert to MB
+            memory_used = peak / 1024 / 1024
 
             # Store single run results
             if not hasattr(self, "run_results"):
@@ -319,7 +322,10 @@ class DaskDataProcessor(BaseDataProcessor):
 
     @time_operation("cleaning")
     def clean_data(self, df: dd.DataFrame) -> dd.DataFrame:
-        return df.fillna(0)
+        result = df.fillna(0)
+        # Materialize to ensure computation happens
+        _ = result.head(1)
+        return result
 
     @time_operation("aggregation")
     def aggregate_data(self, df: dd.DataFrame) -> dd.DataFrame:
@@ -331,17 +337,26 @@ class DaskDataProcessor(BaseDataProcessor):
             .reset_index()
         )
         agg_df.columns = [*group_cols, "value2_mean", "value2_median", "value2_max"]
+        # Materialize the aggregation
+        agg_df = agg_df.persist()
+        _ = len(agg_df)
         return agg_df
 
     @time_operation("sorting")
     def sort_data(self, df: dd.DataFrame) -> dd.DataFrame:
         df = df.repartition(npartitions=max(1, df.npartitions // 4))
-        return df.sort_values("value2", ascending=False)
+        result = df.sort_values("value2", ascending=False)
+        # Materialize sorting
+        result = result.persist()
+        _ = len(result)
+        return result
 
     @time_operation("filtering")
     def filter_data(self, df: dd.DataFrame) -> Tuple[dd.DataFrame, float]:
         mean_value2 = df["value2"].mean().compute()
         filtered_df = df[df["value2"] > mean_value2]
+        # Materialize the filter
+        filtered_df = filtered_df.persist()
         avg_filtered = filtered_df["value2"].mean().compute()
         return filtered_df, avg_filtered
 
@@ -362,7 +377,7 @@ class PyArrowDataProcessor(BaseDataProcessor):
             ("category2", pa.int32()),
             ("category3", pa.int32()),
             ("code", pa.string()),
-            ("flag", pa.int64()),
+            ("flag", pa.int32()),  # Changed from int64 to int32 for consistency
             ("value1", pa.int32()),
             ("value2", pa.int32()),
         ]
@@ -492,7 +507,7 @@ class SparkDataProcessor(BaseDataProcessor):
             StructField("category2", IntegerType(), True),
             StructField("category3", IntegerType(), True),
             StructField("code", StringType(), True),
-            StructField("flag", LongType(), True),
+            StructField("flag", IntegerType(), True),  # Changed from LongType to IntegerType for consistency
             StructField("value1", IntegerType(), True),
             StructField("value2", IntegerType(), True),
         ]
@@ -518,8 +533,10 @@ class SparkDataProcessor(BaseDataProcessor):
     def load_data(self):
         df = self.spark.read.csv(str(self.file_path), schema=self.SCHEMA, header=False)
 
-        # Calculate metrics
+        # Materialize the dataframe to ensure loading is complete
+        df = df.cache()
         row_count = df.count()
+
         self.performance_metrics["row_count"] = row_count
 
         # Estimate memory size (rough approximation)
@@ -532,28 +549,45 @@ class SparkDataProcessor(BaseDataProcessor):
 
     @time_operation("cleaning")
     def clean_data(self, df):
-        return df.fillna(0)
+        result = df.fillna(0)
+        # Materialize to ensure computation
+        result = result.cache()
+        _ = result.count()
+        return result
 
     @time_operation("aggregation")
     def aggregate_data(self, df):
         group_cols = ["year_month", "category1", "category2"]
-        return df.groupBy(group_cols).agg(
+        result = df.groupBy(group_cols).agg(
             F.mean("value2").alias("value2_mean"),
-            F.expr("percentile_approx(value2, 0.5)").alias("value2_median"),
+            # Using exact median for fair comparison with other libraries
+            # Note: This is slower than percentile_approx but ensures consistent methodology
+            F.expr("percentile(value2, 0.5)").alias("value2_median"),
             F.max("value2").alias("value2_max"),
         )
+        # Materialize aggregation
+        result = result.cache()
+        _ = result.count()
+        return result
 
     @time_operation("sorting")
     def sort_data(self, df):
-        return df.orderBy(F.col("value2").desc())
+        result = df.orderBy(F.col("value2").desc())
+        # Materialize sorting
+        result = result.cache()
+        _ = result.count()
+        return result
 
     @time_operation("filtering")
     def filter_data(self, df):
         # Calculate mean value
         mean_value = df.select(F.mean("value2")).collect()[0][0]
 
-        # Filter and calculate new mean
+        # Filter and materialize
         filtered_df = df.filter(F.col("value2") > mean_value)
+        filtered_df = filtered_df.cache()
+
+        # Calculate new mean (this will trigger materialization)
         avg_filtered = filtered_df.select(F.mean("value2")).collect()[0][0]
 
         return filtered_df, float(avg_filtered)
@@ -586,10 +620,13 @@ class SparkDataProcessor(BaseDataProcessor):
             self.spark.stop()
 
 
-def run_single_iteration(processor, name: str, iteration: int):
-    """Run a single iteration of all operations."""
+def run_single_iteration(processor_class, file_path: str, name: str, iteration: int):
+    """Run a single iteration of all operations with a fresh processor instance."""
     try:
         print(f"  Iteration {iteration + 1}...")
+
+        # Create fresh processor instance for each iteration
+        processor = processor_class(file_path)
 
         df_result = processor.load_data()
         df_clean = processor.clean_data(df_result.df)
@@ -598,25 +635,27 @@ def run_single_iteration(processor, name: str, iteration: int):
         df_filtered = processor.filter_data(df_clean.df)
         correlation = processor.calculate_correlation(df_clean.df)
 
-        # Store average filtered value (only from last iteration)
-        if iteration == 0:  # Store from first iteration
-            processor.performance_metrics["average_filtered_value"] = (
-                df_filtered.additional_info
-            )
+        # Get the metrics from this single run
+        iteration_metrics = {
+            'average_filtered_value': df_filtered.additional_info,
+            'run_results': processor.run_results.copy()
+        }
 
         # Cleanup
-        del df_result, df_clean, df_agg, df_sorted, df_filtered, correlation
+        del df_result, df_clean, df_agg, df_sorted, df_filtered, correlation, processor
         cleanup_memory()
 
-        return True
+        return True, iteration_metrics
 
     except Exception as e:
         print(f"    Error in iteration {iteration + 1}: {e}")
-        return False
+        import traceback
+        traceback.print_exc()
+        return False, None
 
 
 def process_implementation(
-    processor, name: str, num_runs: int = 5, warmup_runs: int = 1
+    processor_class, file_path: str, name: str, num_runs: int = 5, warmup_runs: int = 1
 ):
     """Process implementation with multiple runs for statistical analysis."""
     try:
@@ -630,18 +669,31 @@ def process_implementation(
         print(f"  Running {warmup_runs} warm-up runs...")
         for i in range(warmup_runs):
             print(f"    Warm-up {i + 1}...")
-            # Create temporary processor for warmup
-            warmup_processor = type(processor)(processor.file_path)
-            run_single_iteration(warmup_processor, name, 0)
-            del warmup_processor
+            success, _ = run_single_iteration(processor_class, file_path, name, 0)
+            if not success:
+                print(f"    Warm-up {i + 1} failed, continuing...")
             cleanup_memory()
+
+        # Create a main processor to aggregate results
+        main_processor = processor_class(file_path)
 
         # Actual measured runs
         print(f"  Running {num_runs} measured runs...")
         successful_runs = 0
+        all_run_metrics = []
+
         for i in range(num_runs):
-            if run_single_iteration(processor, name, i):
+            success, iteration_metrics = run_single_iteration(processor_class, file_path, name, i)
+            if success and iteration_metrics:
                 successful_runs += 1
+                all_run_metrics.append(iteration_metrics)
+
+                # Aggregate run_results into main processor
+                for operation, data in iteration_metrics['run_results'].items():
+                    if operation not in main_processor.run_results:
+                        main_processor.run_results[operation] = {"times": [], "memory": []}
+                    main_processor.run_results[operation]["times"].extend(data["times"])
+                    main_processor.run_results[operation]["memory"].extend(data["memory"])
             else:
                 print(f"    Iteration {i + 1} failed, continuing...")
 
@@ -649,28 +701,47 @@ def process_implementation(
             print(f"All runs failed for {name}")
             return None
 
+        # Store average filtered value from first successful run
+        if all_run_metrics:
+            main_processor.performance_metrics["average_filtered_value"] = all_run_metrics[0]['average_filtered_value']
+
+        # Get basic metrics from a sample run (they should be the same across runs)
+        if all_run_metrics and 'run_results' in all_run_metrics[0]:
+            sample_processor = processor_class(file_path)
+            sample_result = sample_processor.load_data()
+            # These metrics are dataset-specific, not performance metrics
+            if hasattr(sample_processor, 'performance_metrics'):
+                if 'memory_size_gb' in sample_processor.performance_metrics:
+                    main_processor.performance_metrics['memory_size_gb'] = sample_processor.performance_metrics['memory_size_gb']
+                if 'row_count' in sample_processor.performance_metrics:
+                    main_processor.performance_metrics['row_count'] = sample_processor.performance_metrics['row_count']
+            del sample_processor, sample_result
+            cleanup_memory()
+
         # Calculate total operation time statistics
-        if hasattr(processor, "run_results"):
+        if hasattr(main_processor, "run_results"):
             all_operation_times = []
-            for operation, data in processor.run_results.items():
+            for operation, data in main_processor.run_results.items():
                 if "times" in data:
                     all_operation_times.extend(data["times"])
 
             if all_operation_times:
-                processor.performance_metrics["total_operation_time_mean"] = (
+                main_processor.performance_metrics["total_operation_time_mean"] = (
                     sum(all_operation_times)
                     / len(all_operation_times)
-                    * len(processor.run_results)
+                    * len(main_processor.run_results)
                 )
 
-        processor.save_performance_metrics(f"performance_metrics_{name}.json")
+        main_processor.save_performance_metrics(f"performance_metrics_{name}.json")
 
         print(
             f"{name.capitalize()} processing completed successfully! ({successful_runs}/{num_runs} runs)"
         )
         print(f"Memory cleaned after {name} implementation")
 
-        return {"metrics": processor.performance_metrics.copy()}
+        result = {"metrics": main_processor.performance_metrics.copy()}
+        del main_processor
+        return result
 
     except Exception as e:
         print(f"Error in {name} implementation: {e}")
@@ -684,27 +755,26 @@ def process_implementation(
 
 def run_comparison(file_path: str, skip_dask: bool = False, skip_spark: bool = False):
     """Run comparison between different implementations."""
-    processors = {
-        "pandas": PandasDataProcessor(file_path),
-        "polars": PolarsDataProcessor(file_path),
-        "pyarrow": PyArrowDataProcessor(file_path),
+    processor_classes = {
+        "pandas": PandasDataProcessor,
+        "polars": PolarsDataProcessor,
+        "pyarrow": PyArrowDataProcessor,
     }
 
     if not skip_dask:
-        processors["dask"] = DaskDataProcessor(file_path)
+        processor_classes["dask"] = DaskDataProcessor
 
     if not skip_spark:
-        try:
-            processors["spark"] = SparkDataProcessor(file_path)
-        except Exception as e:
-            print(f"Skipping Spark due to initialization error: {e}")
-            skip_spark = True
+        processor_classes["spark"] = SparkDataProcessor
 
     results = {}
-    for name, processor in processors.items():
-        result = process_implementation(processor, name)
-        if result:
-            results[name] = result
+    for name, processor_class in processor_classes.items():
+        try:
+            result = process_implementation(processor_class, file_path, name)
+            if result:
+                results[name] = result
+        except Exception as e:
+            print(f"Skipping {name} due to error: {e}")
         cleanup_memory()
 
     return results
@@ -812,27 +882,28 @@ def run_comprehensive_benchmark():
         # Test each library
         libraries = ["pandas", "polars", "pyarrow", "dask", "spark"]
 
+        processor_class_map = {
+            "pandas": PandasDataProcessor,
+            "polars": PolarsDataProcessor,
+            "pyarrow": PyArrowDataProcessor,
+            "dask": DaskDataProcessor,
+            "spark": SparkDataProcessor,
+        }
+
         for lib_name in libraries:
             try:
-                if lib_name == "pandas":
-                    processor = PandasDataProcessor(config["file"])
-                elif lib_name == "polars":
-                    processor = PolarsDataProcessor(config["file"])
-                elif lib_name == "pyarrow":
-                    processor = PyArrowDataProcessor(config["file"])
-                elif lib_name == "dask":
-                    processor = DaskDataProcessor(config["file"])
-                elif lib_name == "spark":
-                    processor = SparkDataProcessor(config["file"])
+                processor_class = processor_class_map.get(lib_name)
+                if processor_class is None:
+                    print(f"Unknown library: {lib_name}")
+                    continue
 
                 result = process_implementation(
-                    processor, f"{lib_name}_{config['name']}", num_runs, warmup_runs
+                    processor_class, config["file"], f"{lib_name}_{config['name']}", num_runs, warmup_runs
                 )
                 if result:
                     dataset_results[lib_name] = result
 
                 # Extra cleanup for memory-intensive operations
-                del processor
                 cleanup_memory()
 
             except Exception as e:
