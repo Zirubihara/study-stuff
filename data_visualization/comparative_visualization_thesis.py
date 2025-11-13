@@ -1,47 +1,3 @@
-"""
-╔════════════════════════════════════════════════════════════════════════════╗
-║                    COMPARATIVE VISUALIZATION ANALYSIS                       ║
-║                    Master's Thesis - Chapter: Data Visualization            ║
-║                                                                              ║
-║  Porównanie 5 Bibliotek Wizualizacji Danych                                ║
-║  7 Wspólnych Wykresów - Side-by-Side Implementation                        ║
-║                                                                              ║
-║  Biblioteki: Bokeh | Holoviews | Matplotlib | Plotly | Streamlit          ║
-╚════════════════════════════════════════════════════════════════════════════╝
-
-Autor: [Twoje Imię]
-Data: 2025-10-26
-Promotor: [Imię Promotora]
-
-STRUKTURA PLIKU:
-================
-Sekcja 1: Imports & Configuration
-Sekcja 2: Data Loading (wspólna dla wszystkich)
-Sekcja 3-9: Implementacje 7 wykresów:
-    - Chart 1: Execution Time Comparison (Data Processing)
-    - Chart 2: Operation Breakdown (Data Processing)
-    - Chart 3: Memory Usage Comparison (Data Processing)
-    - Chart 4: Scalability Analysis (Data Processing)
-    - Chart 5: Training Time Comparison (ML/DL)
-    - Chart 6: Inference Speed Comparison (ML/DL)
-    - Chart 7: Memory Usage Comparison (ML/DL)
-Sekcja 10: Main execution & comparison report
-
-USAGE:
-======
-# Generate all 7 charts with all 5 libraries:
-python comparative_visualization_thesis.py
-
-# Generate specific chart only:
-python comparative_visualization_thesis.py --chart execution_time
-
-# Generate for specific library only:
-python comparative_visualization_thesis.py --library bokeh
-
-# Generate comparison report (for thesis):
-python comparative_visualization_thesis.py --report
-"""
-
 # ═══════════════════════════════════════════════════════════════════════════
 # SECTION 1: IMPORTS & CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════════════
@@ -680,13 +636,19 @@ class Chart3_MemoryUsage_DP:
         chart_data = []
         for lib in Config.LIBRARIES:
             if Config.DATASET_SIZE in dp_data[lib]:
-                load_mem = dp_data[lib][Config.DATASET_SIZE].get(
-                    "loading_memory_mean", 0
-                )
-                clean_mem = dp_data[lib][Config.DATASET_SIZE].get(
-                    "cleaning_memory_mean", 0
-                )
-                total_mem = (load_mem + clean_mem) / 1024  # MB to GB
+                # For Spark, use memory_size_gb (JVM memory tracking issue)
+                if lib == "spark":
+                    total_mem = dp_data[lib][Config.DATASET_SIZE].get(
+                        "memory_size_gb", 0
+                    )
+                else:
+                    load_mem = dp_data[lib][Config.DATASET_SIZE].get(
+                        "loading_memory_mean", 0
+                    )
+                    clean_mem = dp_data[lib][Config.DATASET_SIZE].get(
+                        "cleaning_memory_mean", 0
+                    )
+                    total_mem = (load_mem + clean_mem) / 1024  # MB to GB
                 chart_data.append(
                     {"Library": Config.LIBRARY_NAMES[lib], "Memory (GB)": total_mem}
                 )
